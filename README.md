@@ -56,6 +56,26 @@ Innovest connects entrepreneurs seeking funding with investors looking for oppor
 </a>
 
 ## Project Features : 
+
+
+
+## Milestones
+### Milestone 1: Frontend Development & Authentication
+ 
+- Implement frontend for **Login**, **Sign-Up**, and **Home** pages.
+- Set up authentication for both **Entrepreneurs** and **Investors**.
+- No direct connectivity between **Entrepreneurs** and **Investors** yet, but each user type can create a post.
+
+### Milestone 2: Role-based Connectivity & Money Matters
+
+- **Connect** Entrepreneurs and Investors.
+- Implement features to handle **investment requests** and **money matters** (such as investment tracking and status updates).
+
+### Milestone 3: UI Enhancements & Final Features
+
+- **Enhance the User Interface** with dynamic elements like **graphs**, **charts**, and **interactive features**.
+- Add **advanced data visualizations** for business performance and investment trends.
+
   
 
 
