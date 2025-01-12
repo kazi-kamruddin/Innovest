@@ -49,13 +49,119 @@ Innovest connects entrepreneurs seeking funding with investors looking for oppor
 3. **Business Consultants**  
    - Professionals seeking tools to connect their clients with potential funding sources.
 
+## Tech Stack
+
+### **1. Backend**
+- **Framework**: Laravel  
+  Laravel is used to handle API development, authentication, and database interactions. Its robust ecosystem makes it ideal for building scalable and secure backend services.
+
+### **2. Frontend**
+- **Framework**: React  
+  React is used to create a dynamic and responsive user interface. Its component-based architecture ensures maintainability and flexibility.
+
+### **3. Rendering Method**
+- **Client-Side Rendering (CSR)**:  
+  The application uses CSR to provide a highly interactive user experience. This ensures faster page transitions and dynamic content updates on the client side.  
+
+### **4. Database**
+- **MySQL**:  
+  MySQL is used as the database management system to store and manage data for users, posts, matches, and transactions.
+
 
 ## User Interface 
 <a href="https://www.figma.com/design/Z5T7rDYzKXwm1aMTGU681c/Innovest?node-id=55-49&t=kKbTOFyg0yDQrX0V-1">
   <img src="https://i.imgur.com/BccJ7tb.png" alt="User Interface" width="600" />
 </a>
 
-## Project Features : 
+
+## Project Features
+
+Innovest offers a comprehensive platform for connecting entrepreneurs and investors. Below are the key features and corresponding API endpoints that power the system:
+
+### **1. User Authentication**
+- Secure registration and login for both entrepreneurs and investors.
+- Token-based authentication to ensure secure access to features.
+
+**API Endpoints**:
+- `POST /login`: Authenticate users and provide an access token.
+- `POST /sign-up`: Register new users as entrepreneurs or investors.
+
+---
+
+### **2. Investment Opportunities**
+- **Investors**:
+  - Browse available investment opportunities.
+  - Show interest in specific opportunities.
+  - Ask questions about opportunities.
+
+**API Endpoints**:
+- `GET /invest`: Fetch a list of available investment opportunities.
+- `GET /invest/:id`: Get details of a specific investment opportunity.
+- `POST /invest/:id/ask-question`: Submit a question about an investment opportunity.
+- `GET /invest/:id/interested`: Check if an investor is interested in a specific opportunity.
+- `POST /invest/:id/interested`: Mark interest in a specific opportunity.
+
+---
+
+### **3. Investor-Entrepreneur Matching**
+- Display personalized matches for both investors and entrepreneurs.
+- Allow interactions between matched parties.
+
+**API Endpoints**:
+- `GET /invest/matches`: Fetch a list of matches for an investor.
+- `GET /invest/matches/:id`: Get details of a specific match for an investor.
+- `GET /invest/matches/:id/ask-question`: Ask questions about a matched opportunity.
+- `GET /invest/innovator-list`: Fetch a list of innovators for potential matches.
+- `GET /invest/innovator-list/:id`: Get details of a specific innovator.
+
+---
+
+### **4. Fundraising for Entrepreneurs**
+- **Entrepreneurs**:
+  - List and manage pitches.
+  - Knock on investors' profiles for funding.
+  - Track investor interest and interactions.
+
+**API Endpoints**:
+- `GET /fundraise`: Fetch all fundraising opportunities.
+- `GET /fundraise/:id`: View details of a specific fundraising opportunity.
+- `GET /fundraise/:id/knock`: Check if a knock was sent to an investor.
+- `POST /fundraise/:id/knock`: Send a knock to an investor.
+- `GET /fundraise/matches`: Fetch matches for an entrepreneur.
+- `GET /fundraise/matches/:id`: Get details of a specific match.
+- `GET /fundraise/matches/:id/knock`: Check if a knock exists in a match.
+- `POST /fundraise/matches/:id/knock`: Send a knock in a matched context.
+- `GET /fundraise/investor-list`: Fetch a list of investors for potential matches.
+- `GET /fundraise/investor-list/:id`: View details of a specific investor.
+
+---
+
+### **5. Entrepreneur Pitch Management**
+- Entrepreneurs can create, view, edit, and delete their pitches.
+- Track pitches and investor interactions.
+
+**API Endpoints**:
+- `GET /fundraise/my-pitches`: Fetch a list of pitches created by the entrepreneur.
+- `GET /fundraise/my-pitches/:id`: Get details of a specific pitch.
+- `PATCH /fundraise/my-pitches/:id`: Update an existing pitch.
+- `POST /fundraise/my-pitches/add-pitch`: Add a new pitch.
+
+---
+
+### **6. News Feed**
+- Keep users informed with the latest updates and activities.
+
+**API Endpoints**:
+- `GET /invest/news-feed`: Fetch news feed for investors.
+- `GET /fundraise/news-feed`: Fetch news feed for entrepreneurs.
+
+---
+
+### **7. Frequently Asked Questions (FAQ)**
+- Provide quick answers to common questions.
+
+**API Endpoints**:
+- `GET /faq`: Fetch a list of frequently asked questions.
 
 
 
@@ -75,6 +181,7 @@ Innovest connects entrepreneurs seeking funding with investors looking for oppor
 
 - **Enhance the User Interface** with dynamic elements like **graphs**, **charts**, and **interactive features**.
 - Add **advanced data visualizations** for business performance and investment trends.
+- Also last touch of **deployment**
 
   
 
