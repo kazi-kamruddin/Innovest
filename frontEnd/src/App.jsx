@@ -1,9 +1,15 @@
+
 import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { useState } from 'react';
+import { Routes, Route, Link, Navigate } from "react-router-dom";
+
+
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-
+import './App.css';
+import LandingPage from './pages/landing_Page.jsx';
+import InvestorProfile from './pages/investorProfile.jsx';
 import './styles/main.css';
 
 
@@ -48,11 +54,14 @@ function App() {
         </div>
       </nav>
 
-      {/* Routes */}
       <Routes>
+
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<LandingPage />} /> 
+        <Route path="/investor-profile" element={<InvestorProfile />} /> 
+
       </Routes>
     </div>
   );
