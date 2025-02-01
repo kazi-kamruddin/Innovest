@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import './App.css';
 import Login from './pages/login.jsx';
-import LandingPage from './pages/landingPage.jsx';
+import LandingPage from './pages/landing_Page.jsx';
 
 const App = () => {
 
