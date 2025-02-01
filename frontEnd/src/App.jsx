@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import './App.css';
 import Login from './pages/login.jsx';
 import LandingPage from './pages/landingPage.jsx';
+import InvestorProfile from './pages/investorProfile.jsx';
 
 const App = () => {
 
@@ -11,6 +12,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} /> 
         <Route path="/login" element={<Login />} /> 
+        <Route path="/investor-profile" element={<InvestorProfile />} /> 
       </Routes>
     </>
   );
