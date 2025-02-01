@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\DummyController;
+use App\Http\Controllers\AuthController;
 
 
 /*
@@ -19,6 +20,9 @@ Route::get('/', function () {
     return response()->json(['message' => 'Welcome to my API!']);
 });
 
+Route::post('/signup', 'AuthController@signup');
+Route::post('/login', 'AuthController@login');
+Route::get('/dashboard', 'DashboardController@index')->middleware('auth:api');
 
 Route::get('/test', [TestController::class, 'getTestHuman'])->middleware('test.middleware');
 Route::get('/test/{id}', [TestController::class, 'getTestHumanWithId']);

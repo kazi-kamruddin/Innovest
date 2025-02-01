@@ -1,32 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-  
-    if (!storedUser || storedUser.email !== email || storedUser.password !== password) {
-      alert("Invalid credentials");
+    if (!email || !password) {
+      alert("Please fill in both fields");
       return;
     }
-  
-    // ✅ Store authToken and email
-    localStorage.setItem("authToken", "some_random_token");
-    localStorage.setItem("userEmail", storedUser.email);
-  
-    alert("Login Successful!");
-    navigate('/dashboard');
+    const user = { email, password };
+    localStorage.setItem('user', JSON.stringify(user));
+    navigate('/login');
   };
-  
 
   return (
     <div className="container">
-      <h2>Login Page</h2>
+      <h2>Sign Up Page</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="email" className="form-label">Email:</label>
@@ -50,10 +43,10 @@ function Login() {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">Login</button>
+        <button type="submit" className="btn btn-primary">Sign Up</button>
       </form>
     </div>
   );
 }
 
-export default Login;
+export default SignUp;
