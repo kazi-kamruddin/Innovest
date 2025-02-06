@@ -2,7 +2,8 @@ import React from "react";
 import { useState } from 'react';
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 
-
+import Navbar from './pages/navbar.jsx'; 
+import Footer from './pages/footer.jsx'; 
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -52,7 +53,8 @@ function App() {
           </div>
         </div>
       </nav>
-
+     
+      <Navbar /> 
       <Routes>
 
         <Route path="/signup" element={<SignUp />} />
@@ -62,6 +64,8 @@ function App() {
         <Route path="/investor-profile" element={<InvestorProfile />} /> 
 
       </Routes>
+      <Footer />
+    
     </div>
   );
 }

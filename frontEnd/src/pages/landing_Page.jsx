@@ -1,31 +1,9 @@
 import React from 'react';
 import './landing_Page.css';
 
-
 function LandingPage() {
   return (
     <>
-      {/* Navbar Section */}
-      <nav className="navbar">
-        <div className="logo">
-          <a href="#">Innovest</a>
-        </div>
-        <div className="nav-container">
-        <ul className="nav-links">
-          <li>
-            <a href="#">Invest</a>
-            <a href="#">Fundraise</a>
-            <a href="#">Help</a>
-            <a href="#">Contact</a>
-          </li>
-        </ul>
-        <div className="auth-links">
-           <a href="#">Login</a>
-          <a href="#">Sign-Up</a>
-        </div>
-        </div>
-      </nav>
-
       {/* Banner */}
       <div className="hero">
         <div className="hero-content">
@@ -125,47 +103,6 @@ function LandingPage() {
         </div>
       </div>
 
-      {/* <!-- Footer --> */}
-    <footer className="footer">
-      <div className="footer-container">
-       <div className="footer-section">
-          <h3>Innovest</h3>
-         <p>Copyright © 2020 Landify UI Kit.<br/>All rights reserved</p>
-        <div className="social-icons">
-          <img src="src/images/footer.jpeg" alt="Facebook"/>
-          <img src="src/images/footer2.jpeg" alt="Instagram"/>
-          <img src="src/images/footer3.jpeg" alt="Twitter"/>
-        </div>
-      </div>
-      <div className="footer-section">
-        <h3>Company</h3>
-        <ul>
-          <li><a href="#">About us</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Contact us</a></li>
-          <li><a href="#">Pricing</a></li>
-          <li><a href="#">Testimonials</a></li>
-        </ul>
-      </div>
-      <div className="footer-section">
-        <h3>Support</h3>
-        <ul>
-          <li><a href="#">Help center</a></li>
-          <li><a href="#">Terms of service</a></li>
-          <li><a href="#">Legal</a></li>
-          <li><a href="#">Privacy policy</a></li>
-          <li><a href="#">Status</a></li>
-        </ul>
-      </div>
-      <div className="footer-section">
-        <h3>Stay up to date</h3>
-        <form className="newsletter">
-          <input type="email" placeholder="Your email address"/>
-          <button type="submit">→</button>
-        </form>
-       </div>
-     </div>
-   </footer>
     </>
   );
 }
