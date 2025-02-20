@@ -3,25 +3,11 @@ import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
-    const userEmail = localStorage.getItem("userEmail");
-
-    if (!authToken) {
-      alert("Unauthorized! Redirecting to login...");
-      navigate("/login");
-    } else {
-      setEmail(userEmail); 
-    }
-  }, [navigate]);
+  const [email, setEmail] = useState('emailNotFetched');
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userEmail");
-    navigate("/login");
-  };
+    console.log('logout');
+  }
 
   return (
     <div className="container">

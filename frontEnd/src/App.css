@@ -1,0 +1,9 @@
+/* .whole-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height 
+}*/
+
+.main-section {
+  margin-top: 86px; 
+} 

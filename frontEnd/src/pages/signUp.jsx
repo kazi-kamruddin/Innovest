@@ -8,13 +8,7 @@ function SignUp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("Please fill in both fields");
-      return;
-    }
-    const user = { email, password };
-    localStorage.setItem('user', JSON.stringify(user));
-    navigate('/login');
+    console.log('signup');
   };
 
   return (
@@ -24,23 +18,15 @@ function SignUp() {
         <div className="mb-3">
           <label htmlFor="email" className="form-label">Email:</label>
           <input
-            type="email"
-            className="form-control"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            type="email" className="form-control" id="email" value={email}
+            onChange={(e) => setEmail(e.target.value)} required
           />
         </div>
         <div className="mb-3">
           <label htmlFor="password" className="form-label">Password:</label>
           <input
-            type="password"
-            className="form-control"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            type="password" className="form-control" id="password" value={password}
+            onChange={(e) => setPassword(e.target.value)} required
           />
         </div>
         <button type="submit" className="btn btn-primary">Sign Up</button>
