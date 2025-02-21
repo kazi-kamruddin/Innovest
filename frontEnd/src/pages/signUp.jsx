@@ -8,14 +8,9 @@ function SignUp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("Please fill in both fields");
-      return;
-    }
-    const user = { email, password };
-    localStorage.setItem('user', JSON.stringify(user));
-    navigate('/login');
+    console.log('Signup done');
   };
+  
 
   return (
     <div className="container">
