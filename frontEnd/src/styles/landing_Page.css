@@ -1,16 +1,10 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
- }
- 
- /* Banner  */
+/* Banner  */
  .hero {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: #faf8f8;
-    padding: 150px 50px 50px;
+    padding: 50px 50px 50px;
     margin-top: 1px;
 }
 
@@ -255,6 +249,9 @@
     margin-bottom: 20px;
   }
   
+
+
+
 
 
 

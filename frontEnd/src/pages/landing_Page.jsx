@@ -1,5 +1,7 @@
 import React from 'react';
-import './landing_Page.css';
+import { Link } from "react-router-dom";
+import '../styles/landing_Page.css';
+
 
 function LandingPage() {
   return (
@@ -102,7 +104,6 @@ function LandingPage() {
           </div>
         </div>
       </div>
-
     </>
   );
 }
