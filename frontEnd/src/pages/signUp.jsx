@@ -1,26 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSignup } from '../hooks/useSignUp';
 
 function SignUp() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { signup, error, isLoading } = useSignup();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("Please fill in both fields");
-      return;
-    }
-    const user = { email, password };
-    localStorage.setItem('user', JSON.stringify(user));
-    navigate('/login');
+    await signup(name, email, password);
+    navigate('/dashboard');
   };
 
   return (
     <div className="container">
       <h2>Sign Up Page</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="name" className="form-label">Name:</label>
+          <input
+            type="text"
+            className="form-control"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
         <div className="mb-3">
           <label htmlFor="email" className="form-label">Email:</label>
           <input
@@ -43,7 +53,7 @@ function SignUp() {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">Sign Up</button>
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>Sign Up</button>
       </form>
     </div>
   );

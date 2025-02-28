@@ -1,11 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom"; // Add Router here
-import App from "./App";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from "react-router-dom";
+import './index.css'
+import App from './App.jsx';
+import { AuthContextProvider } from './context/authContext.jsx';
 
-ReactDOM.render(
-  <Router>  {/* Router should be here */}
-    <App />
-  </Router>,
-  document.getElementById("root")
-);
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <AuthContextProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </AuthContextProvider>
+  </StrictMode>,
+) 
