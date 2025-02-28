@@ -1,8 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/navbar.css";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 function Navbar() {
+
+  const { user } = useAuthContext();
+
   return (
     <nav className="navbar">
       <div className="logo">
@@ -18,9 +22,12 @@ function Navbar() {
           </li>
         </ul>
         <div className="auth-links">
-          <Link to="/login">Login</Link>
+          {/* <Link to="/login">Login</Link>
           <Link to="/signup">Sign-Up</Link>
-          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/dashboard">Dashboard</Link> */}
+          {!user && <Link to="/login">Login</Link>}
+          {!user && <Link to="/signup">Sign-Up</Link>}
+          {user && <Link to="/dashboard">Dashboard</Link>}
         </div>
       </div>
     </nav>
