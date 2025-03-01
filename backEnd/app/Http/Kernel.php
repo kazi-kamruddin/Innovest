@@ -10,7 +10,7 @@ class Kernel extends HttpKernel
      * The application's global HTTP middleware stack.
      *
      * These middleware are run during every request to your application.
-     *
+     
      * @var array<int, class-string|string>
      */
     protected $middleware = [
@@ -44,5 +44,6 @@ class Kernel extends HttpKernel
         'test.middleware' => \App\Http\Middleware\TestMiddleware::class,
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'auth.jwt' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
     ];
 }
