@@ -1,10 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\PitchController; // Added PitchController
 
 /*
 |--------------------------------------------------------------------------
@@ -16,13 +15,12 @@ use App\Http\Controllers\AuthController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
 Route::get('/test', [TestController::class, 'getTestHuman'])->middleware('test.middleware');
 Route::get('/test/{id}', [TestController::class, 'getTestHumanWithId']);
-
-
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/validate-token', [AuthController::class, 'validateJwtToken']);
 
-
+Route::get('/pitches', [PitchController::class, 'getAllPitches']); // Added Pitch API route
