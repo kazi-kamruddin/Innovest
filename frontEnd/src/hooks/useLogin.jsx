@@ -17,6 +17,7 @@ export const useLogin = () => {
       }, { withCredentials: true });
       
       const { token, user } = response.data;
+      console.log("JWT Token:", token);
 
       if (token) {
         localStorage.setItem('token', token);
