@@ -7,7 +7,11 @@ import Login from "./pages/login";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/landing_Page";
 import InvestorProfile from "./pages/InvestorProfile";
+
+import Allpitches from "./pages/all_pitches";
+
 import AboutUs from "./pages/aboutUs";
+
 
 import Navbar from "./components/Navbar";  
 import Footer from "./components/Footer"; 
@@ -34,7 +38,11 @@ function App() {
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to={"/login"} />} />
           <Route path="/investor-profile" element={<InvestorProfile />} />
+
+          <Route path="/allpitches" element={<Allpitches />} />
+
           <Route path="/about-us" element={<AboutUs />} />
+
         </Routes> 
       </div> 
       
