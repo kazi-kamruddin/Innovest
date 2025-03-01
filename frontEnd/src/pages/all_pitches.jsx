@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; 
 import "../styles/all_pitches.css";
 
 const InvestmentPitches = () => {
   const [pitches, setPitches] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/pitches") 
+    fetch("http://127.0.0.1:8000/api/pitches")
       .then((response) => response.json())
       .then((data) => setPitches(data))
       .catch((error) => console.error("Error fetching pitches:", error));
@@ -32,16 +33,10 @@ const InvestmentPitches = () => {
             <div className="card-body">
               <h3>{pitch.title}</h3>
               <p className="location">📍 {pitch.company_location}, {pitch.country}</p>
-
-              {/* <p className="description"><strong>Business Overview:</strong> {pitch.the_business}</p> */}
               <p><strong>Market:</strong> {pitch.the_market}</p>
-              {/* <p><strong>Progress:</strong> {pitch.progress}</p> */}
-               {/* <p><strong>Objective:</strong> {pitch.objective}</p> */}
 
               <ul>
                 <li><strong>Industry:</strong> {pitch.industry}</li>
-                {/* <li><strong>Stage:</strong> {pitch.stage}</li>
-                <li><strong>Ideal Investor Role:</strong> {pitch.ideal_investor_role}</li> */}
                 <li><strong>Contact:</strong> 📞 {pitch.cell_number}</li>
               </ul>
 
@@ -49,8 +44,10 @@ const InvestmentPitches = () => {
                 <span><strong>Raising Amount:</strong> ${pitch.total_raising_amount}</span>
                 <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
               </div>
+              <Link to={`/more_all_pitches/${pitch.id}`}>
+                  <button className="find-out-more">Find Out More</button>
+              </Link>
 
-              <button className="find-out-more">Find Out More</button>
             </div>
           </div>
         ))}

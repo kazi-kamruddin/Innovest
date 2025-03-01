@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PitchController; // Added PitchController
+use App\Http\Controllers\PitchController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -23,4 +23,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/validate-token', [AuthController::class, 'validateJwtToken']);
 
-Route::get('/pitches', [PitchController::class, 'getAllPitches']); // Added Pitch API route
+Route::get('/pitches', [PitchController::class, 'getAllPitches']); 
+Route::get('/pitches/{id}', [PitchController::class, 'getPitchById']);  
+

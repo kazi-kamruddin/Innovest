@@ -7,6 +7,7 @@ use App\Models\Pitch;
 
 class PitchController extends Controller
 {
+    
     public function getAllPitches()
     {
         try {
@@ -14,6 +15,17 @@ class PitchController extends Controller
             return response()->json($pitches, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+ 
+    public function getPitchById($id)
+    {
+        try {
+            $pitch = Pitch::findOrFail($id); // Fetch the pitch by ID
+            return response()->json($pitch, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Pitch not found'], 404);
         }
     }
 }

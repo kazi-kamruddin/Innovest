@@ -1,0 +1,132 @@
+.pitch-details-container1 {
+    padding: 0; 
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;  
+    min-height: 10vh;
+}
+
+.pitch-image-container {
+    margin: 0; 
+    padding: 0; 
+    width: 100%; 
+}
+
+.pitch-image {
+    width: 1500px; 
+    height: 450px; 
+   margin-top: -49px;
+    align-content: center;
+    margin-bottom: 15px;
+}
+
+.pitch-details-title1 {
+    font-size: 29px;
+    color: #bf0707;
+    margin-bottom: 15px;
+    text-align: center;  
+    width: 100%;
+}
+
+  .pitch-info-card1 {
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    width: 80%;
+    max-width: 1150px;
+    margin: 0 auto;
+    margin-bottom: 30px;
+  }
+  
+
+  .pitch-info-title1 {
+    font-size: 33px;
+    color: #007bff;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: left;  
+    width: 100%;
+    margin-bottom: 50px;
+  }
+  
+
+  .pitch-info-location1,
+  .pitch-info-contact1,
+  .pitch-info-industry1,
+  .pitch-info-stage1,
+  .pitch-info-investor-role1,
+  .pitch-info-amount1,
+  .pitch-info-investment1,
+  .pitch-info-business1,
+  .pitch-info-market1,
+  .pitch-info-progress1,
+  .pitch-info-objective1 {
+    font-size: 17px;
+    color: #555;
+    margin: 8px 0;
+    text-align: left;  
+    width: 100%;
+  }
+  
+  
+  .pitch-info-location1 strong,
+  .pitch-info-contact1 strong,
+  .pitch-info-industry1 strong,
+  .pitch-info-stage1 strong,
+  .pitch-info-investor-role1 strong,
+  .pitch-info-amount1 strong,
+  .pitch-info-investment1 strong,
+  .pitch-info-business1 strong,
+  .pitch-info-market1 strong,
+  .pitch-info-progress1 strong,
+  .pitch-info-objective1 strong {
+    color: #333;
+    font-weight: bold;
+    font-size: 19px;
+  }
+  
+
+  .pitch-info-objective1 {
+    text-align: justify;  
+  }
+  
+
+  .pitch-details-container1 > div {
+    font-size: 1.5rem;
+    color: #333;
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .pitch-info-card1 {
+      width: 90%;
+      padding: 15px;
+    }
+  
+    .pitch-details-title1 {
+      font-size: 1.6rem;
+    }
+  
+    .pitch-info-title1 {
+      font-size: 1.5rem;
+    }
+  
+    .pitch-info-location1,
+    .pitch-info-contact1,
+    .pitch-info-industry1,
+    .pitch-info-stage1,
+    .pitch-info-investor-role1,
+    .pitch-info-amount1,
+    .pitch-info-investment1,
+    .pitch-info-business1,
+    .pitch-info-market1,
+    .pitch-info-progress1,
+    .pitch-info-objective1 {
+      font-size: 0.9rem;
+    }
+  }
+  
