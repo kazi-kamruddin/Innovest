@@ -11,7 +11,7 @@ import InvestorProfile from "./pages/InvestorProfile";
 import Navbar from "./components/Navbar";  
 import Footer from "./components/Footer"; 
 import "./App.css";
-
+import EditProfile from "./pages/edit_profile";
 
 function App() {
     
@@ -31,6 +31,7 @@ function App() {
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to={"/login"} />} />
           <Route path="/investor-profile" element={<InvestorProfile />} />
+          <Route path="/editProfile" element={<EditProfile />} />
         </Routes> 
       </div> 
       
