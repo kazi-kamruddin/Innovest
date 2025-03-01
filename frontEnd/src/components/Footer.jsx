@@ -1,5 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Import Link
 import "../styles/footer.css";
+import '../pages/aboutUs.jsx';
 
 function Footer() {
   return (
@@ -17,7 +19,7 @@ function Footer() {
         <div className="footer-section">
           <h3>Company</h3>
           <ul>
-            <li><a href="#">About us</a></li>
+            <li><Link to="/about-us">About us</Link></li> {/* Use Link instead of <a> */}
             <li><a href="#">Blog</a></li>
             <li><a href="#">Contact us</a></li>
             <li><a href="#">Pricing</a></li>

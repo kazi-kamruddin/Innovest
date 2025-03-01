@@ -17,6 +17,7 @@ export const useSignup = () => {
       });
       
       const { token, user } = response.data;
+      console.log("JWT Token:", token);
 
       if (token) {
         localStorage.setItem('token', token);
