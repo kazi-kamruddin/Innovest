@@ -1,39 +1,55 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/all_pitches.css";
 
 const InvestmentPitches = () => {
+  const [pitches, setPitches] = useState([]);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/pitches") 
+      .then((response) => response.json())
+      .then((data) => setPitches(data))
+      .catch((error) => console.error("Error fetching pitches:", error));
+  }, []);
+
   return (
     <div className="investment-pitches">
       <div className="search-bar">
         <input type="text" placeholder="Search..." />
         <button>🔍</button>
       </div>
+
       <div className="navigation-links">
         <a href="#">My Portfolio</a>
         <a href="#">News Feed</a>
         <a href="#">Explore</a>
         <a href="#">My Matches</a>
       </div>
+
       <div className="pitch-cards">
-        {[1, 2, 3].map((item) => (
-          <div className="pitch-card" key={item}>
+        {pitches.map((pitch) => (
+          <div className="pitch-card" key={pitch.id}>
             <div className="card-header"></div>
             <div className="card-body">
-              <h3>GEN AI DUBBING</h3>
-              <p className="location">📍 North East, United States</p>
-              <p className="description">
-                Audiences want highly tailored video experiences in their native language,
-                but video dubbing is incredibly time-consuming and costly.
-              </p>
+              <h3>{pitch.title}</h3>
+              <p className="location">📍 {pitch.company_location}, {pitch.country}</p>
+
+              {/* <p className="description"><strong>Business Overview:</strong> {pitch.the_business}</p> */}
+              <p><strong>Market:</strong> {pitch.the_market}</p>
+              {/* <p><strong>Progress:</strong> {pitch.progress}</p> */}
+               {/* <p><strong>Objective:</strong> {pitch.objective}</p> */}
+
               <ul>
-                <li>Enterprise integrations with Articulate, TechSmith, and InVideo</li>
-                <li>358.9% growth in MRR ($60k total current MRR)</li>
-                <li>Awarded AppSumo’s #1 performing campaign of 2023</li>
+                <li><strong>Industry:</strong> {pitch.industry}</li>
+                {/* <li><strong>Stage:</strong> {pitch.stage}</li>
+                <li><strong>Ideal Investor Role:</strong> {pitch.ideal_investor_role}</li> */}
+                <li><strong>Contact:</strong> 📞 {pitch.cell_number}</li>
               </ul>
+
               <div className="funding-info">
-                <span>$2,000,000 Required</span>
-                <span>$15,000 Per Investor</span>
+                <span><strong>Raising Amount:</strong> ${pitch.total_raising_amount}</span>
+                <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
               </div>
+
               <button className="find-out-more">Find Out More</button>
             </div>
           </div>
