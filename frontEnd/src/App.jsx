@@ -7,9 +7,11 @@ import Login from "./pages/login";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/landing_Page";
 import InvestorProfile from "./pages/InvestorProfile";
+import AboutUs from "./pages/aboutUs";
 
 import Navbar from "./components/Navbar";  
 import Footer from "./components/Footer"; 
+import ScrollToTop from "./components/ScrollToTop.jsx";
 import "./App.css";
 
 
@@ -20,6 +22,7 @@ function App() {
   return (
     <>
       <Navbar /> 
+      <ScrollToTop />
 
       <div className="main-section">
         <Routes >
@@ -31,6 +34,7 @@ function App() {
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to={"/login"} />} />
           <Route path="/investor-profile" element={<InvestorProfile />} />
+          <Route path="/about-us" element={<AboutUs />} />
         </Routes> 
       </div> 
       
