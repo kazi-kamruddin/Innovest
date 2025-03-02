@@ -1,0 +1,89 @@
+.editProfile-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  .editProfile-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 550px;
+    display: flex;
+    flex-direction: column;
+    
+  }
+  
+  .editProfile-form label {
+    font-weight: bold;
+    margin-top: 5px;
+  }
+  
+  .editProfile-form input,
+  .editProfile-form textarea {
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+  }
+  
+  .investment-range {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .investment-range input {
+    flex: 1;
+  }
+  
+  .interests {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .interests label {
+    display: grid;
+    grid-template-columns: 200px auto; 
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  
+
+    
+  .interests input {
+    order: 2; 
+    margin-left: 5px;
+  }
+  
+  
+  
+  button {
+    margin-top: 15px;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background: #0056b3;
+  }
+  
+  .back-btn {
+    margin-top: 10px;
+    background: #6c757d;
+  }
+  
+  .back-btn:hover {
+    background: #5a6268;
+  }
+  
