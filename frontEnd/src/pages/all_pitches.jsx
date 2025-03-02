@@ -1,20 +1,33 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; 
 import "../styles/all_pitches.css";
 
 const InvestmentPitches = () => {
   const [pitches, setPitches] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/pitches") 
+    fetch("http://127.0.0.1:8000/api/pitches")
       .then((response) => response.json())
       .then((data) => setPitches(data))
       .catch((error) => console.error("Error fetching pitches:", error));
   }, []);
 
+ 
+  const filteredPitches = pitches.filter((pitch) =>
+    pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pitch.country.toLowerCase().includes(searchTerm.toLowerCase()) 
+  );
+
   return (
     <div className="investment-pitches">
       <div className="search-bar">
-        <input type="text" placeholder="Search..." />
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <button>🔍</button>
       </div>
 
@@ -26,34 +39,33 @@ const InvestmentPitches = () => {
       </div>
 
       <div className="pitch-cards">
-        {pitches.map((pitch) => (
-          <div className="pitch-card" key={pitch.id}>
-            <div className="card-header"></div>
-            <div className="card-body">
-              <h3>{pitch.title}</h3>
-              <p className="location">📍 {pitch.company_location}, {pitch.country}</p>
+        {filteredPitches.length > 0 ? (
+          filteredPitches.map((pitch) => (
+            <div className="pitch-card" key={pitch.id}>
+              <div className="card-header"></div>
+              <div className="card-body">
+                <h3>{pitch.title}</h3>
+                <p className="location">📍 {pitch.company_location}, {pitch.country}</p>
+                <p><strong>Market:</strong> {pitch.the_market}</p>
 
-              {/* <p className="description"><strong>Business Overview:</strong> {pitch.the_business}</p> */}
-              <p><strong>Market:</strong> {pitch.the_market}</p>
-              {/* <p><strong>Progress:</strong> {pitch.progress}</p> */}
-               {/* <p><strong>Objective:</strong> {pitch.objective}</p> */}
+                <ul>
+                  <li><strong>Industry:</strong> {pitch.industry}</li>
+                  <li><strong>Contact:</strong> 📞 {pitch.cell_number}</li>
+                </ul>
 
-              <ul>
-                <li><strong>Industry:</strong> {pitch.industry}</li>
-                {/* <li><strong>Stage:</strong> {pitch.stage}</li>
-                <li><strong>Ideal Investor Role:</strong> {pitch.ideal_investor_role}</li> */}
-                <li><strong>Contact:</strong> 📞 {pitch.cell_number}</li>
-              </ul>
-
-              <div className="funding-info">
-                <span><strong>Raising Amount:</strong> ${pitch.total_raising_amount}</span>
-                <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
+                <div className="funding-info">
+                  <span><strong>Raising Amount:</strong> ${pitch.total_raising_amount}</span>
+                  <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
+                </div>
+                <Link to={`/more_all_pitches/${pitch.id}`}>
+                    <button className="find-out-more">Find Out More</button>
+                </Link>
               </div>
-
-              <button className="find-out-more">Find Out More</button>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No pitches found.</p>
+        )}
       </div>
     </div>
   );
