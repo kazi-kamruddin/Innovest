@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../hooks/useLogin';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login, error, isLoading } = useLogin();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('login');
+    await login(email, password);
+    navigate('/dashboard');
   };
-  
 
   return (
     <div className="container">
       <h2>Login Page</h2>
+      {error && <p className="text-danger">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="email" className="form-label">Email:</label>
@@ -30,7 +33,7 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)} required
           />
         </div>
-        <button type="submit" className="btn btn-primary">Login</button>
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>Login</button>
       </form>
     </div>
   );

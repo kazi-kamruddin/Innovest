@@ -1,19 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLogout } from '../hooks/useLogout.jsx';
+import { useAuthContext } from '../hooks/useAuthContext.jsx';
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { logout } = useLogout();
+  const { user } = useAuthContext();
   const [email, setEmail] = useState('emailNotFetched');
 
   const handleLogout = () => {
-    console.log('logout');
-  }
+    logout();
+  };
 
   return (
+
     <div className="container">
+
+      {user && (
+        <div>
+            <br /><br /><br />
+            <span>logged in as {user.email} </span>
+            <br /><br />
+            <button onClick={handleLogout}>Log out</button>
+        </div>
+      )}
+
+
       <h2>Welcome to your Dashboard</h2>
-      <p>You are logged in as: <strong>{email}</strong></p>
-      <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
     </div>
   );
 }

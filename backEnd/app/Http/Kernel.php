@@ -26,6 +26,8 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'api' => [
+            \Fruitcake\Cors\HandleCors::class,
+            //'throttle:api',
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, //  ensures that requests originating from the frontend (typically a browser) are treated as stateful. Used to persist cookies across requests
             \Illuminate\Routing\Middleware\SubstituteBindings::class, // responsible for automatically substituting route parameter bindings in a controller action when you have route parameters like {id} or {slug}.
         ],
@@ -40,5 +42,8 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'test.middleware' => \App\Http\Middleware\TestMiddleware::class,
+        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'customJWT' => \App\Http\Middleware\JwtMiddleware::class,
     ];
 }

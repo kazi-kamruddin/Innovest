@@ -122,6 +122,8 @@ return [
     */
 
     'key' => env('APP_KEY'),
+    'jwt_secret' => env('JWT_SECRET'),
+
 
     'cipher' => 'AES-256-CBC',
 
@@ -157,9 +159,11 @@ return [
         Illuminate\Queue\QueueServiceProvider::class,
         Illuminate\Redis\RedisServiceProvider::class,
         Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
+        Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        Illuminate\Session\SessionServiceProvider::class,
 
         /*
          * Package Service Providers...
