@@ -19,12 +19,32 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        return response()->json($this->authService->registerUser($request), 201);
+        try {
+            return response()->json($this->authService->registerUser($request), 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,'message' => 'Registration failed. Please check your input.','errors' => $e->errors(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,'message' => 'Something went wrong during registration.','error' => $e->getMessage(),
+            ], 500);
+        }
     }
-
+    
     public function login(Request $request)
     {
-        return response()->json($this->authService->loginUser($request), 201);
+        try {
+            return response()->json($this->authService->loginUser($request), 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,'message' => 'Invalid credentials. Please check your email and password.','errors' => $e->errors(),
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,'message' => 'Something went wrong during login.','error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function validateJwtToken(Request $request)

@@ -44,5 +44,6 @@ class Kernel extends HttpKernel
         'test.middleware' => \App\Http\Middleware\TestMiddleware::class,
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'customJWT' => \App\Http\Middleware\JwtMiddleware::class,
     ];
 }

@@ -11,6 +11,7 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.15",
         "laravel/tinker": "^2.5",
+        "lcobucci/jwt": "^4.0",
         "nesbot/carbon": "^2.72",
         "tymon/jwt-auth": "^1.0@dev"
     },

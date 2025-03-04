@@ -21,13 +21,13 @@ import EditProfile from "./pages/edit_profile";
 
 function App() {
     
-   const { user } = useAuthContext();
+  const { user } = useAuthContext();
 
   return (
     <>
       <Navbar /> 
       <ScrollToTop />
-
+      
       <div className="main-section">
         <Routes >
           <Route path="/" element={<LandingPage />} />
@@ -38,9 +38,9 @@ function App() {
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to={"/login"} />} />
           <Route path="/investor-profile" element={<InvestorProfile />} /> 
-          <Route path="/more_all_pitches/:id" element={<MoreAllPitches />} /> 
           <Route path="/editProfile" element={<EditProfile />} /> 
-          <Route path="/allpitches" element={<Allpitches />} />
+          <Route path="/all-pitches" element={<Allpitches />} />
+          <Route path="/all-pitches/:id" element={<MoreAllPitches />} /> 
           <Route path="/about-us" element={<AboutUs />} />
         </Routes> 
       </div> 
