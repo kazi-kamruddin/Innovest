@@ -57,7 +57,7 @@ const InvestmentPitches = () => {
                   <span><strong>Raising Amount:</strong> ${pitch.total_raising_amount}</span>
                   <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
                 </div>
-                <Link to={`/more_all_pitches/${pitch.id}`}>
+                <Link to={`/all-pitches/${pitch.id}`}>
                     <button className="find-out-more">Find Out More</button>
                 </Link>
               </div>

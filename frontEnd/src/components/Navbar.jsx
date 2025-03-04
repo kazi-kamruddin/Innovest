@@ -15,7 +15,7 @@ function Navbar() {
       <div className="nav-container">
         <ul className="nav-links">
           <li>
-            <a href="#">Invest</a>
+            <Link to="/all-pitches">Invest</Link>
             <a href="#">Fundraise</a>
             <a href="#">Help</a>
             <a href="#">Contact</a>

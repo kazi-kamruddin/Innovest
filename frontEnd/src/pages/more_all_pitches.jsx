@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../styles/more_all_pitches.css";
-import pitchImage from "../assets/pitch_investor.jpg"; // Import the image
+import pitchImage from "../assets/pitch_investor.jpg"; 
 
 const MoreAllPitches = () => {
   const [pitch, setPitch] = useState(null);
