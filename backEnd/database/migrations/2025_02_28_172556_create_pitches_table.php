@@ -8,7 +8,7 @@ return new class extends Migration {
     {
         Schema::create('pitches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Link to users table
             $table->string('title');
             $table->string('company_location');
             $table->string('country');
