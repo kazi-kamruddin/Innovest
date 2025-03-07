@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import "../styles/all_pitches.css";
 
 const InvestmentPitches = () => {
   const [pitches, setPitches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // State for the filter dropdowns
+  const [industryFilter, setIndustryFilter] = useState("");
+  const [stageFilter, setStageFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
 
+  // Fetch all pitches with filters
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/pitches")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Fetched Data:", data); // Debugging API response
-        // Ensure data is an array
-        setPitches(Array.isArray(data) ? data : data.pitches || []);
-      })
-      .catch((error) => {
+    const fetchFilteredPitches = async () => {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/pitches?industry=${industryFilter}&stage=${stageFilter}&country=${countryFilter}`
+        );
+        const data = await response.json();
+        setPitches(data);
+      } catch (error) {
         console.error("Error fetching pitches:", error);
-        setPitches([]); // Ensure pitches is always an array
-      });
-  }, []);
+        setPitches([]);
+      }
+    };
+
+    fetchFilteredPitches();
+  }, [industryFilter, stageFilter, countryFilter]); // Re-fetch pitches when a filter changes
 
   const filteredPitches = Array.isArray(pitches)
     ? pitches.filter((pitch) =>
@@ -39,11 +48,37 @@ const InvestmentPitches = () => {
         <button>🔍</button>
       </div>
 
-      <div className="navigation-links">
-        <a href="#">My Portfolio</a>
-        <a href="#">News Feed</a>
-        <a href="#">Explore</a>
-        <a href="#">My Matches</a>
+      <div className="filters">
+        <select
+          value={industryFilter}
+          onChange={(e) => setIndustryFilter(e.target.value)}
+        >
+          <option value="">Filter by Industry</option>
+          {/* Add the actual industry options here */}
+          <option value="Tech">Tech</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Finance">Finance</option>
+        </select>
+
+        <select
+          value={stageFilter}
+          onChange={(e) => setStageFilter(e.target.value)}
+        >
+          <option value="">Filter by Stage</option>
+          <option value="Seed">Seed</option>
+          <option value="Growth">Growth</option>
+          <option value="Mature">Mature</option>
+        </select>
+
+        <select
+          value={countryFilter}
+          onChange={(e) => setCountryFilter(e.target.value)}
+        >
+          <option value="">Filter by Country</option>
+          <option value="USA">USA</option>
+          <option value="Canada">Canada</option>
+          <option value="UK">UK</option>
+        </select>
       </div>
 
       <div className="pitch-cards">
