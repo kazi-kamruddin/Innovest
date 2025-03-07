@@ -206,7 +206,7 @@ Clone the project repository to your local machine using the following command:
 
 ```bash
 git clone https://github.com/your-username/innovest.git
-
+```
 ### Step 2: Set Up the Backend (Laravel)
 
 1.  Navigate to the project directory:
