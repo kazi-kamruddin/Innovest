@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PitchController; 
-
+use App\Http\Controllers\InvestorInfoController;
 
 
 Route::get('/test', [TestController::class, 'getTestHuman'])->middleware('test.middleware');
@@ -21,6 +21,9 @@ Route::get('/pitches/{id}', [PitchController::class, 'getPitchById']);
 Route::middleware(['customJWT'])->group(function () {
     Route::get('/users/{id}/pitches', [PitchController::class, 'getUserPitches']); 
     Route::post('/pitches', [PitchController::class, 'createPitch']); 
+
+    Route::post('/investor-info', [InvestorInfoController::class, 'store']); 
+    Route::get('/investor-info/{userId}', [InvestorInfoController::class, 'getInvestorInfo']); 
 });
   
 
