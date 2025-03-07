@@ -9,23 +9,15 @@ const InvestmentPitches = () => {
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/pitches")
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Fetched Data:", data); // Debugging API response
-        // Ensure data is an array
-        setPitches(Array.isArray(data) ? data : data.pitches || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching pitches:", error);
-        setPitches([]); // Ensure pitches is always an array
-      });
+      .then((data) => setPitches(data))
+      .catch((error) => console.error("Error fetching pitches:", error));
   }, []);
 
-  const filteredPitches = Array.isArray(pitches)
-    ? pitches.filter((pitch) =>
-        pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pitch.country.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
+ 
+  const filteredPitches = pitches.filter((pitch) =>
+    pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pitch.country.toLowerCase().includes(searchTerm.toLowerCase()) 
+  );
 
   return (
     <div className="investment-pitches">
@@ -58,7 +50,7 @@ const InvestmentPitches = () => {
 
                 <ul>
                   <li><strong>Industry:</strong> {pitch.industry}</li>
-                  <li><strong>Contact:</strong>  {pitch.cell_number}</li>
+                  <li><strong>Contact:</strong> 📞 {pitch.cell_number}</li>
                 </ul>
 
                 <div className="funding-info">
@@ -66,7 +58,7 @@ const InvestmentPitches = () => {
                   <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
                 </div>
                 <Link to={`/all-pitches/${pitch.id}`}>
-                  <button className="find-out-more">Find Out More</button>
+                    <button className="find-out-more">Find Out More</button>
                 </Link>
               </div>
             </div>
