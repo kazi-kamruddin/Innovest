@@ -13,7 +13,6 @@ class PitchController extends Controller
         try {
             $query = Pitch::with('user');
         
-            // Apply filters if they are present in the request
             if ($request->has('industry')) {
                 $query->where('industry', 'like', '%' . $request->industry . '%');
             }

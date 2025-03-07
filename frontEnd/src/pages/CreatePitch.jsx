@@ -26,7 +26,7 @@ const CreatePitch = () => {
     objective: "",
   });
 
-  // Industry, Stage, and Investor Role options
+
   const industryOptions = [
     "Technology", "Healthcare", "Finance", "Real Estate", "Retail",
     "Manufacturing", "Education", "Food & Beverage", "Automotive", "Other"

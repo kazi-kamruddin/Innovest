@@ -6,7 +6,6 @@ const InvestmentPitches = () => {
   const [pitches, setPitches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   
-  // State for the filter dropdowns
   const [industryFilter, setIndustryFilter] = useState("");
   const [stageFilter, setStageFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
@@ -27,7 +26,7 @@ const InvestmentPitches = () => {
     };
 
     fetchFilteredPitches();
-  }, [industryFilter, stageFilter, countryFilter]); // Re-fetch pitches when a filter changes
+  }, [industryFilter, stageFilter, countryFilter]); 
 
   const filteredPitches = Array.isArray(pitches)
     ? pitches.filter((pitch) =>
@@ -54,7 +53,6 @@ const InvestmentPitches = () => {
           onChange={(e) => setIndustryFilter(e.target.value)}
         >
           <option value="">Filter by Industry</option>
-          {/* Add the actual industry options here */}
           <option value="Tech">Tech</option>
           <option value="Healthcare">Healthcare</option>
           <option value="Finance">Finance</option>
