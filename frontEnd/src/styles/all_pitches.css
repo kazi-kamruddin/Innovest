@@ -4,40 +4,6 @@
   padding: 20px;
 }
 
-/* Override Bootstrap Styles for Pitch Creation */
-.investment-pitches .form-control {
-  border-radius: 5px !important; /* Override any bootstrap border-radius */
-  padding: 10px !important; /* Ensure padding isn't overridden */
-}
-
-.investment-pitches .btn {
-  background-color: #007bff !important; /* Custom button color */
-  color: white !important; /* Ensure button text is white */
-}
-
-.investment-pitches .row {
-  margin-right: 0 !important; /* Remove any unwanted gaps caused by Bootstrap grid */
-  margin-left: 0 !important;
-}
-
-.investment-pitches .col-md-4 {
-  padding-left: 10px !important; /* Adjust padding on columns */
-  padding-right: 10px !important;
-}
-
-.investment-pitches .mb-3 {
-  margin-bottom: 10px !important; /* Override bottom margin in Bootstrap */
-}
-
-/* Prevent Bootstrap button styles from conflicting */
-.investment-pitches .btn-primary {
-  background-color: #007bff !important;
-  border-color: #007bff !important;
-  border-radius: 5px !important;
-}
-
-
-
 .search-bar {
   display: flex;
   justify-content: center;

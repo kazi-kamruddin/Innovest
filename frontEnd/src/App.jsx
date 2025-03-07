@@ -11,7 +11,7 @@ import InvestorProfile from "./pages/InvestorProfile";
 import Allpitches from "./pages/all_pitches";
 import MoreAllPitches from './pages/more_all_pitches'; 
 import AboutUs from "./pages/aboutUs";
-import CreatePitch from "./pages/CreatePitch";
+
 
 import Navbar from "./components/Navbar";  
 import Footer from "./components/Footer"; 
@@ -42,7 +42,6 @@ function App() {
           <Route path="/all-pitches" element={<Allpitches />} />
           <Route path="/all-pitches/:id" element={<MoreAllPitches />} /> 
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/create-pitch" element={<CreatePitch />} />
         </Routes> 
       </div> 
       
