@@ -1,8 +1,17 @@
 import "../styles/investor_profile.css";
+import { useLogout } from '../hooks/useLogout.jsx';
+import { useAuthContext } from '../hooks/useAuthContext.jsx';
 
 const InvestorProfile = () => {
   const profileImageUrl =
     "https://media.gq-magazine.co.uk/photos/5e96bf31013fff000829de0c/16:9/w_2560%2Cc_limit/GettyImages-1199899108.jpg";
+
+  const { logout } = useLogout();
+  const { user } = useAuthContext();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div className="container">
@@ -58,6 +67,15 @@ const InvestorProfile = () => {
           </p>
         </div>
       </div>
+
+      {user && (
+        <div>
+            <br /><br /><br />
+            <span>logged in as {user.email} </span>
+            <br /><br />
+            <button onClick={handleLogout}>Log out</button>
+        </div>
+      )}
     </div>
   );
 };

@@ -16,6 +16,12 @@ function LandingPage() {
           <Link to="/investor-info-submit">
               <button className="btn secondary">Investor Profile Info</button>
           </Link>
+          <Link to="/investor-profile">
+              <button className="btn secondary"> Profile </button>
+          </Link>
+          <Link to="/editProfile">
+              <button className="btn secondary">edit Profile </button>
+          </Link>
           </div>
         </div>
         <div className="hero-image">
