@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/all_pitches.css";
+import { FaIndustry, FaMapMarkerAlt, FaLayerGroup } from 'react-icons/fa';
 
 const InvestmentPitches = () => {
   const [pitches, setPitches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const [industryFilter, setIndustryFilter] = useState("");
   const [stageFilter, setStageFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
 
-  // Fetch all pitches with filters
   useEffect(() => {
     const fetchFilteredPitches = async () => {
       try {
@@ -26,7 +26,7 @@ const InvestmentPitches = () => {
     };
 
     fetchFilteredPitches();
-  }, [industryFilter, stageFilter, countryFilter]); 
+  }, [industryFilter, stageFilter, countryFilter]);
 
   const filteredPitches = Array.isArray(pitches)
     ? pitches.filter((pitch) =>
@@ -47,36 +47,45 @@ const InvestmentPitches = () => {
         <button>🔍</button>
       </div>
 
-      <div className="filters">
-        <select
-          value={industryFilter}
-          onChange={(e) => setIndustryFilter(e.target.value)}
-        >
-          <option value="">Filter by Industry</option>
-          <option value="Tech">Tech</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Finance">Finance</option>
-        </select>
+      <div className="filter-section">
+        <div className="filter-item">
+          <FaIndustry className="filter-icon" />
+          <select
+            value={industryFilter}
+            onChange={(e) => setIndustryFilter(e.target.value)}
+          >
+            <option value="">Filter by Industry</option>
+            <option value="Tech">Tech</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Finance">Finance</option>
+          </select>
+        </div>
 
-        <select
-          value={stageFilter}
-          onChange={(e) => setStageFilter(e.target.value)}
-        >
-          <option value="">Filter by Stage</option>
-          <option value="Seed">Seed</option>
-          <option value="Growth">Growth</option>
-          <option value="Mature">Mature</option>
-        </select>
+        <div className="filter-item">
+          <FaLayerGroup className="filter-icon" />
+          <select
+            value={stageFilter}
+            onChange={(e) => setStageFilter(e.target.value)}
+          >
+            <option value="">Filter by Stage</option>
+            <option value="Seed">Seed</option>
+            <option value="Growth">Growth</option>
+            <option value="Mature">Mature</option>
+          </select>
+        </div>
 
-        <select
-          value={countryFilter}
-          onChange={(e) => setCountryFilter(e.target.value)}
-        >
-          <option value="">Filter by Country</option>
-          <option value="USA">USA</option>
-          <option value="Canada">Canada</option>
-          <option value="UK">UK</option>
-        </select>
+        <div className="filter-item">
+          <FaMapMarkerAlt className="filter-icon" />
+          <select
+            value={countryFilter}
+            onChange={(e) => setCountryFilter(e.target.value)}
+          >
+            <option value="">Filter by Country</option>
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+            <option value="UK">UK</option>
+          </select>
+        </div>
       </div>
 
       <div className="pitch-cards">

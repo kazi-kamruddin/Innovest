@@ -14,7 +14,7 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await signup(name, email, password);
-    navigate('/dashboard');
+    navigate('/investor-profile');
   };
 
   return (
