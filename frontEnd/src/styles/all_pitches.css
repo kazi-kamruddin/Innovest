@@ -40,16 +40,16 @@
   font-weight: bold;
 }
 
-/* Updated grid layout */
+
 .pitch-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Two cards in a row */
-  gap: 80px; /* Space between cards */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 80px;
   justify-content: center;
 }
 
 .pitch-card {
-  width: 100%; /* Adjust width to fit in grid */
+  width: 100%; 
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -102,9 +102,9 @@ ul {
   align-content: center;
 }
 
-/* Responsive design */
+
 @media (max-width: 768px) {
   .pitch-cards {
-      grid-template-columns: 1fr; /* One card per row on small screens */
+      grid-template-columns: 1fr;
   }
 }

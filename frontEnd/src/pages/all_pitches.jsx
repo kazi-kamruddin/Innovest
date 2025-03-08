@@ -1,23 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import "../styles/all_pitches.css";
 
 const InvestmentPitches = () => {
   const [pitches, setPitches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const [industryFilter, setIndustryFilter] = useState("");
+  const [stageFilter, setStageFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
 
+  // Fetch all pitches with filters
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/pitches")
-      .then((response) => response.json())
-      .then((data) => setPitches(data))
-      .catch((error) => console.error("Error fetching pitches:", error));
-  }, []);
+    const fetchFilteredPitches = async () => {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/pitches?industry=${industryFilter}&stage=${stageFilter}&country=${countryFilter}`
+        );
+        const data = await response.json();
+        setPitches(data);
+      } catch (error) {
+        console.error("Error fetching pitches:", error);
+        setPitches([]);
+      }
+    };
 
- 
-  const filteredPitches = pitches.filter((pitch) =>
-    pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pitch.country.toLowerCase().includes(searchTerm.toLowerCase()) 
-  );
+    fetchFilteredPitches();
+  }, [industryFilter, stageFilter, countryFilter]); 
+
+  const filteredPitches = Array.isArray(pitches)
+    ? pitches.filter((pitch) =>
+        pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pitch.country.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <div className="investment-pitches">
@@ -31,11 +47,36 @@ const InvestmentPitches = () => {
         <button>🔍</button>
       </div>
 
-      <div className="navigation-links">
-        <a href="#">My Portfolio</a>
-        <a href="#">News Feed</a>
-        <a href="#">Explore</a>
-        <a href="#">My Matches</a>
+      <div className="filters">
+        <select
+          value={industryFilter}
+          onChange={(e) => setIndustryFilter(e.target.value)}
+        >
+          <option value="">Filter by Industry</option>
+          <option value="Tech">Tech</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Finance">Finance</option>
+        </select>
+
+        <select
+          value={stageFilter}
+          onChange={(e) => setStageFilter(e.target.value)}
+        >
+          <option value="">Filter by Stage</option>
+          <option value="Seed">Seed</option>
+          <option value="Growth">Growth</option>
+          <option value="Mature">Mature</option>
+        </select>
+
+        <select
+          value={countryFilter}
+          onChange={(e) => setCountryFilter(e.target.value)}
+        >
+          <option value="">Filter by Country</option>
+          <option value="USA">USA</option>
+          <option value="Canada">Canada</option>
+          <option value="UK">UK</option>
+        </select>
       </div>
 
       <div className="pitch-cards">
@@ -50,7 +91,7 @@ const InvestmentPitches = () => {
 
                 <ul>
                   <li><strong>Industry:</strong> {pitch.industry}</li>
-                  <li><strong>Contact:</strong> 📞 {pitch.cell_number}</li>
+                  <li><strong>Contact:</strong>  {pitch.cell_number}</li>
                 </ul>
 
                 <div className="funding-info">
@@ -58,7 +99,7 @@ const InvestmentPitches = () => {
                   <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
                 </div>
                 <Link to={`/all-pitches/${pitch.id}`}>
-                    <button className="find-out-more">Find Out More</button>
+                  <button className="find-out-more">Find Out More</button>
                 </Link>
               </div>
             </div>
