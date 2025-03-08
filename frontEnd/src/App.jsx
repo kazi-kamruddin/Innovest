@@ -11,8 +11,12 @@ import InvestorProfile from "./pages/InvestorProfile";
 import Allpitches from "./pages/all_pitches";
 import MoreAllPitches from './pages/more_all_pitches'; 
 import AboutUs from "./pages/aboutUs";
+
+import FundraiseDashboard from "./pages/FundraiseDashboard";
+
 import CreatePitch from "./pages/CreatePitch";
 import InvestorInfoSubmit from "./pages/investorInfoSubmit.jsx";
+
 
 
 import Navbar from "./components/Navbar";  
@@ -41,7 +45,12 @@ function App() {
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to={"/login"} />} />
           <Route path="/investor-profile" element={<InvestorProfile />} /> 
           <Route path="/editProfile" element={<EditProfile />} /> 
+
+          <Route path="/fundraise-dashboard" element={<FundraiseDashboard />} />
+
+
           <Route path="/investor-info-submit" element={<InvestorInfoSubmit />} />
+
           <Route path="/all-pitches" element={<Allpitches />} />
           <Route path="/all-pitches/:id" element={<MoreAllPitches />} /> 
           <Route path="/about-us" element={<AboutUs />} />
