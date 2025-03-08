@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/landing_Page";
 import InvestorProfile from "./pages/InvestorProfile";
 import ProfileEdit from "./pages/editUserProfile.jsx";
+import InvestorList from "./pages/investorList.jsx";
 
 import Allpitches from "./pages/all_pitches";
 import MoreAllPitches from './pages/more_all_pitches'; 
@@ -54,6 +55,7 @@ function App() {
 
 
           <Route path="/investor-info-submit" element={<InvestorInfoSubmit />} />
+          <Route path="/investor-list" element={<InvestorList />} />
 
           <Route path="/all-pitches" element={<Allpitches />} />
           <Route path="/all-pitches/:id" element={<MoreAllPitches />} /> 

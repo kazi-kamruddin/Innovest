@@ -128,7 +128,8 @@
 
 .fundraise-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     margin-top: auto;
 }
@@ -174,7 +175,6 @@
     background-color: #5ca76f;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .fundraise-box-container {
         flex-direction: column;
