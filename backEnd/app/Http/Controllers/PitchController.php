@@ -54,6 +54,24 @@ class PitchController extends Controller
         }
     }
 
+    public function destroy($id)
+    {
+        try {
+            $pitch = Pitch::findOrFail($id);
+
+            // if ($pitch->user_id !== auth()->id()) {
+            //     return response()->json(['error' => 'Unauthorized'], 403);
+            // }
+
+            $pitch->delete();
+            return response()->json(['message' => 'Pitch deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete pitch'], 500);
+        }
+    }
+
+
+
     public function createPitch(Request $request){
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',

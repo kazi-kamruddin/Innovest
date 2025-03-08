@@ -15,6 +15,7 @@ const InvestorProfile = () => {
       if (!user) return;
 
       const token = localStorage.getItem("token"); 
+      console.log(token);
 
       try {
         const response = await fetch(`http://localhost:8000/api/profile/${user.id}`, {

@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react"; 
 import { useAuthContext } from "../hooks/useAuthContext"; 
+import { Link } from "react-router-dom";
 import "../styles/FundraiseDashboard.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const FundraiseDashboard = () => {
   const { user } = useAuthContext(); 
@@ -41,14 +45,50 @@ const FundraiseDashboard = () => {
       });
   }, [user]);
 
+  const deletePitch = async (id) => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      toast.error("Unauthorized: Token is missing. Please log in again.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/pitches/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("Error deleting pitch:", data.error);
+        toast.error(data.error || "Error deleting pitch. Please try again.");
+        return;
+      }
+  
+      setPitches(pitches.filter((pitch) => pitch.id !== id));
+      toast.success("Pitch deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting pitch:", error);
+      toast.error(error.message || "Error deleting pitch. Please try again.");
+    }
+  };
+  
+
   return (
     <div className="fundraise-dashboard-container">
       <div className="fundraise-box-container">
  
         <div className="fundraise-box add-fundraise">
-          <button className="add-fundraise-button">
-            <span className="plus-sign">+</span>
-          </button>
+          <Link to="/create-pitch">
+            <button className="add-fundraise-button">
+              <span className="plus-sign">+</span>
+            </button>
+          </Link>
+          
           <p className="hit">Hit the big blue button to add a new pitch.</p>
         </div>
 
@@ -75,8 +115,11 @@ const FundraiseDashboard = () => {
               </div>
 
               <div className="fundraise-footer">
-                <button className="manage-fundraise-btn">Manage my Pitch</button>
-                <button className="delete-fundraise-btn">🗑</button>
+                {/* <button className="manage-fundraise-btn">Manage my Pitch</button> */}
+                <button className="delete-fundraise-btn" onClick={() => deletePitch(pitch.id)}>
+                  🗑
+                </button>
+
               </div>
             </div>
           ))
@@ -86,8 +129,14 @@ const FundraiseDashboard = () => {
       </div>
 
       <div className="fundraise-bottom">
-        <button className="fundraise-pitch-button">Explore Investor List</button>
+          <Link to="/investor-list">
+            <button className="fundraise-pitch-button">Explore Investor List</button>
+          </Link>
+        
       </div>
+
+      <ToastContainer position="top-right" autoClose={2300} hideProgressBar={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+
     </div>
   );
 };

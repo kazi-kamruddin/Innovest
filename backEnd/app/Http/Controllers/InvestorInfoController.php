@@ -49,4 +49,20 @@ class InvestorInfoController extends Controller
             return response()->json(['error' => 'Error retrieving investor info', 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function getInvestorList()
+    {
+        try {
+            $investors = InvestorInfo::with('user')->get();
+
+            if ($investors->isEmpty()) {
+                return response()->json(['message' => 'No investor information found'], 404);
+            }
+
+            return response()->json($investors, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error retrieving investor list', 'message' => $e->getMessage()], 500);
+        }
+    }
+
 }
