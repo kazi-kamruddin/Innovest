@@ -19,10 +19,13 @@ Route::get('/validate-token', [AuthController::class, 'validateJwtToken']);
 Route::get('/pitches', [PitchController::class, 'getAllPitches']); 
 Route::get('/pitches/{id}', [PitchController::class, 'getPitchById']); 
 
+Route::delete('/pitches/{id}', [PitchController::class, 'destroy']);
+
 
 Route::middleware(['customJWT'])->group(function () {
     Route::get('/users/{id}/pitches', [PitchController::class, 'getUserPitches']); 
     Route::post('/pitches', [PitchController::class, 'createPitch']); 
+    
 
     Route::post('/investor-info', [InvestorInfoController::class, 'store']); 
     Route::get('/investor-info/{userId}', [InvestorInfoController::class, 'getInvestorInfo']); 

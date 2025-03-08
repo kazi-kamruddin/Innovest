@@ -19,7 +19,7 @@ function LandingPage() {
           <Link to="/investor-profile">
               <button className="btn secondary"> Profile </button>
           </Link>
-          <Link to="/editProfile">
+          <Link to="/investor-profile/edit-profile">
               <button className="btn secondary">edit Profile </button>
           </Link>
           </div>

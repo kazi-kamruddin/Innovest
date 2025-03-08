@@ -23,7 +23,7 @@ function Navbar() {
         <div className="auth-links">
           {!user && <Link to="/login">Login</Link>}
           {!user && <Link to="/signup">Sign-Up</Link>}
-          {user && <Link to="/dashboard">Dashboard</Link>}
+          {user && <Link to="/investor-profile">Dashboard</Link>}
         </div>
       </div>
     </nav>
