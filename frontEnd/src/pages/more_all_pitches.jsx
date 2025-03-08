@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import "../styles/more_all_pitches.css";
 import pitchImage from "../assets/pitch_investor.jpg"; 
-
-
 import { FaMapMarkerAlt, FaPhoneAlt, FaIndustry, FaLayerGroup, FaDollarSign, FaBriefcase, FaChartLine, FaBullseye } from "react-icons/fa";
 
 const MoreAllPitches = () => {
@@ -43,7 +41,12 @@ const MoreAllPitches = () => {
         <p className="pitch-info-progress1"><FaBullseye /> <strong>Progress:</strong> {pitch.progress}</p>
         <p className="pitch-info-objective1"><FaBullseye /> <strong>Objective:</strong> {pitch.objective}</p>
       </div>
-      <button className="view-profile-button">View Profile</button>
+
+      {/* View Profile Button: Use Link to redirect to the user's profile */}
+      <Link to={`/investor-profile/${pitch.user.id}`} className="view-profile-button">
+            View Profile
+      </Link>
+
     </div>
   );
 };

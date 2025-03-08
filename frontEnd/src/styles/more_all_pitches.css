@@ -29,6 +29,7 @@
   width: 100%;
   font-weight: bold;
   letter-spacing: 1px;
+  margin-bottom: 25px;
 }
 
 .pitch-info-card1 {
@@ -122,12 +123,9 @@
 }
 
 .view-profile-button:hover {
-  background-color: #0056b3;
+  background-color: #5fae5c;
 }
 
-.view-profile-button:active {
-  background-color: #004080;
-}
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
