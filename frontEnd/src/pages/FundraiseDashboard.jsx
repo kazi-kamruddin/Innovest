@@ -129,7 +129,10 @@ const FundraiseDashboard = () => {
       </div>
 
       <div className="fundraise-bottom">
-        <button className="fundraise-pitch-button">Explore Investor List</button>
+          <Link to="/investor-list">
+            <button className="fundraise-pitch-button">Explore Investor List</button>
+          </Link>
+        
       </div>
 
       <ToastContainer position="top-right" autoClose={2300} hideProgressBar={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />

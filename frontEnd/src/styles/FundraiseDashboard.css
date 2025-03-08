@@ -175,7 +175,6 @@
     background-color: #5ca76f;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .fundraise-box-container {
         flex-direction: column;

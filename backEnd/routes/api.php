@@ -19,6 +19,8 @@ Route::get('/validate-token', [AuthController::class, 'validateJwtToken']);
 Route::get('/pitches', [PitchController::class, 'getAllPitches']); 
 Route::get('/pitches/{id}', [PitchController::class, 'getPitchById']); 
 
+Route::get('/investor-list', [InvestorInfoController::class, 'getInvestorList']); 
+
 Route::delete('/pitches/{id}', [PitchController::class, 'destroy']);
 
 
