@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignup } from '../hooks/useSignUp';
+import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
+import "../styles/signup.css";
 
 function SignUp() {
   const [name, setName] = useState('');
@@ -16,47 +18,57 @@ function SignUp() {
   };
 
   return (
-    <div className="container">
-      <h2>Sign Up Page</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="name" className="form-label">Name:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+    <div className="container-signup">
+      <h2 className="signup-heading">Sign Up</h2>
+      {error && <div className="signup-alert-danger">{error}</div>}
+      <form className="signup-box" onSubmit={handleSubmit}>
+        <div className="signup-input-group">
+          <label htmlFor="name">Name:</label>
+          <div className="input-wrapper">
+            <FaUser className="icon" />
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Enter your name"
+            />
+          </div>
         </div>
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email:</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        <div className="signup-input-group">
+          <label htmlFor="email">Email:</label>
+          <div className="input-wrapper">
+            <FaEnvelope className="icon" />
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+            />
+          </div>
         </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password:</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        <div className="signup-input-group">
+          <label htmlFor="password">Password:</label>
+          <div className="input-wrapper">
+            <FaLock className="icon" />
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+            />
+          </div>
         </div>
-        <button type="submit" className="btn btn-primary" disabled={isLoading}>Sign Up</button>
+        <button type="submit" className="signup-btn" disabled={isLoading}>Sign Up</button>
       </form>
     </div>
   );
 }
 
 export default SignUp;
+
