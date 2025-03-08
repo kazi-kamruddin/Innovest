@@ -18,6 +18,7 @@ import FundraiseDashboard from "./pages/FundraiseDashboard";
 
 import CreatePitch from "./pages/CreatePitch";
 import InvestorInfoSubmit from "./pages/investorInfoSubmit.jsx";
+import OthersProfile from "./pages/OthersProfile";
 
 
 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/investor-profile/edit-profile" element={user ? <ProfileEdit /> : <Navigate to={"/login"} />} />
           {/* <Route path="/investor-profile" element={<InvestorProfile />} />  */}
           <Route path="/editProfile" element={<EditProfile />} /> 
+          <Route path="/investor-profile/:userId" element={<OthersProfile />} />
 
           <Route path="/fundraise-dashboard" element={<FundraiseDashboard />} />
 

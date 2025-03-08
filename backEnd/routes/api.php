@@ -16,6 +16,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/validate-token', [AuthController::class, 'validateJwtToken']);
 
+
 Route::get('/pitches', [PitchController::class, 'getAllPitches']); 
 Route::get('/pitches/{id}', [PitchController::class, 'getPitchById']); 
 
