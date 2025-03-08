@@ -7,6 +7,7 @@ import Login from "./pages/login";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/landing_Page";
 import InvestorProfile from "./pages/InvestorProfile";
+import ProfileEdit from "./pages/editUserProfile.jsx";
 
 import Allpitches from "./pages/all_pitches";
 import MoreAllPitches from './pages/more_all_pitches'; 
@@ -42,8 +43,9 @@ function App() {
           <Route path="/login" element={!user ? <Login /> : <Navigate to={"/"} />} />
           <Route path="/signup" element={!user ? <SignUp /> : <Navigate to={"/"} />} />
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-          <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to={"/login"} />} />
-          <Route path="/investor-profile" element={<InvestorProfile />} /> 
+          <Route path="/investor-profile" element={user ? <InvestorProfile /> : <Navigate to={"/login"} />} />
+          <Route path="/investor-profile/edit-profile" element={user ? <ProfileEdit /> : <Navigate to={"/login"} />} />
+          {/* <Route path="/investor-profile" element={<InvestorProfile />} />  */}
           <Route path="/editProfile" element={<EditProfile />} /> 
 
           <Route path="/fundraise-dashboard" element={<FundraiseDashboard />} />
