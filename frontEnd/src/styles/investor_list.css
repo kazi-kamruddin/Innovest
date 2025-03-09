@@ -1,0 +1,125 @@
+
+.investor-list-container {
+    padding: 40px;
+    background-color: #f4f7fc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .investor-list-title {
+    font-size: 2.5rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  
+  .investor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+    padding: 0 10px;
+  }
+
+  .investor-item {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .investor-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    background-color: #f9f9f9;
+  }
+
+  .investor-header {
+    background: linear-gradient(45deg, #007bff, #00bcd4);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid #ffffff;
+    transition: background 0.3s ease;
+  }
+  
+  .investor-header:hover {
+    background: linear-gradient(45deg, #00bcd4, #007bff);
+  }
+  
+  .investor-body {
+    padding: 20px;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+    transition: color 0.3s ease, padding 0.3s ease;
+  }
+  
+  .investor-body p {
+    margin: 10px 0;
+    transition: margin 0.3s ease;
+  }
+  
+  .investor-body strong {
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .investor-item:hover .investor-body p {
+    margin: 15px 0;
+    /* color: #007bff; */
+  }
+  
+  .investor-item:hover .investor-body strong {
+    /* color: #00bcd4; */
+  }
+  
+  @media (max-width: 1200px) {
+    .investor-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .investor-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .investor-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .Toastify__toast {
+    font-size: 1rem;
+    background-color: #28a745;
+    color: white;
+    border-radius: 10px;
+  }
+  
+  .Toastify__toast--error {
+    background-color: #dc3545;
+  }
+  
+  .nvestor-list-loading {
+    font-size: 1.2rem;
+    color: #777;
+    text-align: center;
+  }
+  

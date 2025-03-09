@@ -186,5 +186,114 @@ Innovest offers a comprehensive platform for connecting entrepreneurs and invest
   
 
 
+## How to Download and Run the Project
 
+Follow the steps below to get the project up and running on your local machine.
+
+### Prerequisites
+Before you begin, ensure that you have the following installed on your system:
+
+- **PHP 8.0+**: [Install PHP](https://www.php.net/downloads.php)
+- **Composer**: [Install Composer](https://getcomposer.org/)
+- **Node.js**: [Install Node.js](https://nodejs.org/)
+- **MySQL**: [Install MySQL](https://dev.mysql.com/downloads/installer/)
+- **Git**: [Install Git](https://git-scm.com/)
+- **Laravel Installer**: If not already installed, you can use Composer to install it:  
+  `composer global require laravel/installer`
+  
+### Step 1: Clone the Repository
+Clone the project repository to your local machine using the following command:
+
+```bash
+git clone https://github.com/your-username/innovest.git
+```
+### Step 2: Set Up the Backend (Laravel)
+
+1.  Navigate to the project directory:
+
+    ```bash
+    cd innovest
+    ```
+
+2.  Install backend dependencies using Composer:
+
+    ```bash
+    composer install
+    ```
+
+3.  Create a `.env` file by copying the `.env.example` file:
+
+    ```bash
+    cp .env.example .env
+    ```
+4.  Set up your **MySQL database** in the `.env` file:
+
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=innovest_db
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
+5.  Run the database migrations:
+
+    ```bash
+    php artisan migrate
+    ```
+
+### Step 3: Set Up the Frontend (React)
+
+1.  Navigate to the **frontend** directory:
+
+    ```bash
+    cd innovest
+    cd frontend
+    ```
+
+2.  Install frontend dependencies using npm:
+
+    ```bash
+    npm install
+    ```
+
+3.  Set up environment variables by copying the `.env.example` file:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+4.  Make sure your frontend is configured to communicate with the backend. In the `.env` file, set the **API URL**:
+
+    ```env
+    REACT_APP_API_URL=http://localhost:8000/api
+    ```
+
+5.  Start the React development server:
+
+    ```bash
+    npm run dev
+    ```
+
+    This will start the frontend application at `http://localhost:3000`.
+
+### Step 4: Running the Application
+
+Once both the backend and frontend are set up and running:
+
+1.  **Backend** should be running on `http://localhost:8000`.
+2.  **Frontend** should be running on `http://localhost:3000`.
+
+Visit the frontend URL in your browser to access the Innovest platform. You should be able to sign up, log in, and explore investment opportunities.
+
+### Troubleshooting
+
+- If you encounter issues with database migrations, ensure your database credentials in the `.env` file are correct.
+- If the frontend fails to connect to the backend, double-check the `REACT_APP_API_URL` in the `.env` file.
+- Make sure to have **Node.js** and **npm** installed for the frontend setup and **Composer** for the backend setup.
+
+### Additional Notes
+
+- If you're running both the frontend and backend on different servers or ports, ensure proper **CORS** settings are configured in the backend.
+- You can use Postman to test API endpoints during development.
 

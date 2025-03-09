@@ -7,13 +7,26 @@ use App\Models\Pitch;
 use App\Models\User;
 
 class PitchController extends Controller
-{
-    public function getAllPitches(){
+{   
+    public function getAllPitches(Request $request)
+    {
         try {
-            $pitches = Pitch::with('user')->get(); 
+            $query = Pitch::with('user');
+        
+            if ($request->has('industry')) {
+                $query->where('industry', 'like', '%' . $request->industry . '%');
+            }
+            if ($request->has('stage')) {
+                $query->where('stage', 'like', '%' . $request->stage . '%');
+            }
+            if ($request->has('country')) {
+                $query->where('country', 'like', '%' . $request->country . '%');
+            }
+
+            $pitches = $query->get();
             return response()->json($pitches, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -40,6 +53,24 @@ class PitchController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $pitch = Pitch::findOrFail($id);
+
+            // if ($pitch->user_id !== auth()->id()) {
+            //     return response()->json(['error' => 'Unauthorized'], 403);
+            // }
+
+            $pitch->delete();
+            return response()->json(['message' => 'Pitch deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete pitch'], 500);
+        }
+    }
+
+
 
     public function createPitch(Request $request){
         $validatedData = $request->validate([

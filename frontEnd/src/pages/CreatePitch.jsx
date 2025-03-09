@@ -26,6 +26,18 @@ const CreatePitch = () => {
     objective: "",
   });
 
+
+  const industryOptions = [
+    "Technology", "Healthcare", "Finance", "Real Estate", "Retail",
+    "Manufacturing", "Education", "Food & Beverage", "Automotive", "Other"
+  ];
+  const stageOptions = [
+    "Idea", "Prototype", "Early Revenue", "Scaling", "Profitable"
+  ];
+  const investorRoleOptions = [
+    "Silent Investor", "Active Partner", "Advisor", "Board Member"
+  ];
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -111,15 +123,30 @@ const CreatePitch = () => {
         <div className="row">
           <div className="col-md-4 mb-3">
             <label className="form-label">Industry</label>
-            <input type="text" name="industry" className="form-control" value={formData.industry} onChange={handleChange} required />
+            <select name="industry" className="form-control" value={formData.industry} onChange={handleChange} required>
+              <option value="">Select Industry</option>
+              {industryOptions.map((industry) => (
+                <option key={industry} value={industry}>{industry}</option>
+              ))}
+            </select>
           </div>
           <div className="col-md-4 mb-3">
             <label className="form-label">Stage</label>
-            <input type="text" name="stage" className="form-control" value={formData.stage} onChange={handleChange} />
+            <select name="stage" className="form-control" value={formData.stage} onChange={handleChange}>
+              <option value="">Select Stage</option>
+              {stageOptions.map((stage) => (
+                <option key={stage} value={stage}>{stage}</option>
+              ))}
+            </select>
           </div>
           <div className="col-md-4 mb-3">
             <label className="form-label">Ideal Investor Role</label>
-            <input type="text" name="ideal_investor_role" className="form-control" value={formData.ideal_investor_role} onChange={handleChange} />
+            <select name="ideal_investor_role" className="form-control" value={formData.ideal_investor_role} onChange={handleChange}>
+              <option value="">Select Role</option>
+              {investorRoleOptions.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
           </div>
         </div>
 
