@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // To get the user_id from URL
-import "../styles/others_profile.css";
+import { useParams } from "react-router-dom"; 
+import "../styles/OthersProfile.css";
+import profileImage from "../assets/profile.jpeg"; 
 
 const OthersProfile = () => {
   const [userInfo, setUserInfo] = useState(null);
-  const { userId } = useParams();  // Getting userId from the URL
+  const { userId } = useParams();  
   const token = localStorage.getItem("token")?.trim();
 
   useEffect(() => {
@@ -41,16 +42,14 @@ const OthersProfile = () => {
           <div className="others-profile-card">
             <div className="others-profile-row">
               <div className="others-profile-image">
-                <img
-                  src="https://media.gq-magazine.co.uk/photos/5e96bf31013fff000829de0c/16:9/w_2560%2Cc_limit/GettyImages-1199899108.jpg"
-                  alt="Profile"
-                />
+             <img src={profileImage} alt="Pitch Image" />
               </div>
               <div className="others-profile-info">
                 <h5 className="others-profile-name">{userInfo?.user.name || "No Name Provided"}</h5>
                 <p className="others-profile-location">📍 {userInfo?.location || "Location not set"}</p>
                 <ul className="others-profile-details">
                   <li>• Areas of Interest: {userInfo?.areas_of_interest || "N/A"}</li>
+                  <li>• <strong>Email:</strong> {userInfo?.user.email || "Email not provided"}</li>
                 </ul>
               </div>
               <button className="others-knock-button">Knock</button>
