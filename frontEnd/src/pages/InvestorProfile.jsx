@@ -14,7 +14,7 @@ const InvestorProfile = () => {
     const fetchUserInfo = async () => {
       if (!user) return;
 
-      const token = localStorage.getItem("token"); 
+      const token = localStorage.getItem("token");
       console.log(token);
 
       try {
@@ -22,7 +22,7 @@ const InvestorProfile = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -44,31 +44,17 @@ const InvestorProfile = () => {
     fetchUserInfo();
   }, [user]);
 
-
   const handleLogout = () => {
     logout();
   };
 
   return (
     <div className="container">
-
-
-      <p>{userInfo?.user.email}</p>
-      <p>{userInfo?.location}</p>
-      <p>{userInfo?.areas_of_interest}</p>
-      <p>{userInfo?.about}</p>
-
-      <br />
-      <br />
-      <br />
-      
-
-
       <div className="profile-card">
         <div className="profile-row">
           <div className="profile-image">
             <img
-              src="https://media.gq-magazine.co.uk/photos/5e96bf31013fff000829de0c/16:9/w_2560%2Cc_limit/GettyImages-1199899108.jpg"
+              src="src/images/profile.jpeg"
               alt="Profile"
             />
           </div>
@@ -77,6 +63,7 @@ const InvestorProfile = () => {
             <p className="profile-location">📍 {userInfo?.location || "Location not set"}</p>
             <ul className="profile-details">
               <li>• Areas of Interest: {userInfo?.areas_of_interest || "N/A"}</li>
+              <li>• <strong>Email:</strong> {userInfo?.user.email || "Email not provided"}</li>
             </ul>
           </div>
           <button className="knock-button">Knock</button>
@@ -91,11 +78,10 @@ const InvestorProfile = () => {
       </div>
 
       {user && (
-        <div>
-          <br />
-          <button onClick={handleLogout}>Log out</button>
+        <div className="action-buttons11">
+          <button onClick={handleLogout} className="btn logout">Log out</button>
           <Link to="/investor-profile/edit-profile">
-              <button className="btn secondary">edit Profile </button>
+            <button className="btn secondary">Edit Profile</button>
           </Link>
           <Link to="/investor-info-submit">
               <button className="btn secondary">Investor Profile Info</button>
