@@ -97,6 +97,9 @@ const InvestorProfile = () => {
           <Link to="/investor-profile/edit-profile">
               <button className="btn secondary">edit Profile </button>
           </Link>
+          <Link to="/investor-info-submit">
+              <button className="btn secondary">Investor Profile Info</button>
+          </Link>
         </div>
       )}
     </div>

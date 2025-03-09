@@ -30,11 +30,11 @@ const InvestorList = () => {
   
     return (
       <div className="investor-list-container">
-        <h2>Investor List</h2>
+        <h2 className="">Investor List</h2>
         {loading ? (
-          <p>Loading...</p>
+          <p className="investor-list-loading">Loading...</p>
         ) : error ? (
-          <p>Error: {error}</p>
+          <p className="investor-list-loading">Error: {error}</p>
         ) : investors.length > 0 ? (
           <div className="investor-grid">
             {investors.map((investor) => (
