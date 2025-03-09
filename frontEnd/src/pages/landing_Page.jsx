@@ -12,16 +12,10 @@ function LandingPage() {
           <h1>Connecting Investors and Innovation together here in Innovest</h1>
           <p>Where great businesses and great people meet. We bring together businesses looking for investment and investors with capital,contacts and knowledge to help them succeed.</p>
           <div className="hero-buttons">
-          <button className="btn secondary">Get Started →</button>
-          <Link to="/investor-info-submit">
-              <button className="btn secondary">Investor Profile Info</button>
+          <Link to="/fundraise-dashboard">
+            <button className="btn secondary">Get Started →</button>
           </Link>
-          <Link to="/investor-profile">
-              <button className="btn secondary"> Profile </button>
-          </Link>
-          <Link to="/investor-profile/edit-profile">
-              <button className="btn secondary">edit Profile </button>
-          </Link>
+          
           </div>
         </div>
         <div className="hero-image">
