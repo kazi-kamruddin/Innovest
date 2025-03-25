@@ -1,0 +1,100 @@
+.others-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .others-profile-card {
+    background: white;
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .others-profile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .others-profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+   
+  }
+  
+  .others-profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .others-profile-info {
+    flex-grow: 1;
+    padding-left: 20px;
+  }
+  
+  .others-profile-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .others-profile-location {
+    color: gray;
+    font-size: 1rem;
+    margin-left: -330px;
+  }
+  
+  .others-profile-details {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+  }
+  
+  .others-profile-details li {
+    font-size: 1rem;
+    margin-bottom: 5px;
+  }
+  
+  .others-knock-button {
+    background: green;
+    color: white;
+    font-size: 1.2rem;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .others-knock-button:hover {
+    background: darkgreen;
+  }
+  
+  .others-info-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .others-info-card {
+    flex: 1;
+    background: white;
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .others-card-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .others-card-text {
+    font-size: 1rem;
+    color: #555;
+  }
+  

@@ -1,63 +1,93 @@
+import { useEffect, useState } from "react";
+import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { useLogout } from "../hooks/useLogout.jsx";
+import { Link } from "react-router-dom";
 import "../styles/investor_profile.css";
 
 const InvestorProfile = () => {
-  const profileImageUrl =
-    "https://media.gq-magazine.co.uk/photos/5e96bf31013fff000829de0c/16:9/w_2560%2Cc_limit/GettyImages-1199899108.jpg";
+  const { user } = useAuthContext();
+  const { logout } = useLogout();
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!user) return;
+
+      const token = localStorage.getItem("token");
+      console.log(token);
+
+      try {
+        const response = await fetch(`http://localhost:8000/api/profile/${user.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setUserInfo(data);
+          console.log(data);
+        } else {
+          setUserInfo(null);
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, [user]);
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div className="container">
-      {/* Profile Card */}
       <div className="profile-card">
         <div className="profile-row">
           <div className="profile-image">
-            <img src={profileImageUrl} alt="Profile" />
+            <img
+              src="src/images/profile.jpeg"
+              alt="Profile"
+            />
           </div>
           <div className="profile-info">
-            <h5 className="profile-name">Sadik Rahman</h5>
-            <p className="profile-location">📍 Chittagong, Bangladesh</p>
+            <h5 className="profile-name">{user?.name || "No Name Provided"}</h5>
+            <p className="profile-location">📍 {userInfo?.location || "Location not set"}</p>
             <ul className="profile-details">
-              <li>• Joined August 25, 2022</li>
-              <li>• Investment Range: $0 – $125,000</li>
-              <li>• Currently invested in 5 projects</li>
-              <li>• Social Media Links: N/A</li>
+              <li>• Areas of Interest: {userInfo?.areas_of_interest || "N/A"}</li>
+              <li>• <strong>Email:</strong> {userInfo?.user.email || "Email not provided"}</li>
             </ul>
           </div>
           <button className="knock-button">Knock</button>
         </div>
       </div>
 
-      {/* Additional Information */}
       <div className="info-section">
-        {/* Areas of Interest */}
-        <div className="info-card">
-          <h5 className="card-title">Areas of Interest</h5>
-          <div className="interest-grid">
-            {[{ icon: "❤️", text: "Healthcare" },
-              { icon: "🚌", text: "Transportation" },
-              { icon: "💻", text: "Technology" }].map((item, index) => (
-              <div className="interest-item" key={index}>
-                <span className="interest-icon">{item.icon}</span>
-                <p className="interest-text">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* About Section */}
         <div className="info-card">
           <h5 className="card-title">About</h5>
-          <p className="card-text">
-            I am a passionate and driven investor dedicated to identifying and
-            nurturing promising ventures. With a diverse portfolio spanning
-            industries such as technology, healthcare, and transportation, I
-            thrive on fostering innovation and growth. My investment philosophy
-            is rooted in thorough research, strategic partnerships, and a
-            commitment to long-term success. Based in Helsinki, Finland, I am
-            always eager to connect with like-minded entrepreneurs and investors
-            to explore new opportunities and drive positive change.
-          </p>
+          <p className="card-text">{userInfo?.about || "No bio provided yet."}</p>
         </div>
       </div>
+
+      {user && (
+        <div className="action-buttons11">
+          <button onClick={handleLogout} className="btn logout">Log out</button>
+          <Link to="/investor-profile/edit-profile">
+            <button className="btn secondary">Edit Profile</button>
+          </Link>
+          <Link to="/investor-info-submit">
+              <button className="btn secondary">Investor Profile Info</button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
