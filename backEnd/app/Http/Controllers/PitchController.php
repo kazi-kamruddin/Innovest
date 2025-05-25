@@ -39,20 +39,32 @@ class PitchController extends Controller
         }
     }
 
+    // public function getUserPitches($userId){
+    //     try {
+    //         $user = User::findOrFail($userId);
+    //         $pitches = $user->pitches; 
+
+    //         if ($pitches->isEmpty()) {
+    //             return response()->json(['message' => 'No pitches found for this user'], 404);
+    //         }
+
+    //         return response()->json($pitches, 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'User not found'], 404);
+    //     }
+    // }
+
     public function getUserPitches($userId){
         try {
             $user = User::findOrFail($userId);
-            $pitches = $user->pitches; 
-
-            if ($pitches->isEmpty()) {
-                return response()->json(['message' => 'No pitches found for this user'], 404);
-            }
+            $pitches = $user->pitches;
 
             return response()->json($pitches, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'User not found'], 404);
         }
     }
+
 
     public function destroy($id)
     {
