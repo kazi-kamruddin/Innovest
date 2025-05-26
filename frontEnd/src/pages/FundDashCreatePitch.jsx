@@ -4,9 +4,9 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import '../styles/CreatePitch.css';
+import '../styles/fund-dash-create-pitch.css';
 
-const CreatePitch = () => {
+const FundDashCreatePitch = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
@@ -70,7 +70,7 @@ const CreatePitch = () => {
       toast.success("Pitch submitted successfully!");
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/fundraise-dashboard");
       }, 2000);
 
       setFormData({
@@ -189,4 +189,4 @@ const CreatePitch = () => {
   );
 };
 
-export default CreatePitch;
+export default FundDashCreatePitch;

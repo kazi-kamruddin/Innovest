@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import '../styles/investor_list.css';
+import '../styles/investor-list.css';
 
 const InvestorList = () => {
     const [investors, setInvestors] = useState([]);

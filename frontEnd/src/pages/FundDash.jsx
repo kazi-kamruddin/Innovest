@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react"; 
 import { useAuthContext } from "../hooks/useAuthContext"; 
 import { Link } from "react-router-dom";
-import "../styles/FundraiseDashboard.css";
+import "../styles/fund-dash.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const FundraiseDashboard = () => {
+const FundDash = () => {
   const { user } = useAuthContext(); 
   const [pitches, setPitches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +83,7 @@ const FundraiseDashboard = () => {
       <div className="fundraise-box-container">
  
         <div className="fundraise-box add-fundraise">
-          <Link to="/create-pitch">
+          <Link to="/fundraise-dashboard/create-pitch">
             <button className="add-fundraise-button">
               <span className="plus-sign">+</span>
             </button>
@@ -141,4 +141,4 @@ const FundraiseDashboard = () => {
   );
 };
 
-export default FundraiseDashboard;
+export default FundDash;

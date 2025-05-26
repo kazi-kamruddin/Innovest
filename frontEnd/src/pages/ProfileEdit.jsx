@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
 import { ToastContainer, toast } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css'; 
-import '../styles/investorInfoSubmit.css';
-import '../styles/profile_edit.css';
+import '../styles/profile-edit.css';
 
 const ProfileEdit = () => {
   const { user } = useAuthContext();

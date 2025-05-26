@@ -14,7 +14,7 @@ function Navbar() {
       <div className="nav-container">
         <ul className="nav-links">
           <li>
-            <Link to="/all-pitches">Invest</Link>
+            <Link to="/pitches">Invest</Link>
             <Link to="/fundraise-dashboard">Fundraise</Link> 
             {/* <a href="#">Help</a> */}
             <Link to="/about-us">About Us</Link>
@@ -23,7 +23,7 @@ function Navbar() {
         <div className="auth-links">
           {!user && <Link to="/login">Login</Link>}
           {!user && <Link to="/signup">Sign-Up</Link>}
-          {user && <Link to="/investor-profile">Dashboard</Link>}
+          {user && <Link to="/profile">Dashboard</Link>}
         </div>
       </div>
     </nav>

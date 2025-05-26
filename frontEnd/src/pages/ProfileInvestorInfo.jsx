@@ -3,9 +3,9 @@ import { useAuthContext } from '../hooks/useAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css'; 
-import '../styles/investorInfoSubmit.css';
+import '../styles/profile-investor-info.css';
 
-const InvestorInfoSubmit = () => {
+const ProfileInvestorInfo = () => {
     const [fieldsOfInterest, setFieldsOfInterest] = useState('');
     const [investmentRangeMin, setInvestmentRangeMin] = useState('');
     const [investmentRangeMax, setInvestmentRangeMax] = useState('');
@@ -115,4 +115,4 @@ const InvestorInfoSubmit = () => {
     );
 };
 
-export default InvestorInfoSubmit;
+export default ProfileInvestorInfo;

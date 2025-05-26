@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../styles/aboutUs.css';
+import '../styles/about-us.css';
 
 import sakib from '../assets/sakib.jpg';
 import sumit from '../assets/sumit.jpg';

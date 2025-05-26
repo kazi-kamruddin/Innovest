@@ -2,26 +2,29 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthContext } from "./hooks/useAuthContext";
 
-import SignUp from "./pages/signUp";
-import Login from "./pages/login";
-import Dashboard from "./pages/Dashboard";
-import LandingPage from "./pages/landing_Page";
-import InvestorProfile from "./pages/InvestorProfile";
-import ProfileEdit from "./pages/editUserProfile.jsx";
-import InvestorList from "./pages/investorList.jsx";
-import Allpitches from "./pages/all_pitches";
-import MoreAllPitches from './pages/more_all_pitches'; 
-import AboutUs from "./pages/aboutUs";
-import FundraiseDashboard from "./pages/FundraiseDashboard";
-import CreatePitch from "./pages/CreatePitch";
-import InvestorInfoSubmit from "./pages/investorInfoSubmit.jsx";
-import OthersProfile from "./pages/OthersProfile";
-import EditProfile from "./pages/edit_profile";
+import LandingPage from "./pages/LandingPage";
+import AboutUs from "./pages/AboutUs.jsx";
+
+import RegSignUp from "./pages/RegSignUp.jsx";
+import RegLogin from "./pages/RegLogin.jsx";
+
+import Profile from "./pages/Profile.jsx";
+import ProfileEdit from "./pages/ProfileEdit.jsx";
+import ProfileOthers from "./pages/ProfileOthers";
+import ProfileInvestorInfo from "./pages/ProfileInvestorInfo.jsx";
+
+import FundDash from "./pages/FundDash";
+import FundDashCreatePitch from "./pages/FundDashCreatePitch";
+import InvestorList from "./pages/InvestorList.jsx";
+
+import PitchAll from "./pages/PitchAll";
+import PitchSingle from './pages/PitchSingle';
 
 import Navbar from "./components/Navbar";  
 import Footer from "./components/Footer"; 
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import "./App.css";
+
 
 
 function App() {
@@ -36,21 +39,23 @@ function App() {
       <div className="main-section">
         <Routes >
           <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={!user ? <Login /> : <Navigate to={"/"} />} />
-          <Route path="/signup" element={!user ? <SignUp /> : <Navigate to={"/"} />} />
-
-          <Route path="/investor-profile" element={user ? <InvestorProfile /> : <Navigate to={"/login"} />} />
-          <Route path="/investor-profile/edit-profile" element={user?<ProfileEdit /> : <Navigate to={"/login"}/>} />
-          <Route path="/investor-profile/:userId" element={<OthersProfile />} />
-          <Route path="/editProfile" element={<EditProfile />} />
-          
-          <Route path="/fundraise-dashboard" element={<FundraiseDashboard />} />
-          <Route path="/investor-info-submit" element={<InvestorInfoSubmit />} />
-          <Route path="/investor-list" element={<InvestorList />} />
-          <Route path="/all-pitches" element={<Allpitches />} />
-          <Route path="/all-pitches/:id" element={<MoreAllPitches />} /> 
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/create-pitch" element={<CreatePitch />} />
+
+          <Route path="/login" element={!user ? <RegLogin /> : <Navigate to={"/"} />} />
+          <Route path="/signup" element={!user ? <RegSignUp /> : <Navigate to={"/"} />} />
+
+          <Route path="/profile" element={user ? <Profile /> : <Navigate to={"/login"} />} />
+          <Route path="/profile/edit-profile" element={user?<ProfileEdit /> : <Navigate to={"/login"}/>} />
+          <Route path="/profile/:userId" element={<ProfileOthers />} />
+          <Route path="/profile/investor-info" element={<ProfileInvestorInfo />} />
+          
+          <Route path="/fundraise-dashboard" element={<FundDash />} />
+          <Route path="/fundraise-dashboard/create-pitch" element={<FundDashCreatePitch />} />
+          <Route path="/investor-list" element={<InvestorList />} />
+
+          <Route path="/pitches" element={<PitchAll />} />
+          <Route path="/pitches/:id" element={<PitchSingle />} />
+          
         </Routes> 
       </div> 
       

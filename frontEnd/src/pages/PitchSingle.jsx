@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import "../styles/more_all_pitches.css";
+import "../styles/pitch-single.css";
 import pitchImage from "../assets/pitch_investor.jpg"; 
 import { FaMapMarkerAlt, FaPhoneAlt, FaIndustry, FaLayerGroup, FaDollarSign, FaBriefcase, FaChartLine, FaBullseye } from "react-icons/fa";
 
-const MoreAllPitches = () => {
+const PitchSingle = () => {
   const [pitch, setPitch] = useState(null);
   const { id } = useParams();  
 
@@ -43,7 +43,7 @@ const MoreAllPitches = () => {
       </div>
 
       {/* View Profile Button: Use Link to redirect to the user's profile */}
-      <Link to={`/investor-profile/${pitch.user.id}`} className="view-profile-button">
+      <Link to={`/profile/${pitch.user.id}`} className="view-profile-button">
             View Profile
       </Link>
 
@@ -51,4 +51,4 @@ const MoreAllPitches = () => {
   );
 };
 
-export default MoreAllPitches;
+export default PitchSingle;

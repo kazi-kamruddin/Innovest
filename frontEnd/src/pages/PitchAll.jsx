@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../styles/all_pitches.css";
+import "../styles/pitch-all.css";
 import { FaIndustry, FaMapMarkerAlt, FaLayerGroup } from 'react-icons/fa';
 
-const InvestmentPitches = () => {
+const PitchAll = () => {
   const [pitches, setPitches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -107,7 +107,7 @@ const InvestmentPitches = () => {
                   <span><strong>Raising Amount:</strong> ${pitch.total_raising_amount}</span>
                   <span><strong>Minimum Investment:</strong> ${pitch.minimum_investment}</span>
                 </div>
-                <Link to={`/all-pitches/${pitch.id}`}>
+                <Link to={`/pitches/${pitch.id}`}>
                   <button className="find-out-more">Find Out More</button>
                 </Link>
               </div>
@@ -121,4 +121,4 @@ const InvestmentPitches = () => {
   );
 };
 
-export default InvestmentPitches;
+export default PitchAll;

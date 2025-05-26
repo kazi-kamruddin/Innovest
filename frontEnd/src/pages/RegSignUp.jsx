@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignup } from '../hooks/useSignUp';
 import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
-import "../styles/signup.css";
+import "../styles/reg-signup.css";
 
-function SignUp() {
+function RegSignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -70,5 +70,5 @@ function SignUp() {
   );
 }
 
-export default SignUp;
+export default RegSignUp;
 

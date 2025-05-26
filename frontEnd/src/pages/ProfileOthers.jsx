@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"; 
-import "../styles/OthersProfile.css";
+import "../styles/profile-others.css";
 import profileImage from "../assets/profile.jpeg"; 
 
-const OthersProfile = () => {
+const ProfileOthers = () => {
   const [userInfo, setUserInfo] = useState(null);
   const { userId } = useParams();  
   const token = localStorage.getItem("token")?.trim();
@@ -34,6 +34,7 @@ const OthersProfile = () => {
 
     fetchUserInfo();
   }, [userId]);
+
 
   return (
     <div className="others-container">
@@ -70,4 +71,4 @@ const OthersProfile = () => {
   );
 };
 
-export default OthersProfile;
+export default ProfileOthers;

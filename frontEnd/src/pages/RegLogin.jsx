@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLogin } from '../hooks/useLogin';
-import "../styles/login.css";
+import "../styles/reg-login.css";
 
-function Login() {
+function RegLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, error, isLoading } = useLogin();
@@ -61,5 +61,5 @@ function Login() {
   );
 }
 
-export default Login;
+export default RegLogin;
 

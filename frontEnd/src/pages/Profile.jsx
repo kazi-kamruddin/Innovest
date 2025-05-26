@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
 import { useLogout } from "../hooks/useLogout.jsx";
 import { Link } from "react-router-dom";
-import "../styles/investor_profile.css";
+import "../styles/profile.css";
 
-const InvestorProfile = () => {
+const Profile = () => {
   const { user } = useAuthContext();
   const { logout } = useLogout();
   const [userInfo, setUserInfo] = useState(null);
@@ -80,10 +80,10 @@ const InvestorProfile = () => {
       {user && (
         <div className="action-buttons11">
           <button onClick={handleLogout} className="btn logout">Log out</button>
-          <Link to="/investor-profile/edit-profile">
+          <Link to="/profile/edit-profile">
             <button className="btn secondary">Edit Profile</button>
           </Link>
-          <Link to="/investor-info-submit">
+          <Link to="/profile/investor-info">
               <button className="btn secondary">Investor Profile Info</button>
           </Link>
         </div>
@@ -92,4 +92,4 @@ const InvestorProfile = () => {
   );
 };
 
-export default InvestorProfile;
+export default Profile;
