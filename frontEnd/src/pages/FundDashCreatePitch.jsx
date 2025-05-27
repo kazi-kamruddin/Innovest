@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,6 @@ const FundDashCreatePitch = () => {
     objective: "",
   });
 
-
   const industryOptions = [
     "Technology", "Healthcare", "Finance", "Real Estate", "Retail",
     "Manufacturing", "Education", "Food & Beverage", "Automotive", "Other"
@@ -47,14 +46,17 @@ const FundDashCreatePitch = () => {
 
     if (!user) {
       toast.error("You must be logged in to submit a pitch.");
+      console.warn(`[WARN] Attempted pitch submission without auth`);
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token")?.trim();
-      console.log("Submitting pitch with user_id:", user.id);
-      console.log("Authorization header:", `Bearer ${token}`);
+    const token = localStorage.getItem("token")?.trim();
 
+    console.log(`[INFO] Submitting pitch | user_id=${user.id}`);
+    console.log("[DEBUG] Payload:", formData);
+    console.log("[DEBUG] Token present:", Boolean(token));
+
+    try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/pitches",
         { ...formData, user_id: user.id },
@@ -66,7 +68,7 @@ const FundDashCreatePitch = () => {
         }
       );
 
-      console.log("Server response:", response.data);
+      console.log("[SUCCESS] Pitch submitted | pitch_id:", response.data?.id);
       toast.success("Pitch submitted successfully!");
 
       setTimeout(() => {
@@ -88,9 +90,10 @@ const FundDashCreatePitch = () => {
         progress: "",
         objective: "",
       });
-
     } catch (error) {
-      console.error("Error submitting pitch:", error.response);
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.message;
+      console.error(`[ERROR] Pitch submission failed | status=${status} | message=${message}`);
       toast.error("Failed to submit pitch.");
     }
   };

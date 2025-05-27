@@ -66,16 +66,18 @@ class PitchController extends Controller
     }
 
 
-    public function destroy($id)
+    public function destroy($userId, $pitchId)
     {
         try {
-            $pitch = Pitch::findOrFail($id);
+            $pitch = Pitch::findOrFail($pitchId);
 
-            // if ($pitch->user_id !== auth()->id()) {
-            //     return response()->json(['error' => 'Unauthorized'], 403);
-            // }
+            // Check if pitch belongs to the user
+            if ($pitch->user_id != (int)$userId) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
 
             $pitch->delete();
+
             return response()->json(['message' => 'Pitch deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to delete pitch'], 500);
