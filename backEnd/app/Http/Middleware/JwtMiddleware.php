@@ -23,11 +23,11 @@ class JwtMiddleware
             $token = $request->header('Authorization');
 
             if (!$token || !$this->jwtService->validateJwtToken($token)) {
-                throw new AuthenticationException(); 
+                throw new AuthenticationException();
             }
 
             $userIdFromToken = $this->jwtService->getUserIdFromToken($token);
-            
+
             if (!$userIdFromToken) {
                 return response()->json([
                     'success' => false,
@@ -35,8 +35,9 @@ class JwtMiddleware
                 ], Response::HTTP_UNAUTHORIZED);
             }
 
-            $userIdFromRoute = $request->route('id'); 
-            
+            // Get userId param from route
+            $userIdFromRoute = $request->route('userId'); 
+
             if ($userIdFromRoute && $userIdFromToken != $userIdFromRoute) {
                 return response()->json([
                     'success' => false,

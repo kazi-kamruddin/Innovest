@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
-import { useNavigate } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import '../styles/fund-dash-create-pitch.css';
+import "../styles/fund-dash-create-pitch.css";
 
-const FundDashCreatePitch = () => {
+const FundDashEditPitch = () => {
+  const { id } = useParams();
   const { user } = useAuthContext();
   const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     title: "",
@@ -26,6 +27,9 @@ const FundDashCreatePitch = () => {
     objective: "",
   });
 
+  const [showModal, setShowModal] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
+
   const industryOptions = [
     "Technology", "Healthcare", "Finance", "Real Estate", "Retail",
     "Manufacturing", "Education", "Food & Beverage", "Automotive", "Other"
@@ -37,71 +41,94 @@ const FundDashCreatePitch = () => {
     "Silent Investor", "Active Partner", "Advisor", "Board Member"
   ];
 
+  useEffect(() => {
+    fetch(`http://127.0.0.1:8000/api/pitches/${id}`)
+      .then((response) => {
+        console.log("GET /api/pitches/" + id, response);
+        if (!response.ok) throw new Error("Failed to fetch pitch data");
+        return response.json();
+      })
+      .then((data) => {
+        setFormData({
+          title: data.title || "",
+          company_location: data.company_location || "",
+          country: data.country || "",
+          cell_number: data.cell_number || "",
+          industry: data.industry || "",
+          stage: data.stage || "",
+          ideal_investor_role: data.ideal_investor_role || "",
+          total_raising_amount: data.total_raising_amount || "",
+          minimum_investment: data.minimum_investment || "",
+          the_business: data.the_business || "",
+          the_market: data.the_market || "",
+          progress: data.progress || "",
+          objective: data.objective || "",
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching pitch:", error);
+        toast.error("Failed to load pitch details.");
+      });
+  }, [id]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setShowModal(true); 
+  };
 
-    if (!user) {
-      toast.error("You must be logged in to submit a pitch.");
-      console.warn(`[WARN] Attempted pitch submission without auth`);
-      return;
+  const confirmUpdate = () => {
+    setShowModal(false);
+
+    const token = localStorage.getItem("token");
+    const userId = user.id;
+
+    if (!token || !userId) {
+        toast.error("You are not authorized. Please log in again.");
+        return;
     }
 
-    const token = localStorage.getItem("token")?.trim();
+    console.log("PUT /api/users/" + userId + "/pitches/" + id);
+    console.log("Payload:", formData);
 
-    console.log(`[INFO] Submitting pitch | user_id=${user.id}`);
-    console.log("[DEBUG] Payload:", formData);
-    console.log("[DEBUG] Token present:", Boolean(token));
-
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/pitches",
-        { ...formData, user_id: user.id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+    fetch(`http://127.0.0.1:8000/api/users/${userId}/pitches/${id}`, {
+        method: "PUT",
+        headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+    })
+        .then((res) => {
+        console.log("Response:", res);
+        if (!res.ok) {
+            return res.json().then((err) => {
+            throw new Error(err?.error || "Failed to update pitch");
+            });
         }
-      );
+        return res.json();
+        })
+        .then((data) => {
+        toast.success("Pitch updated successfully!");
+        setTimeout(() => navigate("/fundraise-dashboard"), 1500);
+        })
+        .catch((error) => {
+        toast.error(error.message || "Update failed.");
+        });
+  };
 
-      console.log("[SUCCESS] Pitch submitted | pitch_id:", response.data?.id);
-      toast.success("Pitch submitted successfully!");
 
-      setTimeout(() => {
-        navigate("/fundraise-dashboard");
-      }, 2000);
-
-      setFormData({
-        title: "",
-        company_location: "",
-        country: "",
-        cell_number: "",
-        industry: "",
-        stage: "",
-        ideal_investor_role: "",
-        total_raising_amount: "",
-        minimum_investment: "",
-        the_business: "",
-        the_market: "",
-        progress: "",
-        objective: "",
-      });
-    } catch (error) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-      console.error(`[ERROR] Pitch submission failed | status=${status} | message=${message}`);
-      toast.error("Failed to submit pitch.");
-    }
+  const cancelUpdate = () => {
+    setShowModal(false);
   };
 
   return (
     <div className="investment-pitches">
-      <h2 className="text-center mb-4">Create a New Pitch</h2>
-      <form onSubmit={handleSubmit} className="p-4 border rounded shadow">
+      <h2 className="text-center mb-4">Pitch Editor</h2>
+      <form className="p-4 border rounded shadow" onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label">Pitch Title</label>
           <input type="text" name="title" className="form-control" value={formData.title} onChange={handleChange} required />
@@ -183,13 +210,39 @@ const FundDashCreatePitch = () => {
           <label className="form-label">Objective</label>
           <textarea name="objective" className="form-control" rows="3" value={formData.objective} onChange={handleChange}></textarea>
         </div>
-
-        <button type="submit" className="btn btn-primary w-100">Submit Pitch</button>
+        <button type="submit" className="btn btn-primary w-100">
+          Update Pitch
+        </button>
       </form>
 
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h5>Are you sure you want to update this pitch?</h5>
+            <div className="modal-buttons">
+              <button className="confirm-btn" onClick={confirmUpdate}>
+                Yes, Update
+              </button>
+              <button className="cancel-btn" onClick={cancelUpdate}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };
 
-export default FundDashCreatePitch;
+export default FundDashEditPitch;

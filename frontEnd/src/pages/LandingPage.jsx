@@ -33,7 +33,7 @@ function LandingPage() {
           <div className="future-container">
             <div className="future-card">
               <div className="image-container">
-                <img src="src/images/future1.jpeg" alt="Image 1" class="image-placeholder"/>
+                <img src="src/images/future1.jpeg" alt="Image 1" className="image-placeholder"/>
               </div>
               <div className="description-container">
                 <p className="description">
@@ -43,7 +43,7 @@ function LandingPage() {
             </div>
             <div className="future-card">
               <div className="image-container">
-                <img src="src/images/future2.jpeg" alt="Image 2" class="image-placeholder"/>
+                <img src="src/images/future2.jpeg" alt="Image 2" className="image-placeholder"/>
               </div>
               <div className="description-container">
                 <p className="description">
@@ -53,7 +53,7 @@ function LandingPage() {
             </div>
             <div className="future-card">
               <div className="image-container">
-                <img src="src/images/future3.jpeg" alt="Image 3" class="image-placeholder"/>
+                <img src="src/images/future3.jpeg" alt="Image 3" className="image-placeholder"/>
               </div>
               <div className="description-container">
                 <p className="description">
@@ -71,7 +71,7 @@ function LandingPage() {
             <h2>Our Clients</h2>
             <p>We have been working with some Fortune 300+ clients</p>
         </div>
-        <div class="client-logos">
+        <div className="client-logos">
             <img src="src/images/logo1.jpg" alt="Client Logo 1" />
             <img src="src/images/logo2.jpeg" alt="Client Logo 2" />
             <img src="src/images/logo3.jpg" alt="Client Logo 3" />

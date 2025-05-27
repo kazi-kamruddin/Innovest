@@ -66,21 +66,59 @@ class PitchController extends Controller
     }
 
 
-    public function destroy($id)
+    public function destroy($userId, $pitchId)
     {
         try {
-            $pitch = Pitch::findOrFail($id);
+            $pitch = Pitch::findOrFail($pitchId);
 
-            // if ($pitch->user_id !== auth()->id()) {
-            //     return response()->json(['error' => 'Unauthorized'], 403);
-            // }
+            // Check if pitch belongs to the user
+            if ($pitch->user_id != (int)$userId) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
 
             $pitch->delete();
+
             return response()->json(['message' => 'Pitch deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to delete pitch'], 500);
         }
     }
+
+    public function update(Request $request, $userId, $pitchId)
+    {
+        try {
+            $pitch = Pitch::findOrFail($pitchId);
+
+            if ($pitch->user_id != (int)$userId) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $validatedData = $request->validate([
+                'title' => 'required|string',
+                'company_location' => 'nullable|string',
+                'country' => 'nullable|string',
+                'cell_number' => 'nullable|string',
+                'industry' => 'required|string',
+                'stage' => 'nullable|string',
+                'ideal_investor_role' => 'nullable|string',
+                'total_raising_amount' => 'nullable|numeric',
+                'minimum_investment' => 'nullable|numeric',
+                'the_business' => 'nullable|string',
+                'the_market' => 'nullable|string',
+                'progress' => 'nullable|string',
+                'objective' => 'nullable|string',
+            ]);
+
+            $pitch->update($validatedData);
+
+            return response()->json(['message' => 'Pitch updated successfully', 'pitch' => $pitch], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update pitch'], 500);
+        }
+    }
+
 
 
 
