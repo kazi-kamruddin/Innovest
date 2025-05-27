@@ -119,12 +119,16 @@
   margin-bottom: 22px;
   display: block;
   margin-left: auto;
-  margin-right: auto; 
+  margin-right: auto;
+  border: none;              
+  text-decoration: none;      
+  font-weight: normal;       
 }
 
 .view-profile-button:hover {
-  background-color: #5fae5c;
+  background-color: #c95052;
 }
+
 
 
 /* Mobile responsiveness */

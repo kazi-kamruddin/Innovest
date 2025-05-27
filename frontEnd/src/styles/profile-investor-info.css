@@ -45,7 +45,7 @@
   .investor-profile-submit-button {
     width: 100%;
     padding: 14px;
-    background-color: #4caf50;
+    background: #007bff;
     color: #fff;
     font-size: 18px;
     border: none;
@@ -55,7 +55,7 @@
   }
   
   .investor-profile-submit-button:hover {
-    background-color: #45a049;
+    background: #0056b3;
   }
   
   .alert-success {
