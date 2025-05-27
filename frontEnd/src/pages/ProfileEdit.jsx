@@ -120,7 +120,7 @@ const ProfileEdit = () => {
         toast.success("Profile updated successfully!");
         setTimeout(() => {
           window.location.href = "/profile";
-        }, 2300);
+        }, 700);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || "Something went wrong");
