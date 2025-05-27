@@ -29,6 +29,8 @@ Route::middleware(['customJWT'])->group(function () {
     Route::get('/users/{id}/pitches', [PitchController::class, 'getUserPitches']); 
     Route::post('/pitches', [PitchController::class, 'createPitch']); 
     Route::delete('/users/{userId}/pitches/{pitchId}', [PitchController::class, 'destroy']);
+    Route::put('/users/{userId}/pitches/{pitchId}', [PitchController::class, 'update']);
+
 
     Route::post('/investor-info', [InvestorInfoController::class, 'store']); 
     Route::get('/investor-info/{userId}', [InvestorInfoController::class, 'getInvestorInfo']); 

@@ -16,6 +16,7 @@ import ProfileInvestorInfo from "./pages/ProfileInvestorInfo.jsx";
 import FundDash from "./pages/FundDash";
 import FundDashCreatePitch from "./pages/FundDashCreatePitch";
 import InvestorList from "./pages/InvestorList.jsx";
+import FundDashEditPitch from "./pages/FundDashEditPitch.jsx";
 
 import PitchAll from "./pages/PitchAll";
 import PitchSingle from './pages/PitchSingle';
@@ -51,6 +52,7 @@ function App() {
           
           <Route path="/fundraise-dashboard" element={<FundDash />} />
           <Route path="/fundraise-dashboard/create-pitch" element={<FundDashCreatePitch />} />
+          <Route path="/fundraise-dashboard/edit-pitch/:id" element={<FundDashEditPitch />} />
           <Route path="/investor-list" element={<InvestorList />} />
 
           <Route path="/pitches" element={<PitchAll />} />

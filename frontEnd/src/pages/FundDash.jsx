@@ -93,14 +93,14 @@ const FundDash = () => {
   return (
     <div className="fundraise-dashboard-container">
       <div className="fundraise-box-container">
- 
+
         <div className="fundraise-box add-fundraise">
           <Link to="/fundraise-dashboard/create-pitch">
             <button className="add-fundraise-button">
               <span className="plus-sign">+</span>
             </button>
           </Link>
-          
+
           <p className="hit">Hit the big blue button to add a new pitch.</p>
         </div>
 
@@ -126,9 +126,16 @@ const FundDash = () => {
               </div>
 
               <div className="fundraise-footer">
-                {/* <button className="manage-fundraise-btn">Manage my Pitch</button> */}
-                <button 
-                  className="delete-fundraise-btn" 
+                {/* Edit button */}
+                <Link to={`/fundraise-dashboard/edit-pitch/${pitch.id}`}>
+                  <button className="edit-fundraise-btn" style={{ marginRight: "10px" }}>
+                    ✏️ Edit
+                  </button>
+                </Link>
+
+                {/* Delete button */}
+                <button
+                  className="delete-fundraise-btn"
                   onClick={() => handleDeleteClick(pitch)}
                 >
                   🗑
@@ -142,9 +149,9 @@ const FundDash = () => {
       </div>
 
       <div className="fundraise-bottom">
-          <Link to="/investor-list">
-            <button className="fundraise-pitch-button">Explore Investor List</button>
-          </Link>
+        <Link to="/investor-list">
+          <button className="fundraise-pitch-button">Explore Investor List</button>
+        </Link>
       </div>
 
       {showConfirmModal && pitchToDelete && (
@@ -179,18 +186,18 @@ const FundDash = () => {
         </div>
       )}
 
-      <ToastContainer 
-        position="top-right" 
-        autoClose={2300} 
-        hideProgressBar={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
+      <ToastContainer
+        position="top-right"
+        autoClose={2300}
+        hideProgressBar={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
-
     </div>
+
   );
 };
 
