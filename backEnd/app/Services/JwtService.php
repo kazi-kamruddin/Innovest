@@ -26,11 +26,11 @@ class JwtService
 
         $token = $this->jwtConfig->builder()
             ->issuedAt($now)
-            ->expiresAt($now->modify('+1 hour'))
+            ->expiresAt($now->modify('+1 days'))
             ->withClaim('uid', $userId)
             ->getToken($this->jwtConfig->signer(), $this->jwtConfig->signingKey());
 
-        return $token->toString();
+        return $token;  
     }
 
     public function validateJwtToken($jwt)

@@ -23,12 +23,18 @@ const FundDash = () => {
       return;
     }
 
-    fetch(`http://127.0.0.1:8000/api/users/${user.id}/pitches`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("token")}`, 
-        },
-    })
+    const endpoint = `http://127.0.0.1:8000/api/users/${user.id}/pitches`;
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+    };
+
+    console.log("Fetching pitches");
+    console.log("Endpoint:", endpoint);
+    console.log("Method: GET");
+    console.log("Headers:", headers);
+
+    fetch(endpoint, { headers })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch pitches");

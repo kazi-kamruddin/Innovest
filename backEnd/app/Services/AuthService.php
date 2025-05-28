@@ -31,7 +31,12 @@ class AuthService
 
         $token = $this->jwtService->issueJwtToken($user->id);
 
-        return ['message' => 'User registered successfully', 'token' => $token, 'user' => $user];
+        return [
+            'message' => 'Logged in successfully',
+            'token' => $token->toString(),  
+            'expires_at' => $token->claims()->get('exp')->getTimestamp(),  
+            'user' => $user
+        ];
     }
 
     public function loginUser($request)
@@ -51,6 +56,11 @@ class AuthService
 
         $token = $this->jwtService->issueJwtToken($user->id);
 
-        return ['message' => 'Logged in successfully', 'token' => $token, 'user' => $user];
+        return [
+            'message' => 'Logged in successfully',
+            'token' => $token->toString(),  
+            'expires_at' => $token->claims()->get('exp')->getTimestamp(),  
+            'user' => $user
+        ];
     }
 }
