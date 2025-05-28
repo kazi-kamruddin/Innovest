@@ -1,118 +1,205 @@
-import React, { useState } from 'react';
-import { useAuthContext } from '../hooks/useAuthContext'; 
+import React, { useState, useEffect } from 'react';
+import { useAuthContext } from '../hooks/useAuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify'; 
-import 'react-toastify/dist/ReactToastify.css'; 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../styles/profile-investor-info.css';
 
+const fieldsOfInterestOptions = [
+  'Startups', 'Biotech', 'Real Estate', 'Green Tech',
+  'Healthcare', 'E-commerce', 'Cybersecurity', 'AI'
+];
+
+const preferredIndustriesOptions = [
+  'Finance', 'Energy', 'Agriculture', 'Transportation',
+  'Education', 'Logistics', 'Retail', 'Manufacturing'
+];
+
 const ProfileInvestorInfo = () => {
-    const [fieldsOfInterest, setFieldsOfInterest] = useState('');
-    const [investmentRangeMin, setInvestmentRangeMin] = useState('');
-    const [investmentRangeMax, setInvestmentRangeMax] = useState('');
-    const [preferredIndustries, setPreferredIndustries] = useState('');
-    
-    const { user } = useAuthContext();
-    const navigate = useNavigate();
+  const [fieldsOfInterest, setFieldsOfInterest] = useState([]);
+  const [investmentRangeMin, setInvestmentRangeMin] = useState('');
+  const [investmentRangeMax, setInvestmentRangeMax] = useState('');
+  const [preferredIndustries, setPreferredIndustries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
 
-        if (!user) {
-            toast.error('You must be logged in to submit your investor profile');
-            return;
+  const toggleSelection = (value, setter, currentState) => {
+    const updated = currentState.includes(value)
+      ? currentState.filter((item) => item !== value)
+      : [...currentState, value];
+    setter(updated);
+  };
+
+  useEffect(() => {
+    const fetchInvestorInfo = async () => {
+      if (!user) return;
+
+      const token = localStorage.getItem('token');
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/investor-info/${user.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && Object.keys(data).length > 0) {
+            setFieldsOfInterest(data.fields_of_interest ? data.fields_of_interest.split(',').map(s => s.trim()) : []);
+            setInvestmentRangeMin(data.investment_range_min || '');
+            setInvestmentRangeMax(data.investment_range_max || '');
+            setPreferredIndustries(data.preferred_industries ? data.preferred_industries.split(',').map(s => s.trim()) : []);
+          }
+        } else if (response.status !== 404) {
+          toast.error('Failed to load investor profile data');
         }
-
-        const data = {
-            user_id: user.id, 
-            fields_of_interest: fieldsOfInterest,
-            investment_range_min: investmentRangeMin,
-            investment_range_max: investmentRangeMax,
-            preferred_industries: preferredIndustries,
-        };
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/investor-info', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (response.status === 201) {
-                toast.success('Investor profile created/updated successfully');
-                setTimeout(() => {
-                    navigate('/dashboard');
-                }, 2300);
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error submitting profile');
-            }
-        } catch (error) {
-            console.error('Error submitting investor profile:', error);
-            toast.error('There was an error submitting your profile');
-        }
+      } catch (error) {
+        console.error('Error fetching investor profile data:', error);
+        toast.error('Error fetching investor profile data');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return (
-        <div className="investor-profile-form-container">
-            <h2 className="investor-profile-form-heading">Create/Update Your Investor Profile</h2>
-            <form onSubmit={handleSubmit} className="investor-profile-form">
-                <div className="investor-profile-form-group">
-                    <label htmlFor="fields_of_interest" className="investor-profile-form-label">Fields of Interest (comma-separated):</label>
-                    <input
-                        type="text"
-                        id="fields_of_interest"
-                        value={fieldsOfInterest}
-                        onChange={(e) => setFieldsOfInterest(e.target.value)}
-                        placeholder="e.g. Technology, Finance"
-                        className="investor-profile-form-input"
-                    />
-                </div>
+    fetchInvestorInfo();
+  }, [user]);
 
-                <div className="investor-profile-form-group">
-                    <label htmlFor="investment_range_min" className="investor-profile-form-label">Minimum Investment Amount:</label>
-                    <input
-                        type="number"
-                        id="investment_range_min"
-                        value={investmentRangeMin}
-                        onChange={(e) => setInvestmentRangeMin(e.target.value)}
-                        placeholder="e.g. 5000"
-                        className="investor-profile-form-input"
-                    />
-                </div>
+  const handleMinChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      setInvestmentRangeMin('');
+      return;
+    }
+    const num = Math.max(0, Number(value));
+    setInvestmentRangeMin(num);
+  };
 
-                <div className="investor-profile-form-group">
-                    <label htmlFor="investment_range_max" className="investor-profile-form-label">Maximum Investment Amount:</label>
-                    <input
-                        type="number"
-                        id="investment_range_max"
-                        value={investmentRangeMax}
-                        onChange={(e) => setInvestmentRangeMax(e.target.value)}
-                        placeholder="e.g. 50000"
-                        className="investor-profile-form-input"
-                    />
-                </div>
+  const handleMaxChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      setInvestmentRangeMax('');
+      return;
+    }
+    const num = Math.max(0, Number(value));
+    setInvestmentRangeMax(num);
+  };
 
-                <div className="investor-profile-form-group">
-                    <label htmlFor="preferred_industries" className="investor-profile-form-label">Preferred Industries (comma-separated):</label>
-                    <input
-                        type="text"
-                        id="preferred_industries"
-                        value={preferredIndustries}
-                        onChange={(e) => setPreferredIndustries(e.target.value)}
-                        placeholder="e.g. Tech, AI"
-                        className="investor-profile-form-input"
-                    />
-                </div>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                <button type="submit" className="investor-profile-submit-button">Submit</button>
-            </form>
+    if (!user) {
+      toast.error('You must be logged in to submit your investor profile');
+      return;
+    }
 
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+    const data = {
+      user_id: user.id,
+      fields_of_interest: fieldsOfInterest.join(', '),
+      investment_range_min: investmentRangeMin,
+      investment_range_max: investmentRangeMax,
+      preferred_industries: preferredIndustries.join(', ')
+    };
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/investor-info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.status === 201) {
+        toast.success('Investor profile created/updated successfully');
+        setTimeout(() => navigate('/profile'), 900);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error submitting profile');
+      }
+    } catch (error) {
+      console.error('Error submitting investor profile:', error);
+      toast.error('There was an error submitting your profile');
+    }
+  };
+
+  if (loading) {
+    return <div>Loading investor profile data...</div>;
+  }
+
+  return (
+    <div className="investor-profile-container">
+      <h2 className="investor-profile-heading">Create/Update Your Investor Profile</h2>
+      <form onSubmit={handleSubmit} className="investor-profile-form">
+
+        <label className="investor-profile-label">Fields of Interest:</label>
+        <div className="custom-multiselect">
+          {fieldsOfInterestOptions.map((option) => (
+            <div
+              key={option}
+              className={`multiselect-option ${fieldsOfInterest.includes(option) ? 'selected' : ''}`}
+              onClick={() => toggleSelection(option, setFieldsOfInterest, fieldsOfInterest)}
+            >
+              {fieldsOfInterest.includes(option) ? '✔️ ' : ''}{option}
+            </div>
+          ))}
         </div>
-    );
+        <input
+          type="text"
+          className="investor-profile-input readonly-box"
+          value={fieldsOfInterest.join(', ')}
+          readOnly
+        />
+
+        <label className="investor-profile-label">Minimum Investment Amount:</label>
+        <input
+          type="number"
+          min="0"
+          value={investmentRangeMin}
+          onChange={handleMinChange}
+          placeholder="e.g. 5000"
+          className="investor-profile-input"
+        />
+
+        <label className="investor-profile-label">Maximum Investment Amount:</label>
+        <input
+          type="number"
+          min="0"
+          value={investmentRangeMax}
+          onChange={handleMaxChange}
+          placeholder="e.g. 50000"
+          className="investor-profile-input"
+        />
+
+        <label className="investor-profile-label">Preferred Industries:</label>
+        <div className="custom-multiselect">
+          {preferredIndustriesOptions.map((option) => (
+            <div
+              key={option}
+              className={`multiselect-option ${preferredIndustries.includes(option) ? 'selected' : ''}`}
+              onClick={() => toggleSelection(option, setPreferredIndustries, preferredIndustries)}
+            >
+              {preferredIndustries.includes(option) ? '✔️ ' : ''}{option}
+            </div>
+          ))}
+        </div>
+        <input
+          type="text"
+          className="investor-profile-input readonly-box"
+          value={preferredIndustries.join(', ')}
+          readOnly
+        />
+
+        <button type="submit" className="investor-profile-button">Submit</button>
+      </form>
+
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+    </div>
+  );
 };
 
 export default ProfileInvestorInfo;

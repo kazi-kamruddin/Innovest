@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
 import { useLogout } from "../hooks/useLogout.jsx";
 import { Link } from "react-router-dom";
+import { FaMapMarkerAlt, FaEnvelope } from "react-icons/fa"; 
 import "../styles/profile.css";
 
 const Profile = () => {
@@ -15,7 +16,6 @@ const Profile = () => {
       if (!user) return;
 
       const token = localStorage.getItem("token");
-      console.log(token);
 
       try {
         const response = await fetch(`http://localhost:8000/api/profile/${user.id}`, {
@@ -30,7 +30,6 @@ const Profile = () => {
 
         if (response.ok) {
           setUserInfo(data);
-          console.log(data);
         } else {
           setUserInfo(null);
         }
@@ -49,42 +48,58 @@ const Profile = () => {
   };
 
   return (
-    <div className="container">
-      <div className="profile-card">
-        <div className="profile-row">
-          <div className="profile-image">
-            <img
-              src="src/images/profile.jpeg"
-              alt="Profile"
-            />
-          </div>
-          <div className="profile-info">
-            <h5 className="profile-name">{user?.name || "No Name Provided"}</h5>
-            <p className="profile-location">📍 {userInfo?.location || "Location not set"}</p>
-            <ul className="profile-details">
-              <li>• Areas of Interest: {userInfo?.areas_of_interest || "N/A"}</li>
-              <li>• <strong>Email:</strong> {userInfo?.user.email || "Email not provided"}</li>
-            </ul>
-          </div>
-          <button className="knock-button">Knock</button>
+    <div className="profile-container">
+      <div className="profile-header">
+        <div className="profile-pic-wrapper">
+          <img src="src/images/profile.jpeg" alt="Profile" className="profile-pic" />
         </div>
+        <h2 className="username">
+           {user?.name
+           ? user.name
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+             .join(" ")
+            : "No Name Provided"}
+        </h2>
+       {userInfo?.location && (
+          <div className="location-line">
+            <FaMapMarkerAlt className="location-icon" />
+            <span>{userInfo.location}</span>
+          </div>
+        )}
       </div>
 
       <div className="info-section">
-        <div className="info-card">
-          <h5 className="card-title">About</h5>
-          <p className="card-text">{userInfo?.about || "No bio provided yet."}</p>
-        </div>
+        <ul>
+        <li><strong>Email:</strong> {user?.email || "Email not provided"}</li>
+          <li>
+            <strong>Areas of Interest:</strong>
+            <div className="interest-boxes">
+              {userInfo?.areas_of_interest
+                ? userInfo.areas_of_interest.split(",").map((interest, index) => (
+                    <span key={index} className="interest-box">
+                      {interest.trim()}
+                    </span>
+                  ))
+                : "N/A"}
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div className="about-section">
+        <h3>About</h3>
+        <p>{userInfo?.about || "No bio provided yet."}</p>
       </div>
 
       {user && (
-        <div className="action-buttons11">
+        <div className="action-buttons">
           <button onClick={handleLogout} className="btn logout">Log out</button>
           <Link to="/profile/edit-profile">
-            <button className="btn secondary">Edit Profile</button>
+            <button className="btn ssecondary">Edit Profile</button>
           </Link>
           <Link to="/profile/investor-info">
-              <button className="btn secondary">Investor Profile Info</button>
+            <button className="btn ssecondary">Investor Profile</button>
           </Link>
         </div>
       )}
