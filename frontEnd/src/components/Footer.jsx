@@ -10,11 +10,11 @@ function Footer() {
         <div className="footer-section">
           <h3>Innovest</h3>
           <p>Copyright © 2020 Landify UI Kit.<br />All rights reserved</p>
-          <div className="social-icons">
+          {/* <div className="social-icons">
             <img src="src/images/footer.jpeg" alt="Facebook" />
             <img src="src/images/footer2.jpeg" alt="Instagram" />
             <img src="src/images/footer3.jpeg" alt="Twitter" />
-          </div>
+          </div> */}
         </div>
         <div className="footer-section">
           <h3>Company</h3>
@@ -22,8 +22,6 @@ function Footer() {
             <li><Link to="/about-us">About us</Link></li> 
             <li><a href="#">Blog</a></li>
             <li><a href="#">Contact us</a></li>
-            <li><a href="#">Pricing</a></li>
-            <li><a href="#">Testimonials</a></li>
           </ul>
         </div>
         <div className="footer-section">
@@ -31,9 +29,7 @@ function Footer() {
           <ul>
             <li><a href="#">Help center</a></li>
             <li><a href="#">Terms of service</a></li>
-            <li><a href="#">Legal</a></li>
-            <li><a href="#">Privacy policy</a></li>
-            <li><a href="#">Status</a></li>
+            <li><a href="#">Privacy policy</a></li>    
           </ul>
         </div>
         <div className="footer-section">
