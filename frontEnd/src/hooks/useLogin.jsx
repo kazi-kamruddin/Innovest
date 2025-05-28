@@ -12,22 +12,28 @@ export const useLogin = () => {
     setError(null);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login', { 
-        email, password 
-      }, { withCredentials: true });
-      
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/login',
+        { email, password },
+        { withCredentials: true }
+      );
+
       const { token, user } = response.data;
-      console.log("JWT Token:", token);
 
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         dispatch({ type: 'LOGIN', payload: user });
+        setIsLoading(false);
+        return true; 
       }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid credentials');
-    } finally {
       setIsLoading(false);
+      return false; 
+    } catch (err) {
+      const message = err.response?.data?.message || 'Invalid credentials';
+      setError(message);
+      setIsLoading(false);
+      return false; 
     }
   };
 

@@ -13,14 +13,21 @@ function RegSignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await signup(name, email, password);
-    navigate('/');
+    console.log('Signup form submitted with:', { name, email, password });
+    
+    const success = await signup(name, email, password);
+    console.log('Signup returned:', success);
+
+    if (success) {
+      navigate('/'); 
+    } else {
+      console.log('Signup failed or user already exists, staying on signup page.');
+    }
   };
 
   return (
     <div className="container-signup">
       <h2 className="signup-heading">Sign Up</h2>
-      {error && <div className="signup-alert-danger">{error}</div>}
       <form className="signup-box" onSubmit={handleSubmit}>
         <div className="signup-input-group">
           <label htmlFor="name">Name:</label>
@@ -64,6 +71,7 @@ function RegSignUp() {
             />
           </div>
         </div>
+        {error && <div className="signup-alert-danger">This email is already registered</div>}
         <button type="submit" className="signup-btn" disabled={isLoading}>Sign Up</button>
       </form>
     </div>
@@ -71,4 +79,3 @@ function RegSignUp() {
 }
 
 export default RegSignUp;
-
