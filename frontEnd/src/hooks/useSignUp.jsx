@@ -11,21 +11,39 @@ export const useSignup = () => {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/api/register', {
-        name, email, password
-      });
-      
-      const { token, user } = response.data;
-      console.log("JWT Token:", token);
+    const endpoint = 'http://127.0.0.1:8000/api/register';
+    const payload = { name, email, password };
+    const headers = { 'Content-Type': 'application/json' };
 
+    console.log('[Signup] Attempting signup');
+    console.log('[Signup] Endpoint:', endpoint);
+    console.log('[Signup] Method: POST');
+    console.log('[Signup] Headers:', headers);
+    console.log('[Signup] Payload:', payload);
+
+    try {
+      const response = await axios.post(endpoint, payload, { headers });
+      
+      console.log('[Signup] Response status:', response.status);
+      console.log('[Signup] Response data:', response.data);
+
+      const { token, user } = response.data;
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         dispatch({ type: 'LOGIN', payload: user });
+        console.log('[Signup] Signup successful. Token and user saved.');
+        return true;
       }
+      return false; 
     } catch (err) {
-      setError(err.response?.data?.message || 'Signup failed');
+      const message = err.response?.data?.message || 'Signup failed';
+      console.warn('[Signup] Signup failed:', message);
+      if (err.response) {
+        console.warn('[Signup] Error response data:', err.response.data);
+      }
+      setError(message);
+      return false;
     } finally {
       setIsLoading(false);
     }
