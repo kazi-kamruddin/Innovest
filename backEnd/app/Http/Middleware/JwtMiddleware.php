@@ -35,7 +35,6 @@ class JwtMiddleware
                 ], Response::HTTP_UNAUTHORIZED);
             }
 
-            // Get userId param from route
             $userIdFromRoute = $request->route('userId'); 
 
             if ($userIdFromRoute && $userIdFromToken != $userIdFromRoute) {
