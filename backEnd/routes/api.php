@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PitchController; 
 use App\Http\Controllers\InvestorInfoController;
 use App\Http\Controllers\UserInfoController;
-
+use App\Http\Controllers\DummyController;
 
 
 Route::get('/test', [TestController::class, 'getTestHuman'])->middleware('test.middleware');
@@ -34,7 +34,14 @@ Route::middleware(['customJWT'])->group(function () {
     Route::get('/investor-info/{userId}', [InvestorInfoController::class, 'getInvestorInfo']); 
 
     Route::post('/profile/{userId}/edit-profile', [UserInfoController::class, 'store']);  
-    Route::get('/profile/{userId}', [UserInfoController::class, 'getUserInfo']);    
+    Route::get('/profile/{userId}', [UserInfoController::class, 'getUserInfo']);   
+    
+    Route::get('/auth-check', [DummyController::class, 'authCheck']);
+
+    Route::get('/conversations', [MessageController::class, 'getConversations']);
+    Route::post('/conversations/start', [MessageController::class, 'startConversation']);
+    Route::get('/conversations/{id}', [MessageController::class, 'getMessages']);
+    Route::post('/conversations/{id}/messages', [MessageController::class, 'sendMessage']);
 });
   
 
