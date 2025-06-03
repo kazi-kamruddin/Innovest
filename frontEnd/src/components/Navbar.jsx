@@ -17,6 +17,7 @@ function Navbar() {
             <Link to="/pitches">Invest</Link>
             <Link to="/fundraise-dashboard">Fundraise</Link> 
             {/* <a href="#">Help</a> */}
+            <Link to="/messages">Messages</Link>
             <Link to="/about-us">About Us</Link>
           </li>
         </ul>

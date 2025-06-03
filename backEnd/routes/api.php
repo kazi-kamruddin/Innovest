@@ -6,6 +6,7 @@ use App\Http\Controllers\PitchController;
 use App\Http\Controllers\InvestorInfoController;
 use App\Http\Controllers\UserInfoController;
 use App\Http\Controllers\DummyController;
+use App\Http\Controllers\MessageController;
 
 
 Route::get('/test', [TestController::class, 'getTestHuman'])->middleware('test.middleware');
