@@ -20,20 +20,18 @@ function Footer() {
           <h3>Company</h3>
           <ul>
             <li><Link to="/about-us">About us</Link></li> 
-            <li><a href="#">Blog</a></li>
-            <li><a href="#">Contact us</a></li>
+            <li><a href="#">Terms of service</a></li>
           </ul>
         </div>
         <div className="footer-section">
           <h3>Support</h3>
           <ul>
-            <li><a href="#">Help center</a></li>
-            <li><a href="#">Terms of service</a></li>
-            <li><a href="#">Privacy policy</a></li>    
+            <li><a href="#">Contact us</a></li>  
+            <li><a href="#">Privacy policy</a></li>  
           </ul>
         </div>
         <div className="footer-section">
-          <h3>Stay up to date</h3>
+          <h3>Help Center</h3>
           <form className="newsletter">
             <input type="email" placeholder="Your email address" />
             <button type="submit">→</button>

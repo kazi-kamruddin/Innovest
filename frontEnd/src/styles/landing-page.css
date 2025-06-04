@@ -1,40 +1,77 @@
 /* Banner  */
- .hero {
+.animated-innovest {
+    display: inline-block;
+    opacity: 0;
+    animation: fadeInInnovest 2s ease-out 1s forwards;
+    background: linear-gradient(to right, #e23905, #07dacc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+  @keyframes fadeInInnovest {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+.hero {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: #faf8f8;
     padding: 50px 50px 50px;
-    margin-top: 1px;
+    margin-top: 85px;
 }
-
 .hero-content {
     max-width: 60%;
     padding: 20px;
 }
-
 .hero h1 {
-    font-size: 48px;
-    color: #333;
-    margin-bottom: 19px;
+    font-size: 44px;
+    color: #2d2d2d;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #e23905, #07dacc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeInUp 1s ease-in-out;
+    line-height: 1.2;
 }
-
 .hero p {
     font-size: 20px;
-    color: #666;
-    margin-bottom: 40px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    animation: fadeInUp 1.5s ease-in-out;
+    max-width: 95%;
+    background-color: #f1f9f4;
+    padding: 20px;
+    border-left: 5px solid #5cb85c;
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
 }
-
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .hero-buttons {
     margin-top: 30px;
     width: 130px;
    
 }
-
 .btn.secondary {
     --btn-width: 150px;  
     --btn-height: 48px;  
-
     width: var(--btn-width);
     height: var(--btn-height);
     background-color: rgb(69, 158, 10);
@@ -44,27 +81,99 @@
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-   
 }
-
 .btn.secondary:hover {
     background-color: #4d9c30;
     border: 0px;
     color: white;
     transform: scale(1.05);
 }
-
 .hero-image {
     flex-shrink: 0;
 }
-
 .hero-image img {
     width: 550px;
     height: 510px;
     border-radius: 10px;
-   
+    margin-top: 20px;
+    margin-right: -50px;  
 }
 
+
+/* investment Future */
+  .future {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: white;
+    margin-top: 180px;
+  }
+  .blockchain-section {
+    text-align: center;
+    padding: 20px;
+  }
+  .blockchain-section h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  .blockchain-section p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 60px;
+  }
+  .future-container {
+    display: flex;
+    justify-content: center;
+    gap: 90px;
+  }
+  .future-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  padding: 20px;
+  text-align: center;
+  position: static;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  }
+  .future-card:hover {
+  transform: translateY(-5px);
+  background-color: #dfddd7;
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  }
+  .image-container {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  .image-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+  }
+  .description-container {
+    padding: 15px;
+    text-align: center;
+    margin-top: 17px; 
+  }
+  .description {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 20px;
+  }
+  .fade-in-card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .fade-in-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  }
 
 
 /* clients */
@@ -77,38 +186,32 @@
     margin-top: 140px;
     padding: 150px 50px 50px;
 }
-
 .client-content {
     max-width: 60%;
     padding: 20px;
     text-align: center;
 }
-
 .client h2 {
     font-size: 33px;
     color: #333;
     margin-bottom: 4px;
 }
-
 .client p {
     font-size: 15px;
     color: #666;
     margin-bottom: 20px; 
 }
-
 .client-logos {
     display: flex;
     justify-content: center;
     gap: 130px; 
     flex-wrap: wrap; 
 }
-
 .client-logos img {
     width: 80px; 
     height: auto;
     object-fit: contain; 
 }
-
 
 
 /* power of investment */
@@ -120,11 +223,9 @@
     margin-top: 120px;
     text-align: center;
 }
-
 .power-content {
     padding: 50px;
 }
-
 .header {
     font-size: 32px;
     font-weight: bold;
@@ -132,19 +233,16 @@
     margin-bottom: 5px;
     margin-top: 90px;
 }
-
 .sub-header {
     font-size: 17px;
     color: #777;
     margin-bottom: 40px;
 }
-
 .cards {
     display: flex;
     justify-content: center;
     gap: 140px;
 }
-
 .card {
     background-color: #fff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -159,99 +257,58 @@
     height: 100px;
     margin-bottom: 20px;
 }
+.cards .card img.power-card-img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
 
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.cards .card img.power-card-img.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 .card-title {
     font-size: 1.5em;
     font-weight: bold;
     margin-bottom: 10px;
     color: #333;
 }
-
 .card-text {
     font-size: 1em;
     color: #555;
 }
+ .bubble-sliderr {
+  position: relative;
+  height: 100px; 
+  overflow: hidden;
+}
 
+.bubble-slidee {
+  position: absolute;
+  width: 100%;
+  opacity: 0;
+  animation: slideBubble 9s infinite;
+  transition: opacity 0.5s ease-in-out;
+}
 
+.bubble-slidee:nth-child(1) {
+  animation-delay: 0s;
+}
+.bubble-slidee:nth-child(2) {
+  animation-delay: 3s;
+}
+.bubble-slidee:nth-child(3) {
+  animation-delay: 6s;
+}
 
-  /* investment Future */
-  .future {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
-    background-color: white;
-    margin-top: 180px;
-  }
-  
-  .blockchain-section {
-    text-align: center;
-    padding: 20px;
-  }
-  
-  .blockchain-section h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    color: #333;
-  }
-  
-  .blockchain-section p {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 60px;
-  }
-  
-  .future-container {
-    display: flex;
-    justify-content: center;
-    gap: 90px;
-  }
-  
-  .future-card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    padding: 20px;
-    text-align: center;
-    position:static; 
-    transition: transform 0.3s ease;
-  }
-  
-  .future-card:hover {
-    transform: translateY(-5px);
-    background-color: #dfddd7;
-
-  }
-  
-  .image-container {
-    width: 100%;
-    height: 150px;
-    overflow: hidden;
-    border-radius: 10px;
-  }
-  
-  .image-placeholder {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; 
-  }
-  
-  .description-container {
-    padding: 15px;
-    text-align: center;
-    margin-top: 17px; 
-  }
-  
-  .description {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 20px;
-  }
-  
-
-
-
-
-
-
+@keyframes slideBubble {
+  0% { opacity: 0; transform: translateY(100%); }
+  5% { opacity: 1; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(0); }
+  35% { opacity: 0; transform: translateY(-100%); }
+  100% { opacity: 0; }
+}
