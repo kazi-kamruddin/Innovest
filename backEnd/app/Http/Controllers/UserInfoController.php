@@ -33,20 +33,50 @@ class UserInfoController extends Controller
         }
     }
 
-    public function getUserInfo($userId)
-    {
-        try {
-            $userInfo = UserInfo::with('user') 
+public function getUserInfo($userId)
+{
+    try {
+        // Try to get full user info
+        $userInfo = UserInfo::with('user')
             ->where('user_id', $userId)
             ->first();
 
-            if (!$userInfo) {
-                return response()->json(['message' => 'User info not found'], 404);
-            }
-
-            return response()->json($userInfo, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error retrieving user info', 'message' => $e->getMessage()], 500);
+        if ($userInfo) {
+            return response()->json([
+                'user' => [
+                    'id' => $userInfo->user->id,
+                    'name' => $userInfo->user->name,
+                    'email' => $userInfo->user->email,
+                ],
+                'location' => $userInfo->location,
+                'areas_of_interest' => $userInfo->areas_of_interest,
+                'about' => $userInfo->about,
+            ]);
         }
+
+        // Fallback: just fetch from users table
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'location' => null,
+            'areas_of_interest' => null,
+            'about' => null,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error retrieving user info',
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
+
 }

@@ -19,6 +19,8 @@ Route::get('/validate-token', [AuthController::class, 'validateJwtToken']);
 Route::get('/pitches', [PitchController::class, 'getAllPitches']); 
 Route::get('/pitches/{id}', [PitchController::class, 'getPitchById']); 
 
+Route::get('/profile/{userId}', [UserInfoController::class, 'getUserInfo']); 
+
 Route::get('/investor-list', [InvestorInfoController::class, 'getInvestorList']); 
 
 //Route::delete('/pitches/{id}', [PitchController::class, 'destroy']);
@@ -35,7 +37,7 @@ Route::middleware(['customJWT'])->group(function () {
     Route::get('/investor-info/{userId}', [InvestorInfoController::class, 'getInvestorInfo']); 
 
     Route::post('/profile/{userId}/edit-profile', [UserInfoController::class, 'store']);  
-    Route::get('/profile/{userId}', [UserInfoController::class, 'getUserInfo']);   
+    //Route::get('/profile/{userId}', [UserInfoController::class, 'getUserInfo']);   
     
     Route::get('/auth-check', [DummyController::class, 'authCheck']);
 

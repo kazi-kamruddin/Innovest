@@ -29,25 +29,21 @@ class User extends Authenticatable
         return $this->hasOne(UserInfo::class);
     }
 
-    // Conversations where the user is user_one
     public function conversationsInitiated()
     {
         return $this->hasMany(Conversation::class, 'user_one_id');
     }
 
-    // Conversations where the user is user_two
     public function conversationsReceived()
     {
         return $this->hasMany(Conversation::class, 'user_two_id');
     }
 
-    // All conversations (merged from both ends)
     public function getConversationsAttribute(): Collection
     {
         return $this->conversationsInitiated->merge($this->conversationsReceived);
     }
 
-    // Messages sent by the user
     public function messages()
     {
         return $this->hasMany(Message::class, 'sender_id');
