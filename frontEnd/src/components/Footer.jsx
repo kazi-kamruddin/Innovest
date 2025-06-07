@@ -11,7 +11,7 @@ function Footer() {
       <div className="footer-container">
         <div className="footer-section">
           <h3>Innovest</h3>
-          <p>©2025 All rights reserved.</p>
+          <p>Copyright©2025 All rights reserved.</p>
         </div>
 
         <div className="footer-section">
