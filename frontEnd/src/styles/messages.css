@@ -76,7 +76,7 @@
 }
 
 .message-history {
-  height: calc(100% - 100px);
+  height: calc(100% - 150px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;

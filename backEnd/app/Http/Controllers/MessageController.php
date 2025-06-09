@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewMessageEvent;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -100,8 +101,14 @@ class MessageController extends Controller
             'body' => $validated['body'],
         ]);
 
-        // Placeholder: Emit real-time event here
+
+        \Log::info('Before firing event', ['message_id' => $message->id]);
+        
+        broadcast(new NewMessageEvent($message))->toOthers();
         // broadcast(new NewMessageEvent($message))->toOthers();
+
+        \Log::info('Broadcasting message: ', $message->toArray());
+
 
         return response()->json($message, 201);
     }

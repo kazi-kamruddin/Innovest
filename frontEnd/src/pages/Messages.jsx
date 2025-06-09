@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
+import useSubscribeToConversation from "../hooks/useSubscribeToConversation";
 import "../styles/messages.css";
 
 const Messages = () => {
@@ -38,7 +39,6 @@ const Messages = () => {
       })
       .catch((err) => console.error("\n\nError fetching user info:", err));
   }, [user]);
-
 
   useEffect(() => {
     if (!selectedConversation) return;
@@ -102,6 +102,17 @@ const Messages = () => {
     }
   };
 
+  const handleNewMessage = useCallback(
+    (e) => {
+      if (e.message && e.message.conversation_id === selectedConversation?.id) {
+        setMessages((prev) => [...prev, e.message]);
+      }
+    },
+    [selectedConversation]
+  );
+
+  useSubscribeToConversation(selectedConversation?.id, handleNewMessage);
+
   return (
     <div className="messaging-page">
       <div className="messaging-container">
@@ -119,9 +130,6 @@ const Messages = () => {
                 onClick={() => setSelectedConversation(conv)}
               >
                 <div className="partner-name">{conv.partner.name}</div>
-                {/* <div className="latest-message">
-                  {conv.messages?.[0]?.body ?? "No messages yet"}
-                </div> */}
               </div>
             ))
           )}
@@ -137,6 +145,7 @@ const Messages = () => {
               <div className="message-history">
                 {Array.isArray(messages) && messages.length > 0 ? (
                   messages.map((msg) => (
+                    
                     <div
                       key={msg.id}
                       className={`message-bubble ${
@@ -169,8 +178,7 @@ const Messages = () => {
           )}
         </div>
 
-
-        {/* Right column: Placeholder for partner info */}
+        {/* Right column: Partner info */}
         <div className="messaging-right-column">
           {partnerInfo ? (
             <>
@@ -181,7 +189,6 @@ const Messages = () => {
             <p>Loading user info...</p>
           )}
         </div>
-        
       </div>
     </div>
   );
