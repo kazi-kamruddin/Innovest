@@ -203,6 +203,96 @@
 }
 
 
+/* view */
+.slideshow-section {
+  width: 100%;
+  overflow: hidden;
+  background: white;
+  padding: 60px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 120px;
+}
+.slideshow-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.slideshow-headline {
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin-bottom: 23px;
+  color: #111;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 1px;
+}
+.slideshow-subline {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+  text-align: center;
+  margin-top: -15px;
+  margin-bottom: 50px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 600px;
+}
+.slideshow-container {
+  position: relative;
+  width: 1400px;
+  height: 340px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 130px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 175, 189, 0.6),  
+    rgba(255, 195, 160, 0.5),  
+    rgba(255, 245, 157, 0.4),  
+    rgba(204, 255, 204, 0.4)  
+  );
+  backdrop-filter: blur(12px);
+}
+.slideshow-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  animation: slideFadeZoom 30s infinite;
+  animation-timing-function: ease-in-out;
+  transition: transform 0.6s ease;
+}
+
+@keyframes slideFadeZoom {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(1);
+  }
+  5% {
+    opacity: 1;
+    transform: translateX(0) scale(1.05);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(0) scale(1.1);
+  }
+  25% {
+    opacity: 0;
+    transform: translateX(-60%) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%) scale(1.1);
+  }
+}
+
+
+
 
 /* investment Future */
   .future {
@@ -286,8 +376,8 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #fefcfb;
-    margin-top: 70px;
+    background-color: white;
+    margin-top: 100px;
     text-align: center;
 }
 .power-content {
@@ -379,3 +469,5 @@
   35% { opacity: 0; transform: translateY(-100%); }
   100% { opacity: 0; }
 }
+
+

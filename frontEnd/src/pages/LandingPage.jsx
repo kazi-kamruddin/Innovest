@@ -8,64 +8,61 @@ function LandingPage() {
   const cardRefs = useRef([]);
   const powerImgRefs = useRef([]);
   const [typewriterKey, setTypewriterKey] = useState(0);
-  const { ref: powerHeaderRef, inView: powerHeaderInView } = useInView({
-    threshold: 0.3,
-  });
-  const { ref: statsRef, inView: statsInView } = useInView({
-  triggerOnce: false, 
-  threshold: 0.3,
-  });
-  const { ref: bannerHeaderRef, inView: bannerHeaderInView } = useInView({
-  threshold: 0.3,
-  });
+
+  const { ref: powerHeaderRef, inView: powerHeaderInView } = useInView({ threshold: 0.3 });
+  const { ref: statsRef, inView: statsInView } = useInView({ threshold: 0.3, triggerOnce: false });
+  const { ref: bannerHeaderRef, inView: bannerHeaderInView } = useInView({ threshold: 0.3 });
+
   const orangeStats = [
-  { number: '2k+', label: 'Trusted Users' },
-  { number: '1k+', label: 'Entrepreneurs Joined' },
-  { number: '500+', label: 'Community Connections' },
+    { number: '2k+', label: 'Trusted Users' },
+    { number: '1k+', label: 'Entrepreneurs Joined' },
+    { number: '500+', label: 'Community Connections' },
   ];
+
   const purpleStats = [
-  { number: '70%', label: 'Investor Retention Rate' },
-  { number: '78%', label: 'Repeat Investment' },
-  { number: '82%', label: 'Funding Success' },
+    { number: '70%', label: 'Investor Retention Rate' },
+    { number: '78%', label: 'Repeat Investment' },
+    { number: '82%', label: 'Funding Success' },
   ];
+
   function AnimatedStatCard({ stats, className }) {
-  const [index, setIndex] = useState(0);
-  const [fade, setFade] = useState(true);
-  const current = stats[index];
+    const [index, setIndex] = useState(0);
+    const [fade, setFade] = useState(true);
+    const current = stats[index];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % stats.length);
-        setFade(true);
-      }, 500);
-    }, 2500); 
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setFade(false);
+        setTimeout(() => {
+          setIndex((prev) => (prev + 1) % stats.length);
+          setFade(true);
+        }, 500);
+      }, 2500);
 
-    return () => clearInterval(interval);
-  }, [stats]);
-  return (
-    <div className={`stat-card ${className}`}>
-      <h2>
-        <span className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
-          {current.number}
-        </span>
-      </h2>
-      <p className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
-        {current.label}
-      </p>
-    </div>
-  );
-}
+      return () => clearInterval(interval);
+    }, [stats]);
+
+    return (
+      <div className={`stat-card ${className}`}>
+        <h2>
+          <span className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
+            {current.number}
+          </span>
+        </h2>
+        <p className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
+          {current.label}
+        </p>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
           const index = cardRefs.current.indexOf(entry.target);
           if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.classList.add('visible');
-            }, index * 600);
+            setTimeout(() => entry.target.classList.add('visible'), index * 600);
           } else {
             entry.target.classList.remove('visible');
           }
@@ -84,15 +81,14 @@ function LandingPage() {
       });
     };
   }, []);
+
   useEffect(() => {
     const imgObserver = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
           const index = powerImgRefs.current.indexOf(entry.target);
           if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.classList.add('visible');
-            }, index * 600);
+            setTimeout(() => entry.target.classList.add('visible'), index * 600);
           } else {
             entry.target.classList.remove('visible');
           }
@@ -100,15 +96,18 @@ function LandingPage() {
       },
       { threshold: 0.3 }
     );
+
     powerImgRefs.current.forEach(img => {
       if (img) imgObserver.observe(img);
     });
+
     return () => {
       powerImgRefs.current.forEach(img => {
         if (img) imgObserver.unobserve(img);
       });
     };
   }, []);
+
   useEffect(() => {
     if (powerHeaderInView) {
       setTypewriterKey(prev => prev + 1);
@@ -118,62 +117,85 @@ function LandingPage() {
   return (
     <>
       {/* Banner */}
-<div className="hero">
-  <div className="hero-main-content">
-    <div className="hero-left">
-    <h1 className="hero-heading" ref={bannerHeaderRef}>
-  Connecting Investors and Innovation together here in{' '}
-  <span className="highlight-word typewriter-inline">
-    {bannerHeaderInView && (
-      <Typewriter
-        key={typewriterKey}
-        onInit={(typewriter) => {
-          typewriter.typeString('Innovest').pauseFor(2000).start();
-        }}
-        options={{
-          autoStart: false,
-          loop: true,
-          delay: 250,
-          cursor: '',
-        }}
-      />
-    )}
-  </span>
-</h1>
-      <p className="hero-subtext">
-        Where great businesses and great people meet. We bring together businesses
-        looking for investment and investors with capital, contacts and knowledge
-        to help them succeed.
-      </p>
-      <div className="hero-buttons">
-        <Link to="/fundraise-dashboard">
-          <button className="btn modern">GET STARTED NOW</button>
-        </Link>
+      <div className="hero">
+        <div className="hero-main-content">
+          <div className="hero-left">
+            <h1 className="hero-heading" ref={bannerHeaderRef}>
+              Connecting Investors and Innovation together here in{' '}
+              <span className="highlight-word typewriter-inline">
+                {bannerHeaderInView && (
+                  <Typewriter
+                    key={typewriterKey}
+                    onInit={(typewriter) => {
+                      typewriter.typeString('Innovest').pauseFor(2000).start();
+                    }}
+                    options={{
+                      autoStart: false,
+                      loop: true,
+                      delay: 250,
+                      cursor: '',
+                    }}
+                  />
+                )}
+              </span>
+            </h1>
+            <p className="hero-subtext">
+              Where great businesses and great people meet. We bring together businesses
+              looking for investment and investors with capital, contacts and knowledge
+              to help them succeed.
+            </p>
+            <div className="hero-buttons">
+              <Link to="/fundraise-dashboard">
+                <button className="btn modern">GET STARTED NOW</button>
+              </Link>
+            </div>
+
+            <div className="hero-stats-section">
+              <div className="hero-stats-left">
+                <img src="/src/images/avatar.jpeg" alt="Business" className="main-woman-img" />
+                <div className="text-overlay">
+                  <h3>What We Do</h3>
+                  <p>Link investors<br />with visionary entrepreneurs</p>
+                </div>
+              </div>
+              <div className="hero-stats-right" ref={statsRef}>
+                <AnimatedStatCard stats={orangeStats} className="orange" />
+                <AnimatedStatCard stats={purpleStats} className="purple" />
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-right">
+            <div className="circle-wrapper">
+              <img src="src/images/first.png" alt="Business" className="circle-photo" />
+              <img src="src/images/financial7.jpg" alt="Square 3" className="square-photo3 top" />
+              <img src="src/images/financial6.jpg" alt="Square 1" className="square-photo top-left" />
+              <img src="src/images/financial8.gif" alt="Square 2" className="square-photo2 bottom-right" />
+            </div>
+          </div>
+        </div>
       </div>
-     <div className="hero-stats-section">
-  <div className="hero-stats-left">
-    <img src="/src/images/avatar.jpeg" alt="Business" className="main-woman-img" />
-    <div className="text-overlay">
-      <h3>What We Do</h3>
-      <p>Link investors<br />with visionary entrepreneurs</p>
-    </div>
-  </div>
-  <div className="hero-stats-right" ref={statsRef}>
-  <AnimatedStatCard stats={orangeStats} className="orange" />
-  <AnimatedStatCard stats={purpleStats} className="purple" />
-</div>
-</div>
-    </div>
-    <div className="hero-right">
-  <div className="circle-wrapper">
-    <img src="src/images/first.png" alt="Business" className="circle-photo" />
-      <img src="src/images/financial7.jpg" alt="Square 3" className="square-photo3 top" />
-    <img src="src/images/financial6.jpg" alt="Square 1" className="square-photo top-left" />
-    <img src="src/images/financial8.gif" alt="Square 2" className="square-photo2 bottom-right" />
-  </div>
-</div>
-  </div>
-</div>
+
+      {/* View */}
+      <div className="slideshow-section">
+        <div className="slideshow-wrapper">
+          <h2 className="slideshow-headline">Investor and Entrepreneurs</h2>
+          <p className="slideshow-subline">
+            Empowering connections that spark innovation and drive growth.
+          </p>
+          <div className="slideshow-container">
+            {[1, 2, 3, 4, 5].map((num, index) => (
+              <img
+                key={index}
+                src={`src/images/financial${num}.jpg`}
+                alt={`Slide ${num}`}
+                className="slideshow-image"
+                style={{ animationDelay: `${index * 6}s` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Investment Future */}
       <div className="future">
@@ -293,7 +315,6 @@ function LandingPage() {
           </div>
         </div>
       </div>
-      
     </>
   );
 }
