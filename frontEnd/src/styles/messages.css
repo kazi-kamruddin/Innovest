@@ -1,0 +1,137 @@
+.messaging-page {
+  padding: 20px;
+  height: 100vh;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.messaging-container {
+  display: flex;
+  height: calc(100vh - 40px);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.messaging-left-column {
+  width: 250px;
+  padding: 15px;
+  border-right: 1px solid #ddd;
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.messaging-middle-column {
+  flex-grow: 1;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.messaging-right-column {
+  width: 220px;
+  padding: 15px;
+  background-color: #f5f5f5;
+}
+
+.messaging-left-column,
+.messaging-middle-column,
+.messaging-right-column {
+  color: #333;
+}
+
+.conversation-preview {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.conversation-preview:hover {
+  background-color: #e6e6e6;
+}
+
+.partner-name {
+  font-weight: bold;
+  color: #222;
+}
+
+.latest-message {
+  font-size: 0.9em;
+  color: #555;
+}
+
+
+.selected {
+  background-color: #d6e4ff;
+}
+
+.chat-header {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.message-history {
+  height: calc(100% - 150px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-right: 10px;
+}
+
+.message-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.sent {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+}
+
+.received {
+  background-color: #f1f0f0;
+  align-self: flex-start;
+}
+
+.message-form {
+  display: flex;
+  gap: 10px;
+}
+
+.message-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+}
+
+.send-button {
+  padding: 10px 18px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.send-button:hover {
+  background-color: #0056b3;
+}
+
+.no-messages {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  margin-top: 20px;
+}

@@ -38,4 +38,15 @@ class DummyController extends Controller
             'note' => $request->all(),
         ]);
     }
+
+
+    
+    public function authCheck()
+    {
+        return response()->json([
+            'auth_id' => Auth::id(),
+            'auth_user' => Auth::user(),
+        ]);
+    }
+
 }

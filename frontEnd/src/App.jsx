@@ -5,8 +5,10 @@ import { useAuthContext } from "./hooks/useAuthContext";
 import LandingPage from "./pages/LandingPage";
 import Help from "./pages/Help.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
+import Messages from "./pages/Messages.jsx";
 import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
+
 
 import RegSignUp from "./pages/RegSignUp.jsx";
 import RegLogin from "./pages/RegLogin.jsx";
@@ -23,6 +25,7 @@ import FundDashEditPitch from "./pages/FundDashEditPitch.jsx";
 
 import PitchAll from "./pages/PitchAll";
 import PitchSingle from './pages/PitchSingle';
+
 
 import Navbar from "./components/Navbar";  
 import Footer from "./components/Footer"; 
@@ -45,8 +48,10 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/help" element={<Help />} />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/messages" element={<Messages />} /> 
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+
 
           <Route path="/login" element={!user ? <RegLogin /> : <Navigate to={"/"} />} />
           <Route path="/signup" element={!user ? <RegSignUp /> : <Navigate to={"/"} />} />
@@ -62,8 +67,7 @@ function App() {
           <Route path="/investor-list" element={<InvestorList />} />
 
           <Route path="/pitches" element={<PitchAll />} />
-          <Route path="/pitches/:id" element={<PitchSingle />} />
-          
+          <Route path="/pitches/:id" element={<PitchSingle />} />         
         </Routes> 
       </div> 
       

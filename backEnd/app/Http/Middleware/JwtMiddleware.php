@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Services\JwtService;
 use Illuminate\Auth\AuthenticationException;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class JwtMiddleware
 {
@@ -35,7 +37,6 @@ class JwtMiddleware
                 ], Response::HTTP_UNAUTHORIZED);
             }
 
-            // Get userId param from route
             $userIdFromRoute = $request->route('userId'); 
 
             if ($userIdFromRoute && $userIdFromToken != $userIdFromRoute) {
@@ -44,6 +45,16 @@ class JwtMiddleware
                     'message' => 'Unauthorized access'
                 ], Response::HTTP_FORBIDDEN);
             }
+
+            $user = User::find($userIdFromToken);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            Auth::setUser($user);              //laravel er auth system e user set kore
 
             return $next($request);
 
