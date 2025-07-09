@@ -21,6 +21,8 @@ class NewMessageEvent implements ShouldBroadcast
     public function __construct(Message $message)
     {
         $this->message = $message->load('sender');
+
+        \Log::info('Broadcasting NewMessageEvent to conversation: ' . $message->conversation_id);
     }
 
     public function broadcastOn()
@@ -29,6 +31,12 @@ class NewMessageEvent implements ShouldBroadcast
 
         return new PrivateChannel('conversation.' . $this->message->conversation_id);
     }
+
+    public function broadcastAs()
+    {
+        return 'NewMessageEvent';
+    }
+
 
     public function broadcastWith()
     {

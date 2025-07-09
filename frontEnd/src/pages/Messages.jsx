@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
 import useSubscribeToConversation from "../hooks/useSubscribeToConversation";
+import echo from "../config/echo";
 import "../styles/messages.css";
 
 const Messages = () => {
@@ -81,6 +82,8 @@ const Messages = () => {
     fetchPartnerInfo();
   }, [selectedConversation]);
 
+
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -112,6 +115,24 @@ const Messages = () => {
   );
 
   useSubscribeToConversation(selectedConversation?.id, handleNewMessage);
+
+useEffect(() => {
+  if (!selectedConversation) return;
+
+  console.log("🧷 Subscribing to: private-conversation." + selectedConversation.id);
+
+  const channel = echo.private(`conversation.${selectedConversation.id}`);
+  
+  channel.listen("NewMessageEvent", (e) => {
+    console.log("📨 New message received via Pusher:", e.message);
+    setMessages((prev) => [...prev, e.message]);
+  });
+
+  return () => {
+    echo.leave(`conversation.${selectedConversation.id}`);
+  };
+}, [selectedConversation]);
+ 
 
   return (
     <div className="messaging-page">
