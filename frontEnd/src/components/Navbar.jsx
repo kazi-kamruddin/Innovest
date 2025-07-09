@@ -19,6 +19,7 @@ function Navbar() {
             {/* <a href="#">Help</a> */}
             <Link to="/messages">Messages</Link>
             <Link to="/about-us">About Us</Link>
+             <Link to="/help">Help</Link>
           </li>
         </ul>
         <div className="auth-links">
