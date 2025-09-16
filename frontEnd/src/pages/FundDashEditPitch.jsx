@@ -10,6 +10,7 @@ const FundDashEditPitch = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   const [formData, setFormData] = useState({
     title: "",
@@ -42,7 +43,7 @@ const FundDashEditPitch = () => {
   ];
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/pitches/${id}`)
+    fetch(`${API_BASE}/pitches/${id}`)
       .then((response) => {
         console.log("GET /api/pitches/" + id, response);
         if (!response.ok) throw new Error("Failed to fetch pitch data");
@@ -94,7 +95,7 @@ const FundDashEditPitch = () => {
     console.log("PUT /api/users/" + userId + "/pitches/" + id);
     console.log("Payload:", formData);
 
-    fetch(`http://127.0.0.1:8000/api/users/${userId}/pitches/${id}`, {
+    fetch(`${API_BASE}/pitches/users/${userId}/pitches/${id}`, {
         method: "PUT",
         headers: {
         "Content-Type": "application/json",

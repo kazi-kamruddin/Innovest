@@ -9,10 +9,12 @@ const ProfileOthers = () => {
   const { userId } = useParams();
   const token = localStorage.getItem("token");
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/profile/${userId}`, {
+        const response = await fetch(`${API_BASE}/profile/${userId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

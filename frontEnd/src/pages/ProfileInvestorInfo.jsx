@@ -25,6 +25,8 @@ const ProfileInvestorInfo = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const toggleSelection = (value, setter, currentState) => {
     const updated = currentState.includes(value)
       ? currentState.filter((item) => item !== value)
@@ -38,7 +40,7 @@ const ProfileInvestorInfo = () => {
 
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/investor-info/${user.id}`, {
+        const response = await fetch(`${API_BASE}/investor-info/${user.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -105,7 +107,7 @@ const ProfileInvestorInfo = () => {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/investor-info', {
+      const response = await fetch(`${API_BASE}/investor-info`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

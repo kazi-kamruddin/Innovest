@@ -14,6 +14,8 @@ export default function AboutUs() {
     { name: 'Abdullah Ishtiaq', position: 'Marketing Manager', image: sakib },
   ]);
 
+  console.log("\n\n\nAbout Us Page");
+
   return (
     <div className="about-us-container">
       <h2 className="about-us-section-dev-title">Our Dev Team</h2>

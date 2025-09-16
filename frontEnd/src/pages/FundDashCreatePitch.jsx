@@ -10,6 +10,8 @@ const FundDashCreatePitch = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     title: "",
     company_location: "",
@@ -58,7 +60,7 @@ const FundDashCreatePitch = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/pitches",
+        `${API_BASE}/pitches`,
         { ...formData, user_id: user.id },
         {
           headers: {

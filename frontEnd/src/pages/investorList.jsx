@@ -7,9 +7,11 @@ const InvestorList = () => {
     const [investors, setInvestors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const API_BASE = import.meta.env.VITE_API_URL;
   
     useEffect(() => {
-      fetch("http://127.0.0.1:8000/api/investor-list")
+      fetch(`${API_BASE}/investor-info/investor-list`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Failed to fetch investors");
@@ -40,7 +42,7 @@ const InvestorList = () => {
             {investors.map((investor) => (
               <div key={investor.id} className="investor-item">
                 <div className="investor-header">
-                  <h3>{investor.user.name}</h3>
+                  <h3>{investor.name}</h3>
                 </div>
                 <div className="investor-body">
                   <p><strong>Investment Range:</strong> ${investor.investment_range_min} - ${investor.investment_range_max}</p>

@@ -7,13 +7,15 @@ export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useAuthContext();
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const login = async (email, password) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await axios.post(
-        'http://127.0.0.1:8000/api/login',
+        `${API_BASE}/user/login`,
         { email, password },
         { withCredentials: true }
       );

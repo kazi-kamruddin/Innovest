@@ -26,7 +26,8 @@ const ProfileEdit = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch profile data when page loads (same as profile.jsx)
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return;
@@ -34,7 +35,7 @@ const ProfileEdit = () => {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch(`http://localhost:8000/api/profile/${user.id}`, {
+        const response = await fetch(`${API_BASE}/profile/${user.id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -44,7 +45,6 @@ const ProfileEdit = () => {
 
         const data = await response.json();
         if (response.ok) {
-          // If there's no existing profile (new user), the data might be empty
           if (!data || Object.keys(data).length === 0) {
             console.log("No existing profile data found. Initializing empty form.");
             setFormData({
@@ -107,7 +107,7 @@ const ProfileEdit = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:8000/api/profile/${user.id}/edit-profile`, {
+      const response = await fetch(`${API_BASE}/profile/${user.id}/edit-profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

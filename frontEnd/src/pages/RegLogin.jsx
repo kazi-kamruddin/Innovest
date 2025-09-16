@@ -10,26 +10,28 @@ function RegLogin() {
   const { login, error, isLoading } = useLogin();
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setSuccessMsg('');
-  console.log('handleSubmit called');
+  const API_BASE = import.meta.env.VITE_API_URL;
 
-  const success = await login(email, password);
-  console.log('login returned:', success);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSuccessMsg('');
+    console.log('handleSubmit called');
 
-  if (success) {
-    console.log('Login succeeded, setting success message');
-    setSuccessMsg('Login successful!');
-    console.log('Waiting 1.5s before navigating...');
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log('Navigating now');
-    navigate('/');
-  }
-  else {
-    console.log('Login failed or no success returned');
-  }
-};
+    const success = await login(email, password);
+    console.log('login returned:', success);
+
+    if (success) {
+      console.log('Login succeeded, setting success message');
+      setSuccessMsg('Login successful!');
+      console.log('Waiting 1.5s before navigating...');
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Navigating now');
+      navigate('/');
+    }
+    else {
+      console.log('Login failed or no success returned');
+    }
+  };
 
 
 

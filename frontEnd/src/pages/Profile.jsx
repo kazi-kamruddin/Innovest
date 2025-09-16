@@ -11,6 +11,8 @@ const Profile = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (!user) return;
@@ -18,7 +20,7 @@ const Profile = () => {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch(`http://localhost:8000/api/profile/${user.id}`, {
+        const response = await fetch(`${API_BASE}/profile/${user.id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -1,8 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
-import useSubscribeToConversation from "../hooks/useSubscribeToConversation";
-import echo from "../config/echo";
 import "../styles/messages.css";
 
 const Messages = () => {
@@ -40,6 +38,7 @@ const Messages = () => {
       })
       .catch((err) => console.error("\n\nError fetching user info:", err));
   }, [user]);
+
 
   useEffect(() => {
     if (!selectedConversation) return;
@@ -82,8 +81,6 @@ const Messages = () => {
     fetchPartnerInfo();
   }, [selectedConversation]);
 
-
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -105,35 +102,6 @@ const Messages = () => {
     }
   };
 
-  const handleNewMessage = useCallback(
-    (e) => {
-      if (e.message && e.message.conversation_id === selectedConversation?.id) {
-        setMessages((prev) => [...prev, e.message]);
-      }
-    },
-    [selectedConversation]
-  );
-
-  useSubscribeToConversation(selectedConversation?.id, handleNewMessage);
-
-useEffect(() => {
-  if (!selectedConversation) return;
-
-  console.log("🧷 Subscribing to: private-conversation." + selectedConversation.id);
-
-  const channel = echo.private(`conversation.${selectedConversation.id}`);
-  
-  channel.listen("NewMessageEvent", (e) => {
-    console.log("📨 New message received via Pusher:", e.message);
-    setMessages((prev) => [...prev, e.message]);
-  });
-
-  return () => {
-    echo.leave(`conversation.${selectedConversation.id}`);
-  };
-}, [selectedConversation]);
- 
-
   return (
     <div className="messaging-page">
       <div className="messaging-container">
@@ -151,6 +119,9 @@ useEffect(() => {
                 onClick={() => setSelectedConversation(conv)}
               >
                 <div className="partner-name">{conv.partner.name}</div>
+                {/* <div className="latest-message">
+                  {conv.messages?.[0]?.body ?? "No messages yet"}
+                </div> */}
               </div>
             ))
           )}
@@ -166,7 +137,6 @@ useEffect(() => {
               <div className="message-history">
                 {Array.isArray(messages) && messages.length > 0 ? (
                   messages.map((msg) => (
-                    
                     <div
                       key={msg.id}
                       className={`message-bubble ${
@@ -199,7 +169,8 @@ useEffect(() => {
           )}
         </div>
 
-        {/* Right column: Partner info */}
+
+        {/* Right column: Placeholder for partner info */}
         <div className="messaging-right-column">
           {partnerInfo ? (
             <>
@@ -210,6 +181,7 @@ useEffect(() => {
             <p>Loading user info...</p>
           )}
         </div>
+        
       </div>
     </div>
   );

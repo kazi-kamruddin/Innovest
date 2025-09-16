@@ -11,11 +11,13 @@ const PitchAll = () => {
   const [stageFilter, setStageFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchFilteredPitches = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/pitches?industry=${industryFilter}&stage=${stageFilter}&country=${countryFilter}`
+          `${API_BASE}/pitches?industry=${industryFilter}&stage=${stageFilter}&country=${countryFilter}`
         );
         const data = await response.json();
         setPitches(data);

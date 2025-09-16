@@ -5,6 +5,8 @@ import "../styles/fund-dash.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 const FundDash = () => {
   const { user } = useAuthContext(); 
   const [pitches, setPitches] = useState([]);
@@ -15,7 +17,7 @@ const FundDash = () => {
   const [pitchToDelete, setPitchToDelete] = useState(null);
 
   useEffect(() => {
-    console.log("User AuthContext:", user);
+    console.log("\n\nUser AuthContext:", user);
 
     if (!user || !user.id) {
       setError("User not logged in");
@@ -23,13 +25,13 @@ const FundDash = () => {
       return;
     }
 
-    const endpoint = `http://127.0.0.1:8000/api/users/${user.id}/pitches`;
+    const endpoint = `${API_BASE}/pitches/users/${user.id}/pitches`;
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
     };
 
-    console.log("Fetching pitches");
+    console.log("\n\nFetching pitches");
     console.log("Endpoint:", endpoint);
     console.log("Method: GET");
     console.log("Headers:", headers);
@@ -55,8 +57,8 @@ const FundDash = () => {
   const deletePitch = async (id) => {
     const token = localStorage.getItem("token");
 
-    console.log("Deleting pitch");
-    console.log("Endpoint:", `http://127.0.0.1:8000/api/users/${user.id}/pitches/${id}`);
+    console.log("\n\n\nDeleting pitch");
+    console.log("Endpoint:", `${API_BASE}/pitches/users/${user.id}/pitches/${id}`);
     console.log("Method: DELETE");
     console.log("Headers:", {
       Authorization: `Bearer ${token}`,
@@ -64,7 +66,7 @@ const FundDash = () => {
     });
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/users/${user.id}/pitches/${id}`, {
+      const response = await fetch(`${API_BASE}/pitches/users/${user.id}/pitches/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,7 +75,7 @@ const FundDash = () => {
       });
 
       const data = await response.json();
-      console.log("Response status:", response.status);
+      console.log("\nResponse status:", response.status);
       console.log("Response data:", data);
 
       if (!response.ok) {

@@ -7,11 +7,13 @@ export const useSignup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useAuthContext();
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const signup = async (name, email, password) => {
     setIsLoading(true);
     setError(null);
 
-    const endpoint = 'http://127.0.0.1:8000/api/register';
+    const endpoint = `${API_BASE}/user/register`;
     const payload = { name, email, password };
     const headers = { 'Content-Type': 'application/json' };
 
