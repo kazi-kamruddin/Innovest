@@ -143,6 +143,70 @@ const createPitch = async (req, res) => {
 };
 
 
+const createPitchInResponse = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const {
+      user_id,
+      title,
+      company_location,
+      country,
+      cell_number,
+      industry,
+      stage,
+      ideal_investor_role,
+      total_raising_amount,
+      minimum_investment,
+      the_business,
+      the_market,
+      progress,
+      objective,
+    } = req.body;
+
+    if (!user_id || !title || !industry) {
+      return res
+        .status(400)
+        .json({ error: "user_id, title, and industry are required" });
+    }
+
+    const [result] = await db.execute(
+      `INSERT INTO pitches 
+        (user_id, title, company_location, country, cell_number, industry, stage, ideal_investor_role,
+         total_raising_amount, minimum_investment, the_business, the_market, progress, objective, forRequestId) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        user_id,
+        title,
+        company_location || null,
+        country || null,
+        cell_number || null,
+        industry,
+        stage || null,
+        ideal_investor_role || null,
+        total_raising_amount || null,
+        minimum_investment || null,
+        the_business || null,
+        the_market || null,
+        progress || null,
+        objective || null,
+        requestId, // attach the investor request id
+      ]
+    );
+
+    const [pitchRows] = await db.execute(
+      "SELECT * FROM pitches WHERE id = ?",
+      [result.insertId]
+    );
+
+    res.status(201).json(pitchRows[0]);
+  } catch (err) {
+    console.error("Pitch-in-response creation failed:", err);
+    res.status(500).json({ error: "Pitch creation failed" });
+  }
+};
+
+
+
 const updatePitch = async (req, res) => {
   try {
     const { userId, pitchId } = req.params;
@@ -248,6 +312,7 @@ module.exports = {
   getPitchById,
   getUserPitches,
   createPitch,
+  createPitchInResponse,
   updatePitch,
   deletePitch,
 };

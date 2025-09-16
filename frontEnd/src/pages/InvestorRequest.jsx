@@ -151,7 +151,7 @@ const InvestorRequests = () => {
               <button
                 onClick={() => {
                   console.log("Responding to request ID:", r.id);
-                  navigate(`/pitch/create/${r.id}`);
+                  navigate(`/investor-request/create-response-pitch/${r.id}`);
                 }}
               >
                 Respond to Request

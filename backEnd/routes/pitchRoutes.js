@@ -5,6 +5,7 @@ const {
   getPitchById,
   getUserPitches,
   createPitch,
+  createPitchInResponse,
   updatePitch,
   deletePitch
 } = require("../controllers/pitchController");
@@ -18,6 +19,7 @@ router.get("/:id", getPitchById);
 
 router.get("/users/:id/pitches", requireAuth, getUserPitches);
 router.post("/", requireAuth, createPitch);
+router.post("/in-response/:requestId", requireAuth, createPitchInResponse);
 router.put("/users/:userId/pitches/:pitchId", requireAuth, updatePitch);
 router.delete("/users/:userId/pitches/:pitchId", requireAuth, deletePitch);
 
