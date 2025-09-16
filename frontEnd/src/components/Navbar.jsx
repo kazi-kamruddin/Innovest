@@ -15,7 +15,8 @@ function Navbar() {
         <ul className="nav-links">
           <li>
             <Link to="/pitches">Invest</Link>
-            <Link to="/fundraise-dashboard">Fundraise</Link> 
+            <Link to="/fundraise-dashboard">Fundraise</Link>
+            <Link to="/investor-request">Investors' Requests</Link> 
             {/* <a href="#">Help</a> */}
             <Link to="/messages">Messages</Link>
             <Link to="/about-us">About Us</Link>
