@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
@@ -29,8 +29,7 @@ const FundDashCreatePitch = () => {
   });
 
   const industryOptions = [
-    "Technology", "Healthcare", "Finance", "Real Estate", "Retail",
-    "Manufacturing", "Education", "Food & Beverage", "Automotive", "Other"
+    "Technology", "Healthcare", "Finance", "Real Estate", "Education", "Food & Beverage", "Other"
   ];
   const stageOptions = [
     "Idea", "Prototype", "Early Revenue", "Scaling", "Profitable"
@@ -38,6 +37,11 @@ const FundDashCreatePitch = () => {
   const investorRoleOptions = [
     "Silent Investor", "Active Partner", "Advisor", "Board Member"
   ];
+  const countryOptions = [
+    "Afghanistan","Bangladesh","Bhutan",
+    "India","Maldives","Nepal","Pakistan","Sri Lanka"
+  ];
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -116,7 +120,12 @@ const FundDashCreatePitch = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label className="form-label">Country</label>
-            <input type="text" name="country" className="form-control" value={formData.country} onChange={handleChange} />
+            <select name="country" className="form-control" value={formData.country} onChange={handleChange} required>
+              <option value="">Select Country</option>
+              {countryOptions.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
         </div>
 

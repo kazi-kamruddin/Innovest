@@ -5,15 +5,20 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/profile-investor-info.css';
 
-const fieldsOfInterestOptions = [
-  'Startups', 'Biotech', 'Real Estate', 'Green Tech',
-  'Healthcare', 'E-commerce', 'Cybersecurity', 'AI'
+const preferredIndustriesOptions = [
+  "Technology", "Healthcare", "Finance", "Real Estate", 
+  "Education", "Food & Beverage"
 ];
 
-const preferredIndustriesOptions = [
-  'Finance', 'Energy', 'Agriculture', 'Transportation',
-  'Education', 'Logistics', 'Retail', 'Manufacturing'
+const fieldsOfInterestOptions = [
+  "AI", "Software", "Hardware",
+  "Biotech", "Pharmaceuticals",
+  "Banking","Property Management",
+  "EdTech", "Curriculum Development",
+  "Restaurants", "Food Processing", "Beverages",
+  "Sustainability", "Entertainment", "Logistics"
 ];
+
 
 const ProfileInvestorInfo = () => {
   const [fieldsOfInterest, setFieldsOfInterest] = useState([]);
@@ -138,6 +143,26 @@ const ProfileInvestorInfo = () => {
       <h2 className="investor-profile-heading">Create/Update Your Investor Profile</h2>
       <form onSubmit={handleSubmit} className="investor-profile-form">
 
+        <label className="investor-profile-label">Preferred Industries:</label>
+        <div className="custom-multiselect">
+          {preferredIndustriesOptions.map((option) => (
+            <div
+              key={option}
+              className={`multiselect-option ${preferredIndustries.includes(option) ? 'selected' : ''}`}
+              onClick={() => toggleSelection(option, setPreferredIndustries, preferredIndustries)}
+            >
+              {preferredIndustries.includes(option) ? '✔️ ' : ''}{option}
+            </div>
+          ))}
+        </div>
+        <input
+          type="text"
+          className="investor-profile-input readonly-box"
+          value={preferredIndustries.join(', ')}
+          readOnly
+        />
+        
+
         <label className="investor-profile-label">Fields of Interest:</label>
         <div className="custom-multiselect">
           {fieldsOfInterestOptions.map((option) => (
@@ -177,24 +202,6 @@ const ProfileInvestorInfo = () => {
           className="investor-profile-input"
         />
 
-        <label className="investor-profile-label">Preferred Industries:</label>
-        <div className="custom-multiselect">
-          {preferredIndustriesOptions.map((option) => (
-            <div
-              key={option}
-              className={`multiselect-option ${preferredIndustries.includes(option) ? 'selected' : ''}`}
-              onClick={() => toggleSelection(option, setPreferredIndustries, preferredIndustries)}
-            >
-              {preferredIndustries.includes(option) ? '✔️ ' : ''}{option}
-            </div>
-          ))}
-        </div>
-        <input
-          type="text"
-          className="investor-profile-input readonly-box"
-          value={preferredIndustries.join(', ')}
-          readOnly
-        />
 
         <button type="submit" className="investor-profile-button">Submit</button>
       </form>

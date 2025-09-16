@@ -8,12 +8,9 @@ const interestsOptions = [
   "Technology",
   "Healthcare",
   "Finance",
-  "Education",
   "Real Estate",
-  "E-commerce",
-  "Agriculture",
-  "AI",
-  "Entertainment"
+  "Education",
+  "Food & Beverage",
 ];
 
 const ProfileEdit = () => {

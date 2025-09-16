@@ -57,9 +57,13 @@ const PitchAll = () => {
             onChange={(e) => setIndustryFilter(e.target.value)}
           >
             <option value="">Filter by Industry</option>
-            <option value="Tech">Tech</option>
+            <option value="Technology">Technology</option>
             <option value="Healthcare">Healthcare</option>
             <option value="Finance">Finance</option>
+            <option value="Real Estate">Real Estate</option>
+            <option value="Education">Education</option>
+            <option value="Food & Beverage">Food & Beverage</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
@@ -70,9 +74,11 @@ const PitchAll = () => {
             onChange={(e) => setStageFilter(e.target.value)}
           >
             <option value="">Filter by Stage</option>
-            <option value="Seed">Seed</option>
-            <option value="Growth">Growth</option>
-            <option value="Mature">Mature</option>
+            <option value="Idea">Idea</option>
+            <option value="Prototype">Prototype</option>
+            <option value="Early Revenue">Early Revenue</option>
+            <option value="Scaling">Scaling</option>
+            <option value="Profitable">Profitable</option>
           </select>
         </div>
 
@@ -83,9 +89,14 @@ const PitchAll = () => {
             onChange={(e) => setCountryFilter(e.target.value)}
           >
             <option value="">Filter by Country</option>
-            <option value="USA">USA</option>
-            <option value="Canada">Canada</option>
-            <option value="UK">UK</option>
+            <option value="Afghanistan">Afghanistan</option>
+            <option value="Bangladesh">Bangladesh</option>
+            <option value="Bhutan">Bhutan</option>
+            <option value="India">India</option>
+            <option value="Maldives">Maldives</option>
+            <option value="Nepal">Nepal</option>
+            <option value="Pakistan">Pakistan</option>
+            <option value="Sri Lanka">Sri Lanka</option>
           </select>
         </div>
       </div>

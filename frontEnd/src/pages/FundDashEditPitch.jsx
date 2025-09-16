@@ -41,6 +41,16 @@ const FundDashEditPitch = () => {
   const investorRoleOptions = [
     "Silent Investor", "Active Partner", "Advisor", "Board Member"
   ];
+  const countryOptions = [
+    "Afghanistan",
+    "Bangladesh",
+    "Bhutan",
+    "India",
+    "Maldives",
+    "Nepal",
+    "Pakistan",
+    "Sri Lanka"
+  ];
 
   useEffect(() => {
     fetch(`${API_BASE}/pitches/${id}`)
@@ -121,7 +131,6 @@ const FundDashEditPitch = () => {
         });
   };
 
-
   const cancelUpdate = () => {
     setShowModal(false);
   };
@@ -142,7 +151,12 @@ const FundDashEditPitch = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label className="form-label">Country</label>
-            <input type="text" name="country" className="form-control" value={formData.country} onChange={handleChange} />
+            <select name="country" className="form-control" value={formData.country} onChange={handleChange} required>
+              <option value="">Select Country</option>
+              {countryOptions.map((country) => (
+                <option key={country} value={country}>{country}</option>
+              ))}
+            </select>
           </div>
         </div>
 
