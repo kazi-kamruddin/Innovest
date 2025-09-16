@@ -32,8 +32,7 @@ const FundDashEditPitch = () => {
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const industryOptions = [
-    "Technology", "Healthcare", "Finance", "Real Estate", "Retail",
-    "Manufacturing", "Education", "Food & Beverage", "Automotive", "Other"
+    "Technology", "Healthcare", "Finance", "Real Estate", "Education", "Food & Beverage", "Other"
   ];
   const stageOptions = [
     "Idea", "Prototype", "Early Revenue", "Scaling", "Profitable"

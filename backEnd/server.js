@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const pitchRoutes = require("./routes/pitchRoutes");
 const userInfoRoutes = require("./routes/userInfoRoutes");
 const investorInfoRoutes = require("./routes/investorInfoRoutes");
+const investorRequestRoutes = require("./routes/investorRequestRoutes");
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/user", userRoutes);
 app.use("/pitches", pitchRoutes);
 app.use("/profile", userInfoRoutes);
 app.use("/investor-info", investorInfoRoutes);
+app.use("/investor-request", investorRequestRoutes)
 
 
 
