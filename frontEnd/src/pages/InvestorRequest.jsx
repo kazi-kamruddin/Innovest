@@ -1,6 +1,9 @@
+// src/pages/InvestorRequests.jsx
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../styles/investor-request.css";
 
 const InvestorRequests = () => {
@@ -14,7 +17,11 @@ const InvestorRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Check if current user is an investor
+  // For modal confirmation
+  const [showModal, setShowModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  // Check if current user is an investor + fetch requests
   useEffect(() => {
     const checkInvestorStatus = async () => {
       if (!user) {
@@ -25,19 +32,15 @@ const InvestorRequests = () => {
 
       const token = localStorage.getItem("token");
       console.log("Checking investor status for user:", user);
-      console.log("User token:", token);
 
       try {
         const endpoint = `${API_BASE}/investor-info/${user.id}`;
-        console.log("API Request URL:", endpoint);
-
         const res = await fetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (res.ok) {
           const data = await res.json();
-          console.log("Investor status data:", data);
           if (data && Object.keys(data).length > 0) {
             setIsInvestor(true);
           } else {
@@ -51,18 +54,14 @@ const InvestorRequests = () => {
       }
     };
 
-    checkInvestorStatus();
-
     const fetchRequests = async () => {
       console.log("Fetching all investor requests...");
       try {
         const endpoint = `${API_BASE}/investor-request`;
-        console.log("API Request URL:", endpoint);
-
         const res = await fetch(endpoint, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
 
         if (res.ok) {
@@ -79,15 +78,15 @@ const InvestorRequests = () => {
       }
     };
 
+    checkInvestorStatus();
     fetchRequests();
   }, [user]);
 
   if (loading) {
-    console.log("Loading state active...");
     return <div>Loading...</div>;
   }
 
-  // Split requests into my requests vs other requests
+  // Split requests
   const myRequests = user
     ? requests.filter((r) => r.investorId === user.id)
     : [];
@@ -95,8 +94,39 @@ const InvestorRequests = () => {
     ? requests.filter((r) => r.investorId !== user.id)
     : requests;
 
-  console.log("My Requests:", myRequests);
-  console.log("Other Requests:", otherRequests);
+  // Handle close request
+  const handleCloseRequest = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${API_BASE}/investor-request/${selectedRequest.id}/close`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to close request");
+      }
+
+      toast.success("Request marked as closed!");
+      setRequests((prev) =>
+        prev.filter((r) => r.id !== selectedRequest.id)
+      ); // remove from UI
+    } catch (error) {
+      console.error("Error closing request:", error);
+      toast.error("Failed to close request.");
+    } finally {
+      setShowModal(false);
+      setSelectedRequest(null);
+    }
+  };
 
   return (
     <div>
@@ -105,10 +135,7 @@ const InvestorRequests = () => {
       {/* Create new request button for investors */}
       {isInvestor && (
         <button
-          onClick={() => {
-            console.log("Navigating to: /investor-request/create-new-request");
-            navigate("/investor-request/create-new-request");
-          }}
+          onClick={() => navigate("/investor-request/create-new-request")}
           className="btn btn-primary"
         >
           Create New Request
@@ -120,18 +147,37 @@ const InvestorRequests = () => {
         <div style={{ marginTop: "20px" }}>
           <h3>My Requests</h3>
           {myRequests.map((r) => (
-            <div key={r.id} style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}>
-              <p><strong>Title:</strong> {r.title}</p>
-              <p><strong>Description:</strong> {r.description}</p>
-              <p><strong>Category:</strong> {r.category}</p>
-              <p><strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}</p>
+            <div
+              key={r.id}
+              style={{
+                border: "1px solid #ccc",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
+            >
+              <p>
+                <strong>Title:</strong> {r.title}
+              </p>
+              <p>
+                <strong>Description:</strong> {r.description}
+              </p>
+              <p>
+                <strong>Category:</strong> {r.category}
+              </p>
+              <p>
+                <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
+              </p>
+              <button onClick={() => navigate(`/investor-request/edit-request/${r.id}`)}>
+                Edit Request
+              </button>
               <button
+                style={{ marginLeft: "10px" }}
                 onClick={() => {
-                  console.log("Editing request ID:", r.id);
-                  navigate(`/investor-request/edit-request/${r.id}`);
+                  setSelectedRequest(r);
+                  setShowModal(true);
                 }}
               >
-                Edit Request
+                Mark as Closed
               </button>
             </div>
           ))}
@@ -143,16 +189,30 @@ const InvestorRequests = () => {
         <div style={{ marginTop: "20px" }}>
           <h3>Other Investors' Requests</h3>
           {otherRequests.map((r) => (
-            <div key={r.id} style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}>
-              <p><strong>Title:</strong> {r.title}</p>
-              <p><strong>Description:</strong> {r.description}</p>
-              <p><strong>Category:</strong> {r.category}</p>
-              <p><strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}</p>
+            <div
+              key={r.id}
+              style={{
+                border: "1px solid #ccc",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
+            >
+              <p>
+                <strong>Title:</strong> {r.title}
+              </p>
+              <p>
+                <strong>Description:</strong> {r.description}
+              </p>
+              <p>
+                <strong>Category:</strong> {r.category}
+              </p>
+              <p>
+                <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
+              </p>
               <button
-                onClick={() => {
-                  console.log("Responding to request ID:", r.id);
-                  navigate(`/investor-request/create-response-pitch/${r.id}`);
-                }}
+                onClick={() =>
+                  navigate(`/investor-request/create-response-pitch/${r.id}`)
+                }
               >
                 Respond to Request
               </button>
@@ -165,6 +225,31 @@ const InvestorRequests = () => {
       {myRequests.length === 0 && otherRequests.length === 0 && (
         <p>No investor requests available.</p>
       )}
+
+      {/* Confirmation Modal */}
+      {showModal && selectedRequest && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h5>
+              Are you sure you want to mark request "{selectedRequest.title}" as
+              closed?
+            </h5>
+            <div className="modal-buttons">
+              <button className="confirm-btn" onClick={handleCloseRequest}>
+                Yes, Close
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setShowModal(false)}
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer />
     </div>
   );
 };

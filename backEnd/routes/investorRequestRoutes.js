@@ -3,6 +3,7 @@ const requireAuth = require("../middleware/requireAuth");
 const {
   createInvestorRequest,
   editRequest,
+  markRequestAsClosed,
   getSingleRequest,
   getAllInvestorRequests
 } = require("../controllers/investorRequestController");
@@ -15,6 +16,8 @@ router.get("/", requireAuth, getAllInvestorRequests);
 router.get("/:id", requireAuth, getSingleRequest);
 
 router.put("/edit-request/:id", requireAuth, editRequest);
+
+router.put("/:id/close", requireAuth, markRequestAsClosed);
 
 // Get a single investor request by ID
 //router.get("/:id", requireAuth, getInvestorRequest);

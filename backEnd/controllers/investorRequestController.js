@@ -77,6 +77,33 @@ const editRequest = async (req, res) => {
 };
 
 
+const markRequestAsClosed = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id; 
+
+  try {
+    const [request] = await db.query(
+      "SELECT * FROM investor_requests WHERE id = ? AND investorId = ?",
+      [id, userId]
+    );
+
+    if (!request || request.length === 0) {
+      return res.status(404).json({ error: "Request not found or not authorized" });
+    }
+
+    await db.query(
+      "UPDATE investor_requests SET status = 'closed', updatedAt = NOW() WHERE id = ?",
+      [id]
+    );
+
+    res.json({ message: "Request marked as closed successfully" });
+  } catch (error) {
+    console.error("Error closing request:", error);
+    res.status(500).json({ error: "Failed to mark request as closed" });
+  }
+};
+
+
 // GET /investor-requests/:id (specific request)
 const getSingleRequest = async (req, res) => {
   try {
@@ -99,10 +126,12 @@ const getSingleRequest = async (req, res) => {
 const getAllInvestorRequests = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT ir.id, ir.investorId, ir.title, ir.description, ir.category, ir.minInvestment, ir.maxInvestment, 
-              ir.status, ir.createdAt, ir.updatedAt, u.name, u.email
+      `SELECT ir.id, ir.investorId, ir.title, ir.description, ir.category, 
+              ir.minInvestment, ir.maxInvestment, ir.status, ir.createdAt, ir.updatedAt, 
+              u.name, u.email
        FROM investor_requests AS ir
        LEFT JOIN users AS u ON ir.investorId = u.id
+       WHERE ir.status = 'open'
        ORDER BY ir.createdAt DESC`
     );
 
@@ -118,6 +147,7 @@ const getAllInvestorRequests = async (req, res) => {
 module.exports = {
   createInvestorRequest,
   editRequest,
+  markRequestAsClosed,
   getSingleRequest,
   getAllInvestorRequests
 };
