@@ -166,6 +166,25 @@ const getSingleRequest = async (req, res) => {
 };
 
 
+const getPitchesForRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.execute(
+      `SELECT p.*, u.name, u.email
+       FROM pitches AS p
+       LEFT JOIN users AS u ON p.user_id = u.id
+       WHERE p.forRequestId = ?
+       ORDER BY p.created_at DESC`,
+      [id]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching pitches for request:", err);
+    res.status(500).json({ error: "Failed to fetch pitches for this request" });
+  }
+};
+
 
 // GET /investor-requests (list all requests)
 const getAllInvestorRequests = async (req, res) => {
@@ -196,5 +215,6 @@ module.exports = {
   getMyClosedRequests,
   reopenRequest,
   getSingleRequest,
+  getPitchesForRequest,
   getAllInvestorRequests
 };

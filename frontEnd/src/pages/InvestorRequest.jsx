@@ -91,7 +91,6 @@ const InvestorRequests = () => {
     ? requests.filter((r) => r.investorId !== user.id)
     : requests;
 
-
   const handleCloseRequest = async () => {
     if (!selectedRequest) return;
 
@@ -127,7 +126,6 @@ const InvestorRequests = () => {
 
   return (
     <div>
-
       {isInvestor && (
         <div style={{ marginTop: "10px" }}>
           <button
@@ -147,8 +145,7 @@ const InvestorRequests = () => {
         </div>
       )}
 
-
-      {/* my requests*/}
+      {/* My Requests Section */}
       {myRequests.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h3>My Requests</h3>
@@ -161,15 +158,9 @@ const InvestorRequests = () => {
                 marginBottom: "10px",
               }}
             >
-              <p>
-                <strong>Title:</strong> {r.title}
-              </p>
-              <p>
-                <strong>Description:</strong> {r.description}
-              </p>
-              <p>
-                <strong>Category:</strong> {r.category}
-              </p>
+              <p><strong>Title:</strong> {r.title}</p>
+              <p><strong>Description:</strong> {r.description}</p>
+              <p><strong>Category:</strong> {r.category}</p>
               <p>
                 <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
               </p>
@@ -185,12 +176,18 @@ const InvestorRequests = () => {
               >
                 Mark as Closed
               </button>
+              <button
+                style={{ marginLeft: "10px" }}
+                onClick={() => navigate(`/investor-request/${r.id}/response-pitches`)}
+              >
+                Response Pitches
+              </button>
             </div>
           ))}
         </div>
       )}
 
-      {/* other requests */}
+      {/* Other Requests Section */}
       {otherRequests.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h3>Other Investors' Requests</h3>
@@ -203,15 +200,9 @@ const InvestorRequests = () => {
                 marginBottom: "10px",
               }}
             >
-              <p>
-                <strong>Title:</strong> {r.title}
-              </p>
-              <p>
-                <strong>Description:</strong> {r.description}
-              </p>
-              <p>
-                <strong>Category:</strong> {r.category}
-              </p>
+              <p><strong>Title:</strong> {r.title}</p>
+              <p><strong>Description:</strong> {r.description}</p>
+              <p><strong>Category:</strong> {r.category}</p>
               <p>
                 <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
               </p>
@@ -222,17 +213,23 @@ const InvestorRequests = () => {
               >
                 Respond to Request
               </button>
+              <button
+                style={{ marginLeft: "10px" }}
+                onClick={() => navigate(`/investor-request/${r.id}/response-pitches`)}
+              >
+                Response Pitches
+              </button>
             </div>
           ))}
         </div>
       )}
 
-      {/* no requests */}
+      {/* No requests message */}
       {myRequests.length === 0 && otherRequests.length === 0 && (
         <p>No investor requests available.</p>
       )}
 
-
+      {/* Confirmation Modal */}
       {showModal && selectedRequest && (
         <div className="modal-overlay">
           <div className="modal-content">
