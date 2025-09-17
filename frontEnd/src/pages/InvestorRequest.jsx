@@ -17,11 +17,9 @@ const InvestorRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // For modal confirmation
   const [showModal, setShowModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
 
-  // Check if current user is an investor + fetch requests
   useEffect(() => {
     const checkInvestorStatus = async () => {
       if (!user) {
@@ -86,7 +84,6 @@ const InvestorRequests = () => {
     return <div>Loading...</div>;
   }
 
-  // Split requests
   const myRequests = user
     ? requests.filter((r) => r.investorId === user.id)
     : [];
@@ -94,7 +91,7 @@ const InvestorRequests = () => {
     ? requests.filter((r) => r.investorId !== user.id)
     : requests;
 
-  // Handle close request
+
   const handleCloseRequest = async () => {
     if (!selectedRequest) return;
 
@@ -118,7 +115,7 @@ const InvestorRequests = () => {
       toast.success("Request marked as closed!");
       setRequests((prev) =>
         prev.filter((r) => r.id !== selectedRequest.id)
-      ); // remove from UI
+      ); 
     } catch (error) {
       console.error("Error closing request:", error);
       toast.error("Failed to close request.");
@@ -130,19 +127,28 @@ const InvestorRequests = () => {
 
   return (
     <div>
-      <h2>Investor Requests</h2>
 
-      {/* Create new request button for investors */}
       {isInvestor && (
-        <button
-          onClick={() => navigate("/investor-request/create-new-request")}
-          className="btn btn-primary"
-        >
-          Create New Request
-        </button>
+        <div style={{ marginTop: "10px" }}>
+          <button
+            onClick={() => navigate("/investor-request/create-new-request")}
+            className="btn btn-primary"
+          >
+            Create New Request
+          </button>
+
+          <button
+            onClick={() => navigate("/investor-request/my-closed-requests")}
+            className="btn btn-secondary"
+            style={{ marginLeft: "10px" }}
+          >
+            View Closed Requests
+          </button>
+        </div>
       )}
 
-      {/* My Requests Section */}
+
+      {/* my requests*/}
       {myRequests.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h3>My Requests</h3>
@@ -184,7 +190,7 @@ const InvestorRequests = () => {
         </div>
       )}
 
-      {/* Other Requests Section */}
+      {/* other requests */}
       {otherRequests.length > 0 && (
         <div style={{ marginTop: "20px" }}>
           <h3>Other Investors' Requests</h3>
@@ -221,12 +227,12 @@ const InvestorRequests = () => {
         </div>
       )}
 
-      {/* No requests message */}
+      {/* no requests */}
       {myRequests.length === 0 && otherRequests.length === 0 && (
         <p>No investor requests available.</p>
       )}
 
-      {/* Confirmation Modal */}
+
       {showModal && selectedRequest && (
         <div className="modal-overlay">
           <div className="modal-content">

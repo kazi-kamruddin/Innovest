@@ -26,6 +26,7 @@ import InvestorRequest from "./pages/InvestorRequest.jsx";
 import InvestorRequestCreate from "./pages/InvestorRequestCreate.jsx";
 import EditInvestorRequest from "./pages/InvestorRequestEdit.jsx";
 import InvestorRequestResponse from "./pages/InvestorRequestResponse.jsx";
+import InvestorRequestClosed from "./pages/InvestorRequestClosed.jsx";
 
 
 import Navbar from "./components/Navbar";  
@@ -62,10 +63,12 @@ function App() {
           <Route path="/fundraise-dashboard/create-pitch" element={<FundDashCreatePitch />} />
           <Route path="/fundraise-dashboard/edit-pitch/:id" element={<FundDashEditPitch />} />
           <Route path="/investor-list" element={<InvestorList />} />
+
           <Route path="/investor-request" element={<InvestorRequest />} />
           <Route path="/investor-request/create-new-request" element={<InvestorRequestCreate />} />
           <Route path="/investor-request/edit-request/:id" element={<EditInvestorRequest />} />
           <Route path="/investor-request/create-response-pitch/:id" element={<InvestorRequestResponse />} />
+          <Route path="investor-request/my-closed-requests" element={<InvestorRequestClosed />} />
 
           <Route path="/pitches" element={<PitchAll />} />
           <Route path="/pitches/:id" element={<PitchSingle />} />         
