@@ -17,11 +17,9 @@ const InvestorRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // For modal confirmation
   const [showModal, setShowModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
 
-  // Check if current user is an investor + fetch requests
   useEffect(() => {
     const checkInvestorStatus = async () => {
       if (!user) {
@@ -86,7 +84,6 @@ const InvestorRequests = () => {
     return <div>Loading...</div>;
   }
 
-  // Split requests
   const myRequests = user
     ? requests.filter((r) => r.investorId === user.id)
     : [];
@@ -94,7 +91,6 @@ const InvestorRequests = () => {
     ? requests.filter((r) => r.investorId !== user.id)
     : requests;
 
-  // Handle close request
   const handleCloseRequest = async () => {
     if (!selectedRequest) return;
 
@@ -118,7 +114,7 @@ const InvestorRequests = () => {
       toast.success("Request marked as closed!");
       setRequests((prev) =>
         prev.filter((r) => r.id !== selectedRequest.id)
-      ); // remove from UI
+      ); 
     } catch (error) {
       console.error("Error closing request:", error);
       toast.error("Failed to close request.");
@@ -130,16 +126,23 @@ const InvestorRequests = () => {
 
   return (
     <div>
-      <h2>Investor Requests</h2>
-
-      {/* Create new request button for investors */}
       {isInvestor && (
-        <button
-          onClick={() => navigate("/investor-request/create-new-request")}
-          className="btn btn-primary"
-        >
-          Create New Request
-        </button>
+        <div style={{ marginTop: "10px" }}>
+          <button
+            onClick={() => navigate("/investor-request/create-new-request")}
+            className="btn btn-primary"
+          >
+            Create New Request
+          </button>
+
+          <button
+            onClick={() => navigate("/investor-request/my-closed-requests")}
+            className="btn btn-secondary"
+            style={{ marginLeft: "10px" }}
+          >
+            View Closed Requests
+          </button>
+        </div>
       )}
 
       {/* My Requests Section */}
@@ -155,15 +158,9 @@ const InvestorRequests = () => {
                 marginBottom: "10px",
               }}
             >
-              <p>
-                <strong>Title:</strong> {r.title}
-              </p>
-              <p>
-                <strong>Description:</strong> {r.description}
-              </p>
-              <p>
-                <strong>Category:</strong> {r.category}
-              </p>
+              <p><strong>Title:</strong> {r.title}</p>
+              <p><strong>Description:</strong> {r.description}</p>
+              <p><strong>Category:</strong> {r.category}</p>
               <p>
                 <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
               </p>
@@ -178,6 +175,12 @@ const InvestorRequests = () => {
                 }}
               >
                 Mark as Closed
+              </button>
+              <button
+                style={{ marginLeft: "10px" }}
+                onClick={() => navigate(`/investor-request/${r.id}/response-pitches`)}
+              >
+                Response Pitches
               </button>
             </div>
           ))}
@@ -197,15 +200,9 @@ const InvestorRequests = () => {
                 marginBottom: "10px",
               }}
             >
-              <p>
-                <strong>Title:</strong> {r.title}
-              </p>
-              <p>
-                <strong>Description:</strong> {r.description}
-              </p>
-              <p>
-                <strong>Category:</strong> {r.category}
-              </p>
+              <p><strong>Title:</strong> {r.title}</p>
+              <p><strong>Description:</strong> {r.description}</p>
+              <p><strong>Category:</strong> {r.category}</p>
               <p>
                 <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
               </p>
@@ -215,6 +212,12 @@ const InvestorRequests = () => {
                 }
               >
                 Respond to Request
+              </button>
+              <button
+                style={{ marginLeft: "10px" }}
+                onClick={() => navigate(`/investor-request/${r.id}/response-pitches`)}
+              >
+                Response Pitches
               </button>
             </div>
           ))}

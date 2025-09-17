@@ -1,6 +1,6 @@
 const db = require("../config/database");
 
-// POST /investor-requests/create-new-request (create new request)
+// POST /investor-requests/create-new-request 
 const createInvestorRequest = async (req, res) => {
   try {
     const { investorId, title, description, category, minInvestment, maxInvestment } = req.body;
@@ -50,16 +50,13 @@ const editRequest = async (req, res) => {
     const { id } = req.params;
     const { title, description, category, minInvestment, maxInvestment } = req.body;
 
-    // Check if request exists
     const [rows] = await db.execute("SELECT investorId FROM investor_requests WHERE id = ?", [id]);
     if (rows.length === 0) return res.status(404).json({ error: "Request not found" });
 
-    // Check ownership
     if (rows[0].investorId !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized: You can only edit your own requests" });
     }
 
-    // Update the request
     await db.execute(
       `UPDATE investor_requests
        SET title = ?, description = ?, category = ?, minInvestment = ?, maxInvestment = ?, updatedAt = NOW()
@@ -67,7 +64,6 @@ const editRequest = async (req, res) => {
       [title, description, category, minInvestment || null, maxInvestment || null, id]
     );
 
-    // Return updated request
     const [updated] = await db.execute("SELECT * FROM investor_requests WHERE id = ?", [id]);
     res.json(updated[0]);
   } catch (err) {
@@ -104,7 +100,56 @@ const markRequestAsClosed = async (req, res) => {
 };
 
 
-// GET /investor-requests/:id (specific request)
+// GET /investor-request/my-closed
+const getMyClosedRequests = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await db.execute(
+      `SELECT * FROM investor_requests 
+       WHERE investorId = ? AND status = 'closed'
+       ORDER BY updatedAt DESC`,
+      [userId]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching closed requests:", err);
+    res.status(500).json({ error: "Failed to fetch closed requests" });
+  }
+};
+
+
+const reopenRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const [check] = await db.execute(
+      `SELECT * FROM investor_requests 
+       WHERE id = ? AND investorId = (SELECT id FROM investor_info WHERE user_id = ?)`,
+      [id, userId]
+    );
+
+    if (check.length === 0) {
+      return res.status(403).json({ error: "Not authorized to reopen this request" });
+    }
+
+    await db.execute(
+      `UPDATE investor_requests 
+       SET status = 'open', updatedAt = NOW() 
+       WHERE id = ?`,
+      [id]
+    );
+
+    res.json({ message: "Request reopened successfully" });
+  } catch (err) {
+    console.error("Error reopening request:", err);
+    res.status(500).json({ error: "Failed to reopen request" });
+  }
+};
+
+
+
+// GET /investor-requests/:id
 const getSingleRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -120,6 +165,25 @@ const getSingleRequest = async (req, res) => {
   }
 };
 
+
+const getPitchesForRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.execute(
+      `SELECT p.*, u.name, u.email
+       FROM pitches AS p
+       LEFT JOIN users AS u ON p.user_id = u.id
+       WHERE p.forRequestId = ?
+       ORDER BY p.created_at DESC`,
+      [id]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching pitches for request:", err);
+    res.status(500).json({ error: "Failed to fetch pitches for this request" });
+  }
+};
 
 
 // GET /investor-requests (list all requests)
@@ -148,6 +212,9 @@ module.exports = {
   createInvestorRequest,
   editRequest,
   markRequestAsClosed,
+  getMyClosedRequests,
+  reopenRequest,
   getSingleRequest,
+  getPitchesForRequest,
   getAllInvestorRequests
 };

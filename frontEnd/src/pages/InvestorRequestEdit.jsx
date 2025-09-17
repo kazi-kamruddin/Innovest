@@ -28,7 +28,6 @@ const EditInvestorRequest = () => {
 
   console.log("\n\n----------------- Edit Request Page --------------------");
 
-  // Fetch existing request data
   useEffect(() => {
     if (!id) return;
 
