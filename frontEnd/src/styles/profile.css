@@ -132,3 +132,27 @@
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+.investor-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #4caf50, #81c784); /* modern green gradient */
+  color: white;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+}
+
+/* Optional: add a small checkmark icon */
+.investor-badge::before {
+  content: '✔';
+  font-size: 0.8rem;
+  color: white;
+}

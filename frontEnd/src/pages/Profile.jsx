@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
 import { useLogout } from "../hooks/useLogout.jsx";
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaEnvelope } from "react-icons/fa"; 
+import { FaMapMarkerAlt } from "react-icons/fa"; 
 import "../styles/profile.css";
 
 const Profile = () => {
   const { user } = useAuthContext();
   const { logout } = useLogout();
   const [userInfo, setUserInfo] = useState(null);
+  const [investorInfo, setInvestorInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const API_BASE = import.meta.env.VITE_API_URL;
@@ -20,6 +21,7 @@ const Profile = () => {
       const token = localStorage.getItem("token");
 
       try {
+        // fetch user profile
         const response = await fetch(`${API_BASE}/profile/${user.id}`, {
           method: "GET",
           headers: {
@@ -27,16 +29,22 @@ const Profile = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
         const data = await response.json();
+        if (response.ok) setUserInfo(data);
 
-        if (response.ok) {
-          setUserInfo(data);
-        } else {
-          setUserInfo(null);
+        // fetch investor info
+        const investorRes = await fetch(`${API_BASE}/investor-info/${user.id}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (investorRes.ok) {
+          const investorData = await investorRes.json();
+          setInvestorInfo(investorData);
         }
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        console.error("Error fetching profile data:", error);
       } finally {
         setLoading(false);
       }
@@ -49,9 +57,16 @@ const Profile = () => {
     logout();
   };
 
+  if (loading) return <p>Loading profile...</p>;
+
   return (
     <div className="profile-container">
       <div className="profile-header">
+        {/* Investor badge (top right corner) */}
+        {investorInfo && (
+          <div className="investor-badge">Investor</div>
+        )}
+
         <div className="profile-pic-wrapper">
           <img src="src/images/profile.jpeg" alt="Profile" className="profile-pic" />
         </div>
