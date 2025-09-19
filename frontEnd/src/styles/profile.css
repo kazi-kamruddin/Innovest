@@ -83,8 +83,8 @@
 
 .action-buttons {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: center;
+  gap: 30px;
   margin-top: 30px;
   flex-wrap: wrap;
 }
@@ -99,8 +99,20 @@
 }
 
 .btn.logout {
-  background-color: #ff4d4d;
+  background-color: #f63b3b;
   color: white;
+  padding: 10px 16px;
+  font-size: 1rem;
+  min-width: 140px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease; 
+}
+
+.btn.logout:hover {
+  transform: scale(1.09); 
+  opacity: 0.9;           
 }
 
 .btn.ssecondary {
@@ -111,6 +123,9 @@
   overflow: hidden;
 }
 
+.btn.ssecondary:hover {
+   background-color: #479caf;
+}
 .btn:hover {
   opacity: 0.85;
 }
@@ -137,7 +152,7 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: linear-gradient(135deg, #4caf50, #81c784); /* modern green gradient */
+  background: linear-gradient(135deg, #4caf50, #81c784); 
   color: white;
   font-weight: bold;
   padding: 6px 14px;
@@ -150,7 +165,6 @@
   text-transform: uppercase;
 }
 
-/* Optional: add a small checkmark icon */
 .investor-badge::before {
   content: '✔';
   font-size: 0.8rem;

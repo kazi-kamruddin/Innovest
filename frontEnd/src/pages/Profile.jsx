@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa"; 
 import "../styles/profile.css";
 
-const Profile = () => {
+const Profile = () => {    
   const { user } = useAuthContext();
   const { logout } = useLogout();
   const [userInfo, setUserInfo] = useState(null);
@@ -21,7 +21,6 @@ const Profile = () => {
       const token = localStorage.getItem("token");
 
       try {
-        // fetch user profile
         const response = await fetch(`${API_BASE}/profile/${user.id}`, {
           method: "GET",
           headers: {
@@ -32,7 +31,6 @@ const Profile = () => {
         const data = await response.json();
         if (response.ok) setUserInfo(data);
 
-        // fetch investor info
         const investorRes = await fetch(`${API_BASE}/investor-info/${user.id}`, {
           method: "GET",
           headers: {
@@ -62,7 +60,6 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-header">
-        {/* Investor badge (top right corner) */}
         {investorInfo && (
           <div className="investor-badge">Investor</div>
         )}

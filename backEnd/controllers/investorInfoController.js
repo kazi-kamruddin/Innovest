@@ -1,6 +1,6 @@
 const db = require("../config/database");
 
-// POST /investor-info (create or update)
+
 const storeInvestorInfo = async (req, res) => {
   try {
     const {
@@ -15,15 +15,18 @@ const storeInvestorInfo = async (req, res) => {
       return res.status(400).json({ error: "user_id is required" });
     }
 
+    // Check if user exists
     const [userRows] = await db.execute("SELECT id FROM users WHERE id = ?", [user_id]);
     if (userRows.length === 0) {
       return res.status(400).json({ error: "User does not exist" });
     }
 
+    // Ensure logged-in user matches
     if (req.user.id !== user_id) {
       return res.status(403).json({ error: "Unauthorized: user ID mismatch" });
     }
 
+    // Check if investor info already exists
     const [existing] = await db.execute(
       "SELECT id FROM investor_info WHERE user_id = ?",
       [user_id]
@@ -69,13 +72,11 @@ const storeInvestorInfo = async (req, res) => {
   }
 };
 
-
-// GET /investor-info/:userId
+// GET /investor-info/:userId  (private: logged-in user only)
 const getInvestorInfo = async (req, res) => {
   try {
     const { userId } = req.params;
-
-    const loggedInUserId = req.user.id; 
+    const loggedInUserId = req.user.id;
 
     if (parseInt(userId) !== loggedInUserId) {
       return res.status(403).json({ error: "Unauthorized" });
@@ -97,7 +98,26 @@ const getInvestorInfo = async (req, res) => {
   }
 };
 
+// GET /investor-info-public/:userId  (public: anyone can view)
+const getInvestorInfoPublic = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
+    const [rows] = await db.execute(
+      "SELECT * FROM investor_info WHERE user_id = ?",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Investor info not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Error retrieving public investor info:", err);
+    res.status(500).json({ error: "Error retrieving investor info" });
+  }
+};
 
 // GET /investor-list
 const getInvestorList = async (req, res) => {
@@ -122,5 +142,6 @@ const getInvestorList = async (req, res) => {
 module.exports = {
   storeInvestorInfo,
   getInvestorInfo,
+  getInvestorInfoPublic,
   getInvestorList
 };

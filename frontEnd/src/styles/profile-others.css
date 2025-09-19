@@ -121,3 +121,27 @@
   font-size: 1rem;
   color: #555;
 }
+
+.others-investor-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: linear-gradient(135deg, #b06919, #9e9d8a);
+  color: white;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+}
+
+.others-investor-badge::before {
+  content: '✔';
+  font-size: 0.8rem;
+  color: white;
+}
+
