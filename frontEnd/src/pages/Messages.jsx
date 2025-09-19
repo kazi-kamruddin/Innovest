@@ -1,176 +1,189 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { io } from "socket.io-client";
 import "../styles/messages.css";
+
+let socket;
 
 const Messages = () => {
   const { user } = useAuthContext();
-
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [partnerInfo, setPartnerInfo] = useState(null);
-  const [userInfo, setUserInfo] = useState(null);
+  const token = localStorage.getItem("token");
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    if (!user || !user.id) {
-      console.log("\n\nUser not logged in");
-      return;
-    }
+    if (!user) return;
 
-    const token = localStorage.getItem("token");
-    const headers = { Authorization: `Bearer ${token}` };
+    if (!socket) socket = io(API_BASE, { auth: { token } });
 
-    axios
-      .get("http://127.0.0.1:8000/api/conversations", { headers })
-      .then((res) => {
-        console.log("Conversations fetched:", res.data);
-        setConversations(res.data);
-      })
-      .catch((err) => console.error("Error fetching conversations:", err));
+    socket.emit("user_connected", user.id);
 
-    axios
-      .get(`http://127.0.0.1:8000/api/profile/${user.id}`, { headers })
-      .then((res) => {
-        console.log("\n\nUser info fetched:", res.data);
-        setUserInfo(res.data);
-      })
-      .catch((err) => console.error("\n\nError fetching user info:", err));
-  }, [user]);
+    socket.on("receive_message", (msg) => {
+      const normalized = {
+        ...msg,
+        sender_id: msg.sender_id ?? msg.senderId,
+        created_at: msg.created_at ?? new Date(),
+      };
 
+      if (normalized.sender_id === user.id) return;
+
+      if (normalized.conversationId === selectedConversation?.id) {
+        setMessages((prev) => [...prev, normalized]);
+      }
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [user, selectedConversation]);
 
   useEffect(() => {
-    if (!selectedConversation) return;
-
-    console.log("\n\nselected conversation id:", selectedConversation.id);
-
-    const fetchMessages = async () => {
+    const fetchConversations = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const res = await axios.get(
-          `http://127.0.0.1:8000/api/conversations/${selectedConversation.id}`,
-          { headers }
-        );
-        setMessages(res.data);
-        console.log("\n\nFetched messages:", res.data);
+        const res = await fetch(`${API_BASE}/conversations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) setConversations(data);
       } catch (err) {
-        console.error("\n\nError fetching messages:", err);
+        console.error("Error fetching conversations:", err);
       }
     };
+    fetchConversations();
+  }, [API_BASE, token]);
 
-    const fetchPartnerInfo = async () => {
-      const token = localStorage.getItem("token");
-      const headers = { Authorization: `Bearer ${token}` };
-
-      try {
-        const res = await axios.get(
-          `http://127.0.0.1:8000/api/profile/${selectedConversation.partner.id}`,
-          { headers }
-        );
-        setPartnerInfo(res.data);
-        console.log("\n\nFetched partner info:", res.data);
-      } catch (err) {
-        console.error("\n\nError fetching partner info:", err);
-      }
-    };
-
-    fetchMessages();
-    fetchPartnerInfo();
-  }, [selectedConversation]);
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+  const loadConversation = async (conversation) => {
+    setSelectedConversation(conversation);
 
     try {
-      const token = localStorage.getItem("token");
-      const headers = { Authorization: `Bearer ${token}` };
-
-      const res = await axios.post(
-        `http://127.0.0.1:8000/api/conversations/${selectedConversation.id}/messages`,
-        { body: newMessage },
-        { headers }
+      const res = await fetch(
+        `${API_BASE}/conversations/${conversation.id}/messages`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setMessages((prev) => [...prev, res.data]);
-      setNewMessage("");
+      const data = await res.json();
+      if (res.ok) {
+        const normalized = data.map((m) => ({
+          ...m,
+          sender_id: m.sender_id ?? m.senderId,
+        }));
+        setMessages(normalized);
+      }
     } catch (err) {
-      console.error("\n\nError sending message:", err);
+      console.error("Error fetching messages:", err);
     }
+
+    const partnerId =
+      conversation.user_one_id === user.id
+        ? conversation.user_two_id
+        : conversation.user_one_id;
+
+    try {
+      const res = await fetch(`${API_BASE}/profile/${partnerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setPartnerInfo(data);
+    } catch (err) {
+      console.error("Error fetching partner info:", err);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !selectedConversation) return;
+
+    const msg = {
+      conversationId: selectedConversation.id,
+      senderId: user.id,  
+      sender_id: user.id,
+      content: newMessage,
+      created_at: new Date(),
+    };
+
+    socket.emit("send_message", msg);
+
+    setMessages((prev) => [...prev, msg]);
+    setNewMessage("");
   };
 
   return (
     <div className="messaging-page">
       <div className="messaging-container">
-        {/* Left column: Conversation list */}
+        {/* Left column: Conversations */}
         <div className="messaging-left-column">
-          {conversations.length === 0 ? (
-            <p>No conversations yet.</p>
-          ) : (
-            conversations.map((conv) => (
+          <h3>Conversations</h3>
+          {conversations.length === 0 && <p>No conversations yet.</p>}
+          {conversations.map((c) => {
+            const partner =
+              c.user_one_id === user.id
+                ? { id: c.user_two_id, name: c.user2_name }
+                : { id: c.user_one_id, name: c.user1_name };
+            return (
               <div
-                key={conv.id}
+                key={c.id}
                 className={`conversation-preview ${
-                  selectedConversation?.id === conv.id ? "selected" : ""
+                  selectedConversation?.id === c.id ? "selected" : ""
                 }`}
-                onClick={() => setSelectedConversation(conv)}
+                onClick={() => loadConversation(c)}
               >
-                <div className="partner-name">{conv.partner.name}</div>
-                {/* <div className="latest-message">
-                  {conv.messages?.[0]?.body ?? "No messages yet"}
-                </div> */}
+                <div className="partner-name">{partner.name}</div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
-        {/* Middle column: Chat area */}
+        {/* Middle column: Chat */}
         <div className="messaging-middle-column">
           {selectedConversation ? (
             <>
               <h3 className="chat-header">
-                Chat with {selectedConversation.partner.name}
+                Chat with {partnerInfo?.user?.name || "Loading..."}
               </h3>
               <div className="message-history">
-                {Array.isArray(messages) && messages.length > 0 ? (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`message-bubble ${
-                        msg.sender_id === user.id ? "sent" : "received"
-                      }`}
-                    >
-                      {msg.body}
-                    </div>
-                  ))
-                ) : (
+                {messages.length === 0 && (
                   <div className="no-messages">No messages yet</div>
                 )}
+                {messages.map((m) => (
+                  <div
+                    key={m.id || Math.random()}
+                    className={`message-bubble ${
+                      m.sender_id === user.id ? "sent" : "received"
+                    }`}
+                  >
+                    {m.content || m.body}
+                    <small className="message-time">
+                      {new Date(m.created_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </small>
+                  </div>
+                ))}
               </div>
 
-              <form className="message-form" onSubmit={handleSendMessage}>
+              <div className="message-form">
                 <input
                   type="text"
+                  className="message-input"
+                  placeholder="Type a message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="message-input"
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                 />
-                <button type="submit" className="send-button">
+                <button className="send-button" onClick={handleSendMessage}>
                   Send
                 </button>
-              </form>
+              </div>
             </>
           ) : (
             <p>Select a conversation to start chatting</p>
           )}
         </div>
 
-
-        {/* Right column: Placeholder for partner info */}
+        {/* Right column: Partner info */}
         <div className="messaging-right-column">
           {partnerInfo ? (
             <>
@@ -181,7 +194,6 @@ const Messages = () => {
             <p>Loading user info...</p>
           )}
         </div>
-        
       </div>
     </div>
   );
