@@ -72,8 +72,16 @@
 }
 
 .card-header {
-  height: 140px;
-  background: #f0f0f0;
+    height: 140px;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    position: relative; 
+    overflow: hidden;   
 }
 
 .card-body {
@@ -109,7 +117,7 @@ ul {
 .find-out-more {
   width: 100%;
   padding: 10px;
-  background: #007bff;
+  background: #a10c4f;
   color: white;
   border: none;
   border-radius: 5px;
@@ -119,7 +127,7 @@ ul {
 }
 
 .find-out-more:hover {
-  background: #0056b3; 
+  background: #953f65;
 }
 
 
@@ -202,4 +210,32 @@ ul {
   .filter-section h2 {
     font-size: 20px;
   }
+}
+
+
+
+.animated-header-text {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}
+
+.animated-header-text span {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.animated-header-text .fade-in {
+  opacity: 1;
+}
+
+.animated-header-text .fade-out {
+  opacity: 0;
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/pitch-all.css";
+import AnimatedHeaderText from "./AnimatedHeaderText";
 import { FaIndustry, FaMapMarkerAlt, FaLayerGroup } from 'react-icons/fa';
 
 const PitchAll = () => {
@@ -105,7 +106,9 @@ const PitchAll = () => {
         {filteredPitches.length > 0 ? (
           filteredPitches.map((pitch) => (
             <div className="pitch-card" key={pitch.id}>
-              <div className="card-header"></div>
+              <div className="card-header">
+                {pitch ? <AnimatedHeaderText pitch={pitch} /> : "Loading..."}
+             </div>
               <div className="card-body">
                 <h3>{pitch.title}</h3>
                 <p className="location">📍 {pitch.company_location}, {pitch.country}</p>
