@@ -1,13 +1,18 @@
 .messaging-page {
-  padding: 20px;
   height: 100vh;
-  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+  overflow: hidden; 
 }
 
 .messaging-container {
   display: flex;
-  height: calc(100vh - 40px);
+  height: 90vh;
+  width: 100%;
+  max-width: 1200px;
   border: 1px solid #ccc;
   border-radius: 6px;
   background-color: #fff;
@@ -19,21 +24,24 @@
   padding: 15px;
   border-right: 1px solid #ddd;
   background-color: #f0f0f0;
+  overflow-y: auto; 
 }
 
 .messaging-middle-column {
   flex-grow: 1;
-  padding: 20px;
-  border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
+  padding: 20px;
+  border-right: 1px solid #ddd;
   background-color: #fff;
+  overflow: hidden; 
 }
 
 .messaging-right-column {
   width: 220px;
   padding: 15px;
   background-color: #f5f5f5;
+  overflow-y: auto; 
 }
 
 .conversation-preview {
@@ -65,11 +73,12 @@
 
 .message-history {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; 
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 10px;
+  padding-right: 5px;
 }
 
 .message-bubble {
@@ -101,6 +110,7 @@
 .message-form {
   display: flex;
   gap: 10px;
+  flex-shrink: 0; 
 }
 
 .message-input {

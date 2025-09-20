@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { io } from "socket.io-client";
 import "../styles/messages.css";
@@ -14,6 +14,19 @@ const Messages = () => {
   const [partnerInfo, setPartnerInfo] = useState(null);
   const token = localStorage.getItem("token");
   const API_BASE = import.meta.env.VITE_API_URL;
+
+  const messageHistoryRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (messageHistoryRef.current) {
+      messageHistoryRef.current.scrollTop =
+        messageHistoryRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, selectedConversation]);
 
   useEffect(() => {
     if (!user) return;
@@ -97,7 +110,7 @@ const Messages = () => {
 
     const msg = {
       conversationId: selectedConversation.id,
-      senderId: user.id,  
+      senderId: user.id,
       sender_id: user.id,
       content: newMessage,
       created_at: new Date(),
@@ -142,7 +155,7 @@ const Messages = () => {
               <h3 className="chat-header">
                 Chat with {partnerInfo?.user?.name || "Loading..."}
               </h3>
-              <div className="message-history">
+              <div className="message-history" ref={messageHistoryRef}>
                 {messages.length === 0 && (
                   <div className="no-messages">No messages yet</div>
                 )}
@@ -171,7 +184,9 @@ const Messages = () => {
                   placeholder="Type a message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && handleSendMessage()
+                  }
                 />
                 <button className="send-button" onClick={handleSendMessage}>
                   Send

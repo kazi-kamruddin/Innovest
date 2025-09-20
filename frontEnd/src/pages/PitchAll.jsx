@@ -3,15 +3,15 @@ import { Link } from "react-router-dom";
 import "../styles/pitch-all.css";
 import AnimatedHeaderText from "./AnimatedHeaderText";
 import { FaIndustry, FaMapMarkerAlt, FaLayerGroup } from 'react-icons/fa';
+import { useAuthContext } from "../hooks/useAuthContext"; 
 
 const PitchAll = () => {
+  const { user } = useAuthContext(); 
   const [pitches, setPitches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [industryFilter, setIndustryFilter] = useState("");
   const [stageFilter, setStageFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
-
   const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -21,7 +21,8 @@ const PitchAll = () => {
           `${API_BASE}/pitches?industry=${industryFilter}&stage=${stageFilter}&country=${countryFilter}`
         );
         const data = await response.json();
-        setPitches(data);
+        const filtered = data.filter(pitch => pitch.user_id !== user?.id);
+        setPitches(filtered);
       } catch (error) {
         console.error("Error fetching pitches:", error);
         setPitches([]);
@@ -29,7 +30,7 @@ const PitchAll = () => {
     };
 
     fetchFilteredPitches();
-  }, [industryFilter, stageFilter, countryFilter]);
+  }, [industryFilter, stageFilter, countryFilter, API_BASE, user?.id]);
 
   const filteredPitches = Array.isArray(pitches)
     ? pitches.filter((pitch) =>
@@ -108,7 +109,7 @@ const PitchAll = () => {
             <div className="pitch-card" key={pitch.id}>
               <div className="card-header">
                 {pitch ? <AnimatedHeaderText pitch={pitch} /> : "Loading..."}
-             </div>
+              </div>
               <div className="card-body">
                 <h3>{pitch.title}</h3>
                 <p className="location">📍 {pitch.company_location}, {pitch.country}</p>
