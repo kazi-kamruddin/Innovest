@@ -15,6 +15,8 @@ import ProfileOthers from "./pages/ProfileOthers";
 import ProfileInvestorInfo from "./pages/ProfileInvestorInfo.jsx";
 
 import Help from "./pages/Help.jsx";
+import Privacy from "./pages/Privacy.jsx";
+import Terms from "./pages/Terms.jsx";
 
 import FundDash from "./pages/FundDash";
 import FundDashCreatePitch from "./pages/FundDashCreatePitch";
@@ -52,6 +54,8 @@ function App() {
         <Routes >
           <Route path="/" element={<LandingPage />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/messages" element={<Messages />} /> 
 

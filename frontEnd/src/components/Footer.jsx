@@ -1,7 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
+import { FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa"; 
 import "../styles/footer.css";
 import '../pages/AboutUs.jsx';
+import '../pages/Help.jsx';
 
 function Footer() {
   return (
@@ -9,35 +11,35 @@ function Footer() {
       <div className="footer-container">
         <div className="footer-section">
           <h3>Innovest</h3>
-          <p>Copyright © 2025 Innovest<br />All rights reserved</p>
-          {/* <div className="social-icons">
-            <img src="src/images/footer.jpeg" alt="Facebook" />
-            <img src="src/images/footer2.jpeg" alt="Instagram" />
-            <img src="src/images/footer3.jpeg" alt="Twitter" />
-          </div> */}
+          <p>Copyright©2025 All rights reserved.</p>
         </div>
+
         <div className="footer-section">
           <h3>Company</h3>
           <ul>
             <li><Link to="/about-us">About us</Link></li> 
-            <li><a href="#">Blog</a></li>
-            <li><a href="#">Contact us</a></li>
+            <li><Link to="/privacy">Privacy policy</Link></li>  
           </ul>
         </div>
+
         <div className="footer-section">
           <h3>Support</h3>
           <ul>
             <li><Link to="/help" >Help Center</Link></li>  
-            <li><a href="#">Terms of service</a></li>
-            <li><a href="#">Privacy policy</a></li>    
+            <li><Link to="/terms">Terms of service</Link></li>
           </ul>
         </div>
+
         <div className="footer-section">
-          <h3>Stay up to date</h3>
-          <form className="newsletter">
-            <input type="email" placeholder="Your email address" />
-            <button type="submit">→</button>
-          </form>
+          <h3>Our Contact</h3>
+          <p className="contact-line">
+            <FaMapMarkerAlt className="footer-icon" />
+            383/1 Modhubag, Nayatola Police Fari, Tejgaon, Dhaka
+          </p>
+          <p className="contact-line">
+            <FaPhoneAlt className="footer-icon" />
+            +880-1537-477400
+          </p>
         </div>
       </div>
     </footer>
