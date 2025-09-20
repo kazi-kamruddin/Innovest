@@ -27,7 +27,7 @@ function Footer() {
         <div className="footer-section">
           <h3>Support</h3>
           <ul>
-            <li><a href="#">Help center</a></li>
+            <li><Link to="/help" >Help Center</Link></li>  
             <li><a href="#">Terms of service</a></li>
             <li><a href="#">Privacy policy</a></li>    
           </ul>

@@ -14,6 +14,8 @@ import ProfileEdit from "./pages/ProfileEdit.jsx";
 import ProfileOthers from "./pages/ProfileOthers";
 import ProfileInvestorInfo from "./pages/ProfileInvestorInfo.jsx";
 
+import Help from "./pages/Help.jsx";
+
 import FundDash from "./pages/FundDash";
 import FundDashCreatePitch from "./pages/FundDashCreatePitch";
 import InvestorList from "./pages/investorList.jsx";
@@ -49,6 +51,7 @@ function App() {
       <div className="main-section">
         <Routes >
           <Route path="/" element={<LandingPage />} />
+          <Route path="/help" element={<Help />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/messages" element={<Messages />} /> 
 
