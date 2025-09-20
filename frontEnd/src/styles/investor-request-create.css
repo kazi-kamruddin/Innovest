@@ -1,0 +1,138 @@
+/* Strictly scoped to this page by prefixing with .irc-create */
+.irc-create {
+  --c-bg: #f6f7f8;
+  --c-surface: #ffffff;
+  --c-surface-2: #fbfdff;
+  --c-text: #1f2937;
+  --c-muted: #6b7280;
+  --c-border: #cbd5e1;        /* visible border */
+  --c-border-soft: #e5e7eb;
+  --c-primary: #1173d4;
+  --c-primary-600: #0f64b6;
+  --c-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.08);
+
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  color: var(--c-text);
+}
+.irc-create * { box-sizing: border-box; }
+
+/* Header */
+.irc-create .irc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.irc-create .irc-title { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.irc-create .irc-sub   { margin: 6px 0 0; color: var(--c-muted); font-size: 14px; }
+.irc-create .irc-actions { display: flex; gap: 10px; }
+
+/* Card wrapper */
+.irc-create .irc-card {
+  background: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  border-radius: 16px;
+  box-shadow: var(--c-shadow);
+  padding: 16px;
+  width: 100%;
+}
+
+/* Groups */
+.irc-create .irc-group {
+  border: 1.5px solid var(--c-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 16px;
+  background: var(--c-surface-2);
+}
+.irc-create .irc-group > legend {
+  font-weight: 800; font-size: 14px; padding: 0 8px; color: var(--c-text);
+  text-align: left; margin-left: 4px;
+}
+
+/* Grid */
+.irc-create .irc-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.irc-create .irc-col,
+.irc-create .irc-col-full {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.irc-create .irc-col-full { grid-column: 1 / -1; }
+
+/* Inputs & labels */
+.irc-create .form-label { font-weight: 700; font-size: 13px; color: var(--c-text); text-align: left; }
+.irc-create .form-control,
+.irc-create select.form-control,
+.irc-create textarea.form-control {
+  background: #fff;
+  border: 1.5px solid var(--c-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--c-text);
+  width: 100%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+}
+.irc-create .form-control:focus,
+.irc-create select.form-control:focus,
+.irc-create textarea.form-control:focus {
+  border-color: var(--c-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(17,115,212,.15);
+}
+.irc-create textarea.form-control { resize: vertical; min-height: 110px; }
+
+/* Submit */
+.irc-create .irc-submit { margin-top: 16px; }
+
+/* Buttons (scoped) */
+.irc-create .btn {
+  --_bg: #fff; --_bd: var(--c-border); --_tx: var(--c-text);
+  --_bg-h: #f3f6fa; --_bd-h: var(--c-border); --_tx-h: var(--c-text);
+  appearance: none; border: 1.5px solid var(--_bd);
+  background: var(--_bg); color: var(--_tx);
+  padding: 10px 12px; border-radius: 10px;
+  font-weight: 800; cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .05s ease;
+}
+.irc-create .btn:hover { background: var(--_bg-h); border-color: var(--_bd-h); color: var(--_tx-h); }
+.irc-create .btn:active { transform: translateY(1px); }
+.irc-create .btn-primary {
+  --_bg: var(--c-primary); --_bd: var(--c-primary); --_tx: #fff;
+  --_bg-h: var(--c-primary-600); --_bd-h: var(--c-primary-600);
+}
+.irc-create .btn-ghost {
+  --_bg: transparent; --_bd: var(--c-border); --_tx: var(--c-text);
+  --_bg-h: rgba(17,115,212,.08); --_bd-h: var(--c-primary); --_tx-h: var(--c-primary);
+}
+
+/* Modal (scoped via ancestor) */
+.irc-create .modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.45);
+  display: grid; place-items: center;
+}
+.irc-create .modal-content {
+  width: min(520px, 92vw);
+  background: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  border-radius: 16px;
+  box-shadow: var(--c-shadow);
+  padding: 18px;
+}
+.irc-create .modal-body { color: var(--c-muted); margin: 6px 0 14px; }
+.irc-create .modal-buttons {
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.irc-create .confirm-btn {
+  background: var(--c-primary); color: #fff; border: 1.5px solid var(--c-primary);
+  padding: 10px 12px; border-radius: 10px; font-weight: 800; cursor: pointer;
+}
+.irc-create .confirm-btn:hover { background: var(--c-primary-600); border-color: var(--c-primary-600); }
+.irc-create .cancel-btn {
+  background: transparent; color: var(--c-text); border: 1.5px solid var(--c-border);
+  padding: 10px 12px; border-radius: 10px; font-weight: 800; cursor: pointer;
+}
+.irc-create .cancel-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }

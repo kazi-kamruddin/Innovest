@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,6 +12,11 @@ const MyClosedRequests = () => {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // UI enhancements (non-breaking)
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("recent"); // recent | oldest | rangeAsc | rangeDesc
 
   const [showModal, setShowModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -32,12 +37,14 @@ const MyClosedRequests = () => {
 
         if (res.ok) {
           const data = await res.json();
-          setRequests(data);
+          setRequests(Array.isArray(data) ? data : []);
         } else {
           console.error("Failed to fetch closed requests. Status:", res.status);
+          toast.error("Couldn't load your closed requests.");
         }
       } catch (error) {
         console.error("Error fetching closed requests:", error);
+        toast.error("Network error while loading closed requests.");
       } finally {
         setLoading(false);
       }
@@ -65,7 +72,7 @@ const MyClosedRequests = () => {
       if (!res.ok) throw new Error("Failed to reopen");
 
       toast.success("Request reopened!");
-      setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id)); 
+      setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
     } catch (error) {
       console.error("Error reopening request:", error);
       toast.error("Could not reopen request");
@@ -75,57 +82,212 @@ const MyClosedRequests = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading closed requests...</div>;
-  }
+  // Helpers
+  const fmtMoney = (v) =>
+    typeof v === "number"
+      ? v.toLocaleString(undefined, {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        })
+      : v;
+
+  const categories = useMemo(() => {
+    const set = new Set(requests.map((r) => r.category).filter(Boolean));
+    return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  }, [requests]);
+
+  const visible = useMemo(() => {
+    let out = [...requests];
+
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      out = out.filter(
+        (r) =>
+          r.title?.toLowerCase().includes(q) ||
+          r.description?.toLowerCase().includes(q) ||
+          r.category?.toLowerCase().includes(q)
+      );
+    }
+
+    if (category !== "all") {
+      out = out.filter((r) => r.category === category);
+    }
+
+    out.sort((a, b) => {
+      // Prefer closedAt for sorting if your API returns it; fallback to createdAt or id.
+      const aTime = new Date(a.closedAt || a.updatedAt || a.createdAt || a.id);
+      const bTime = new Date(b.closedAt || b.updatedAt || b.createdAt || b.id);
+
+      if (sortBy === "recent") return bTime - aTime;
+      if (sortBy === "oldest") return aTime - bTime;
+
+      const aRange = (a.maxInvestment ?? 0) - (a.minInvestment ?? 0);
+      const bRange = (b.maxInvestment ?? 0) - (b.minInvestment ?? 0);
+      if (sortBy === "rangeAsc") return aRange - bRange;
+      if (sortBy === "rangeDesc") return bRange - aRange;
+
+      return 0;
+    });
+
+    return out;
+  }, [requests, query, category, sortBy]);
 
   return (
-    <div className="my-closed-requests">
-      <h2>My Closed Requests</h2>
+    <div className="my-closed-requests irc">
+      <div className="irc-header">
+        <div>
+          <h2 className="irc-title">My Closed Requests</h2>
+          <p className="irc-sub">Review your closed investment requests and reopen if needed.</p>
+        </div>
 
-      {requests.length > 0 ? (
-        requests.map((r) => (
-          <div key={r.id} className="closed-request-card">
-            <p><strong>Title:</strong> {r.title}</p>
-            <p><strong>Description:</strong> {r.description}</p>
-            <p><strong>Category:</strong> {r.category}</p>
-            <p>
-              <strong>Investment Range:</strong> ${r.minInvestment} - ${r.maxInvestment}
-            </p>
-            <p><strong>Status:</strong> {r.status}</p>
+        <div className="irc-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate("/investor-request")}
+          >
+            Back to All Requests
+          </button>
+        </div>
+      </div>
 
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                setSelectedRequest(r);
-                setShowModal(true);
-              }}
-            >
-              Reopen
-            </button>
-          </div>
-        ))
+      {/* Toolbar: search / category / sort */}
+      <div className="irc-toolbar">
+        <div className="irc-search">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by title, description, or category…"
+            aria-label="Search closed requests"
+          />
+          <span className="irc-search-icon" aria-hidden>🔎</span>
+        </div>
+
+        <div className="irc-filter-row">
+          <select
+            className="irc-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            aria-label="Filter by category"
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c === "all" ? "All categories" : c}
+              </option>
+            ))}
+          </select>
+
+          <select
+            className="irc-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort"
+          >
+            <option value="recent">Recently Closed</option>
+            <option value="oldest">Oldest</option>
+            <option value="rangeAsc">Investment Range ↑</option>
+            <option value="rangeDesc">Investment Range ↓</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <div className="irc-grid">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="irc-card irc-skeleton">
+              <div className="irc-skel-line w-2/3" />
+              <div className="irc-skel-line" />
+              <div className="irc-skel-line w-1/2" />
+              <div className="irc-skel-line w-1/3" />
+            </div>
+          ))}
+        </div>
+      ) : requests.length > 0 ? (
+        <div className="irc-grid">
+          {visible.map((r) => (
+            <div key={r.id} className="irc-card">
+              <div className="irc-card-top">
+                <div className="irc-chip irc-chip--category" title="Category">
+                  {r.category || "Uncategorized"}
+                </div>
+                <div className="irc-chip irc-chip--closed">Closed</div>
+              </div>
+
+              <h4 className="irc-card-title" title={r.title}>{r.title}</h4>
+              <p className="irc-card-desc">{r.description}</p>
+
+              <div className="irc-meta">
+                <div className="irc-meta-row">
+                  <span className="irc-label">Investment Range</span>
+                  <span className="irc-value">
+                    {fmtMoney(r.minInvestment)} – {fmtMoney(r.maxInvestment)}
+                  </span>
+                </div>
+                <div className="irc-meta-row">
+                  <span className="irc-label">Status</span>
+                  <span className="irc-value">{r.status || "Closed"}</span>
+                </div>
+                {(r.closedAt || r.updatedAt || r.createdAt) && (
+                  <div className="irc-meta-row">
+                    <span className="irc-label">Closed</span>
+                    <span className="irc-value">
+                      {new Date(r.closedAt || r.updatedAt || r.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="irc-actions">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setSelectedRequest(r);
+                    setShowModal(true);
+                  }}
+                >
+                  Reopen
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
-        <p>You have no closed requests.</p>
+        <div className="irc-empty">
+          <div className="irc-empty-emoji" aria-hidden>🗂️</div>
+          <h4>You have no closed requests.</h4>
+          <p>Once you close a request, it will show up here.</p>
+          <button className="btn btn-secondary" onClick={() => navigate("/investor-request")}>
+            Back to All Requests
+          </button>
+        </div>
       )}
 
-      <button className="btn btn-secondary" onClick={() => navigate("/investor-request")}>
-        Back to All Requests
-      </button>
-
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal (same behavior, styled) */}
       {showModal && selectedRequest && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h5>
-              Are you sure you want to reopen request "{selectedRequest.title}"?
+        <div
+          className="irc-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="irc-modal-title"
+        >
+          <div
+            className="irc-modal__backdrop"
+            onClick={() => setShowModal(false)}
+          />
+          <div className="irc-modal__content">
+            <h5 id="irc-modal-title" className="irc-modal__title">
+              Reopen this request?
             </h5>
-            <div className="modal-buttons">
-              <button className="confirm-btn" onClick={handleReopen}>
+            <p className="irc-modal__body">
+              Are you sure you want to reopen <strong>"{selectedRequest.title}"</strong>?
+            </p>
+            <div className="irc-modal__actions">
+              <button className="btn btn-primary" onClick={handleReopen}>
                 Yes, Reopen
               </button>
               <button
-                className="cancel-btn"
+                className="btn btn-ghost"
                 onClick={() => setShowModal(false)}
               >
                 No, Cancel

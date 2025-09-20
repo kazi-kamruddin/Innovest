@@ -1,78 +1,166 @@
+/* Scoped styles for CreatePitchInResponse page (only under .cpr) */
+.cpr {
+  --c-bg: #f6f7f8;
+  --c-surface: #ffffff;
+  --c-surface-2: #fbfdff;
+  --c-text: #1f2937;
+  --c-muted: #6b7280;
 
-.investment-pitches .form-control {
-  border-radius: 5px !important;
-  padding: 10px !important;
+  /* Stronger borders for visibility */
+  --c-border: #cbd5e1;        /* slate-300 */
+  --c-border-soft: #e5e7eb;   /* gray-200 */
+
+  --c-primary: #1173d4;
+  --c-primary-600: #0f64b6;
+
+  --c-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.08);
+
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  color: var(--c-text);
+  background: transparent;
 }
 
-.investment-pitches .btn {
-  background-color: #007bff !important;
-  color: white !important;
+.cpr * { box-sizing: border-box; }
+
+/* Header */
+.cpr .cpr-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 14px;
 }
-
-.investment-pitches .row {
-  margin-right: 0 !important;
-  margin-left: 0 !important;
+.cpr .cpr-title { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.cpr .cpr-sub { margin: 6px 0 0; color: var(--c-muted); font-size: 14px; }
+.cpr .cpr-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  background: rgba(17,115,212,.10); color: var(--c-primary); font-weight: 700; font-size: 12px;
 }
+.cpr .cpr-actions { display: flex; gap: 10px; }
 
-.investment-pitches .col-md-4 {
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
-
-.investment-pitches .mb-3 {
-  margin-bottom: 10px !important;
-}
-
-.investment-pitches .btn-primary {
-  background-color: #007bff !important;
-  border-color: #007bff !important;
-  border-radius: 5px !important;
-}
-
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Form container card — stronger border */
+.cpr .card {
+  background: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  border-radius: 16px;
+  box-shadow: var(--c-shadow);
+  padding: 16px;
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
 }
 
-.modal-content {
-  background: white;
-  padding: 20px 30px;
+.cpr .cpr-col,
+.cpr .cpr-col-full {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;  /* slightly more space than before */
+}
+/* Section groups — visible outline + soft inner bg */
+.cpr .cpr-group {
+  border: 1.5px solid var(--c-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 16px;
+  background: var(--c-surface-2);
+  position: relative;
+}
+.cpr .cpr-group > legend {
+  font-weight: 800;
+  font-size: 14px;
+  padding: 0 8px;
+  color: var(--c-text);
+
+  /* Align to the left instead of centered */
+  text-align: left;
+  margin-left: 4px;
+}
+
+/* Add a subtle corner accent to groups */
+.cpr .cpr-group::before {
+  content: "";
+  position: absolute; inset: 8px 8px auto auto;
+  width: 22px; height: 8px;
+  border-top: 2px solid var(--c-border);
+  border-right: 2px solid var(--c-border);
+  border-top-right-radius: 8px;
+  opacity: .7;
+}
+
+/* Responsive grid: auto-fit so fields don’t shrink */
+.cpr .cpr-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.cpr .cpr-col,
+.cpr .cpr-col-full {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.cpr .cpr-col-full { grid-column: 1 / -1; }
+
+/* Labels + Inputs — stronger borders for clarity */
+.cpr .form-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--c-text);
+
+  /* Push label left, with spacing below */
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.cpr .form-control,
+.cpr select.form-control,
+.cpr textarea.form-control {
+  background: #fff;
+  border: 1.5px solid var(--c-border);  /* stronger */
   border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 12px;
+  color: var(--c-text);
+  width: 100%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
 }
 
-.modal-buttons {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
+.cpr .form-control::placeholder,
+.cpr textarea.form-control::placeholder {
+  color: #9aa3b2;  /* slightly darker placeholder for contrast */
 }
 
-.confirm-btn,
-.cancel-btn {
-  padding: 8px 16px;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.cpr .form-control:focus,
+.cpr select.form-control:focus,
+.cpr textarea.form-control:focus {
+  border-color: var(--c-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(17,115,212,.15);
 }
 
-.confirm-btn {
-  background-color: #e63946;
-  color: white;
+.cpr textarea.form-control { resize: vertical; min-height: 96px; }
+
+.cpr .cpr-hint {
+  margin-top: 4px; color: var(--c-muted); font-size: 12px;
 }
 
-.cancel-btn {
-  background-color: #6c757d;
-  color: white;
+/* Divider between groups if needed */
+.cpr .cpr-group + .cpr-group { margin-top: 20px; }
+
+/* Submit row */
+.cpr .cpr-submit { margin-top: 16px; }
+
+/* Buttons (scoped; won’t affect global .btn) */
+.cpr .btn {
+  --_bg: #fff; --_bd: var(--c-border); --_tx: var(--c-text);
+  --_bg-h: #f3f6fa; --_bd-h: var(--c-border); --_tx-h: var(--c-text);
+  appearance: none; border: 1.5px solid var(--_bd);
+  background: var(--_bg); color: var(--_tx);
+  padding: 10px 12px; border-radius: 10px;
+  font-weight: 800; cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .05s ease;
+}
+.cpr .btn:hover { background: var(--_bg-h); border-color: var(--_bd-h); color: var(--_tx-h); }
+.cpr .btn:active { transform: translateY(1px); }
+.cpr .btn-primary {
+  --_bg: var(--c-primary); --_bd: var(--c-primary); --_tx: #fff;
+  --_bg-h: var(--c-primary-600); --_bd-h: var(--c-primary-600);
+}
+.cpr .btn-ghost {
+  --_bg: transparent; --_bd: var(--c-border); --_tx: var(--c-text);
+  --_bg-h: rgba(17,115,212,.08); --_bd-h: var(--c-primary); --_tx-h: var(--c-primary);
 }
