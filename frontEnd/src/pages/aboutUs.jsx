@@ -8,10 +8,10 @@ import kazi from '../assets/kazi.jpg';
 
 export default function AboutUs() {
   const [teamMembers, setTeamMembers] = useState([
-    { name: 'Kazi Kamruddin', position: 'Chief Executive Officer', image: kazi },
-    { name: 'Sadik Rahman', position: 'Legal Advisor', image: sadik },
-    { name: 'Sumit Majumder', position: 'Adoption Counselor', image: sumit },
-    { name: 'Abdullah Ishtiaq', position: 'Marketing Manager', image: sakib },
+    { name: 'Kazi Kamruddin Ahmed', position: 'Project Leader', image: kazi },
+    { name: 'Sadik Rahman', position: 'FrontEnd + BackEnd', image: sadik },
+    { name: 'Sumit Majumder', position: 'FrontEnd + BackEnd', image: sumit },
+    { name: 'Abdullah Ishtiaq', position: 'FrontEnd', image: sakib },
   ]);
 
   console.log("\n\n\nAbout Us Page");
@@ -25,6 +25,7 @@ export default function AboutUs() {
             <img src={member.image} alt={`${member.name}'s portrait`} className="about-us-card-image" />
             <figcaption className="about-us-overlay-text">
               <h3 className="about-us-team-name">{member.name}</h3>
+              <h6 className="g">{member.position}</h6>
             </figcaption>
           </figure>
         ))}

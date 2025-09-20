@@ -3,7 +3,6 @@
     background-color: #f4f4f4;
 }
 
-/* Flex container for title & text */
 .about-us-section-container {
     display: flex;
     align-items: center;
@@ -13,7 +12,6 @@
     margin: 30px auto 30px;
 }
 
-/* Title and Text Styling */
 .about-us-section-title {
     flex: 0.20;
     font-size: 2rem;
@@ -43,7 +41,6 @@
     border-radius: 8px;
 }
 
-/* Responsive layout for smaller screens */
 @media screen and (max-width: 768px) {
     .about-us-section-container {
         flex-direction: column;
@@ -78,7 +75,6 @@
 }
 
 
-/* Team Member Gallery */
 .about-us-gallery {
     display: flex;
     justify-content: center;
@@ -115,7 +111,6 @@
     transform: scale(1.05);
 }
 
-/* Overlay text on hover */
 .about-us-overlay-text {
     position: absolute;
     bottom: 15px;

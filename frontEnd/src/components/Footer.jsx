@@ -9,7 +9,7 @@ function Footer() {
       <div className="footer-container">
         <div className="footer-section">
           <h3>Innovest</h3>
-          <p>Copyright © 2020 Landify UI Kit.<br />All rights reserved</p>
+          <p>Copyright © 2025 Innovest<br />All rights reserved</p>
           {/* <div className="social-icons">
             <img src="src/images/footer.jpeg" alt="Facebook" />
             <img src="src/images/footer2.jpeg" alt="Instagram" />

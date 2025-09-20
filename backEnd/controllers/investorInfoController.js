@@ -15,18 +15,15 @@ const storeInvestorInfo = async (req, res) => {
       return res.status(400).json({ error: "user_id is required" });
     }
 
-    // Check if user exists
     const [userRows] = await db.execute("SELECT id FROM users WHERE id = ?", [user_id]);
     if (userRows.length === 0) {
       return res.status(400).json({ error: "User does not exist" });
     }
 
-    // Ensure logged-in user matches
     if (req.user.id !== user_id) {
       return res.status(403).json({ error: "Unauthorized: user ID mismatch" });
     }
 
-    // Check if investor info already exists
     const [existing] = await db.execute(
       "SELECT id FROM investor_info WHERE user_id = ?",
       [user_id]
@@ -72,7 +69,7 @@ const storeInvestorInfo = async (req, res) => {
   }
 };
 
-// GET /investor-info/:userId  (private: logged-in user only)
+// GET /investor-info/:userId
 const getInvestorInfo = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -98,7 +95,7 @@ const getInvestorInfo = async (req, res) => {
   }
 };
 
-// GET /investor-info-public/:userId  (public: anyone can view)
+// GET /investor-info-public/:userId
 const getInvestorInfoPublic = async (req, res) => {
   try {
     const { userId } = req.params;

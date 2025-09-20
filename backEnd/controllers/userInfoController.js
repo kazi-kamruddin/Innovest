@@ -46,7 +46,6 @@ const storeUserInfo = async (req, res) => {
 
     const { location, areas_of_interest, about } = req.body;
 
-    // Check if user exists in `users` table
     const [userCheck] = await db.execute(
       "SELECT id FROM users WHERE id = ?",
       [userId]
@@ -55,14 +54,12 @@ const storeUserInfo = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if profile already exists in `user_info`
     const [profileCheck] = await db.execute(
       "SELECT id FROM user_info WHERE user_id = ?",
       [userId]
     );
 
     if (profileCheck.length > 0) {
-      // Update existing profile
       await db.execute(
         `UPDATE user_info
          SET location = ?, areas_of_interest = ?, about = ?
@@ -75,7 +72,6 @@ const storeUserInfo = async (req, res) => {
         ]
       );
     } else {
-      // Insert new profile
       await db.execute(
         `INSERT INTO user_info (user_id, location, areas_of_interest, about)
          VALUES (?, ?, ?, ?)`,

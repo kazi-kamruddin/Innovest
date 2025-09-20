@@ -1,4 +1,4 @@
-const pool = require("../config/database"); // mysql2 pool connection
+const pool = require("../config/database"); 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const validator = require("validator");

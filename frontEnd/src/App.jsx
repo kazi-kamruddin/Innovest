@@ -16,7 +16,7 @@ import ProfileInvestorInfo from "./pages/ProfileInvestorInfo.jsx";
 
 import FundDash from "./pages/FundDash";
 import FundDashCreatePitch from "./pages/FundDashCreatePitch";
-import InvestorList from "./pages/InvestorList.jsx";
+import InvestorList from "./pages/investorList.jsx";
 import FundDashEditPitch from "./pages/FundDashEditPitch.jsx";
 
 import PitchAll from "./pages/PitchAll";

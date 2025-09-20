@@ -206,7 +206,7 @@ const Messages = () => {
               <p>Email: {partnerInfo.user.email}</p>
             </>
           ) : (
-            <p>Loading user info...</p>
+            <p>User Info will be shown here</p>
           )}
         </div>
       </div>

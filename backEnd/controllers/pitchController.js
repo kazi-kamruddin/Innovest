@@ -189,7 +189,7 @@ const createPitchInResponse = async (req, res) => {
         the_market || null,
         progress || null,
         objective || null,
-        requestId, // attach the investor request id
+        requestId, 
       ]
     );
 
