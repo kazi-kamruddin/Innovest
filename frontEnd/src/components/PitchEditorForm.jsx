@@ -42,6 +42,11 @@ export function validatePitch(data) {
 
   const total = data.total_raising_amount;
   const minimum = data.minimum_investment;
+  for (const value of [total, minimum]) {
+    if (value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0)) {
+      return "Funding amounts must be valid non-negative numbers.";
+    }
+  }
   if (
     total !== "" && minimum !== "" &&
     Number(minimum) > Number(total)

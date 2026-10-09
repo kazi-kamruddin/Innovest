@@ -13,9 +13,9 @@ export const AuthContextProvider = ({ children }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
+        const expiresAt = Number(decoded.exp) * 1000;
 
-        if (decoded.exp < currentTime) {
+        if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           dispatch({ type: "LOGOUT" });
@@ -24,6 +24,8 @@ export const AuthContextProvider = ({ children }) => {
           const user = { id, name, email };
           localStorage.setItem("user", JSON.stringify(user));
           dispatch({ type: "LOGIN", payload: user });
+        } else {
+          localStorage.removeItem("token");
         }
       } catch (error) {
         console.error("Invalid token:", error);
@@ -35,6 +37,32 @@ export const AuthContextProvider = ({ children }) => {
 
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!state.user) return;
+
+    let expiresAt;
+    try {
+      expiresAt = Number(jwtDecode(localStorage.getItem("token")).exp) * 1000;
+    } catch {
+      expiresAt = NaN;
+    }
+
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      dispatch({ type: "LOGOUT" });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      dispatch({ type: "LOGOUT" });
+    }, expiresAt - Date.now());
+
+    return () => clearTimeout(timer);
+  }, [state.user]);
 
 
   if (loading) return null;

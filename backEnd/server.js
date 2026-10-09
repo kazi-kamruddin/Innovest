@@ -63,6 +63,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+app.set("io", io);
 
 io.use((socket, next) => {
   try {
@@ -88,8 +89,13 @@ io.on("connection", (socket) => {
     try {
       const senderId = userId;
       const targetId = Number(receiverId);
-      if (!Number.isInteger(targetId) || targetId <= 0 || targetId === senderId) {
+      if (!Number.isSafeInteger(targetId) || targetId <= 0 || targetId === senderId) {
         return socket.emit("knock_error", { message: "Invalid recipient" });
+      }
+
+      const [recipients] = await db.execute("SELECT id FROM users WHERE id = ?", [targetId]);
+      if (recipients.length === 0) {
+        return socket.emit("knock_error", { message: "Recipient not found" });
       }
 
       const [existing] = await db.execute(
@@ -158,9 +164,7 @@ io.on("connection", (socket) => {
         const { user_one_id, user_two_id } = rows[0];
         const receiverId = senderId === user_one_id ? user_two_id : user_one_id;
 
-        io.to(`user:${receiverId}`).emit("receive_message", messageData);
-
-        socket.emit("receive_message", messageData);
+        io.to(`user:${senderId}`).to(`user:${receiverId}`).emit("receive_message", messageData);
 
       } catch (err) {
         console.error("Error sending message:", err);

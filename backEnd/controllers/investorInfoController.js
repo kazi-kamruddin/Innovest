@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const { parseAmountRange } = require("../utils/amounts");
 
 
 const storeInvestorInfo = async (req, res) => {
@@ -9,7 +10,7 @@ const storeInvestorInfo = async (req, res) => {
       investment_range_min,
       investment_range_max,
       preferred_industries
-    } = req.body;
+    } = req.body || {};
 
     if (!user_id) {
       return res.status(400).json({ error: "user_id is required" });
@@ -24,6 +25,11 @@ const storeInvestorInfo = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized: user ID mismatch" });
     }
 
+    const amounts = parseAmountRange(investment_range_min, investment_range_max);
+    if (!amounts) {
+      return res.status(400).json({ error: "Investment amounts must be non-negative numbers, with minimum no greater than maximum" });
+    }
+
     const [existing] = await db.execute(
       "SELECT id FROM investor_info WHERE user_id = ?",
       [user_id]
@@ -36,8 +42,8 @@ const storeInvestorInfo = async (req, res) => {
          WHERE user_id = ?`,
         [
           fields_of_interest || null,
-          investment_range_min !== undefined ? parseFloat(investment_range_min) : null,
-          investment_range_max !== undefined ? parseFloat(investment_range_max) : null,
+          amounts.min,
+          amounts.max,
           preferred_industries || null,
           user_id
         ]
@@ -50,8 +56,8 @@ const storeInvestorInfo = async (req, res) => {
         [
           user_id,
           fields_of_interest || null,
-          investment_range_min !== undefined ? parseFloat(investment_range_min) : null,
-          investment_range_max !== undefined ? parseFloat(investment_range_max) : null,
+          amounts.min,
+          amounts.max,
           preferred_industries || null
         ]
       );

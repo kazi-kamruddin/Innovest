@@ -1,11 +1,12 @@
 const db = require("../config/database");
+const { parseAmountRange } = require("../utils/amounts");
 
 // POST /investor-requests/create-new-request 
 const createInvestorRequest = async (req, res) => {
   try {
-    const { investorId, title, description, category, minInvestment, maxInvestment } = req.body;
+    const { investorId, title, description, category, minInvestment, maxInvestment } = req.body || {};
 
-    if (!investorId || !title || !description || !category) {
+    if (!investorId || ![title, description, category].every((value) => typeof value === "string" && value.trim())) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -13,9 +14,14 @@ const createInvestorRequest = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized: user ID mismatch" });
     }
 
-    const [userRows] = await db.execute("SELECT id FROM users WHERE id = ?", [investorId]);
-    if (userRows.length === 0) {
-      return res.status(400).json({ error: "User does not exist" });
+    const amounts = parseAmountRange(minInvestment, maxInvestment);
+    if (!amounts) {
+      return res.status(400).json({ error: "Investment amounts must be non-negative numbers, with minimum no greater than maximum" });
+    }
+
+    const [investorRows] = await db.execute("SELECT user_id FROM investor_info WHERE user_id = ?", [req.user.id]);
+    if (investorRows.length === 0) {
+      return res.status(403).json({ error: "Create an investor profile before posting a request" });
     }
 
     const [result] = await db.execute(
@@ -27,8 +33,8 @@ const createInvestorRequest = async (req, res) => {
         title,
         description,
         category,
-        minInvestment || null,
-        maxInvestment || null
+        amounts.min,
+        amounts.max
       ]
     );
 
@@ -48,7 +54,7 @@ const createInvestorRequest = async (req, res) => {
 const editRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category, minInvestment, maxInvestment } = req.body;
+    const { title, description, category, minInvestment, maxInvestment } = req.body || {};
 
     const [rows] = await db.execute("SELECT investorId FROM investor_requests WHERE id = ?", [id]);
     if (rows.length === 0) return res.status(404).json({ error: "Request not found" });
@@ -57,11 +63,19 @@ const editRequest = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized: You can only edit your own requests" });
     }
 
+    if (![title, description, category].every((value) => typeof value === "string" && value.trim())) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const amounts = parseAmountRange(minInvestment, maxInvestment);
+    if (!amounts) {
+      return res.status(400).json({ error: "Investment amounts must be non-negative numbers, with minimum no greater than maximum" });
+    }
+
     await db.execute(
       `UPDATE investor_requests
        SET title = ?, description = ?, category = ?, minInvestment = ?, maxInvestment = ?, updatedAt = NOW()
        WHERE id = ?`,
-      [title, description, category, minInvestment || null, maxInvestment || null, id]
+      [title, description, category, amounts.min, amounts.max, id]
     );
 
     const [updated] = await db.execute("SELECT * FROM investor_requests WHERE id = ?", [id]);

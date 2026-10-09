@@ -151,7 +151,7 @@ export default function LandingHero() {
             {/* Visual header */}
             <div className="mb-5! flex! items-center! justify-between! gap-3! px-1!">
               <span className="text-[11px]! font-bold! tracking-[0.14em]! text-[#527364]! uppercase!">
-                Discover what's possible
+                Discover what&apos;s possible
               </span>
 
               <span className="inline-flex! items-center! gap-1.5! rounded-full! bg-white/75! px-3! py-1.5! text-[11px]! font-medium! text-[#648072]!">

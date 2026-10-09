@@ -210,7 +210,7 @@ export default function InvestorList() {
         ) : error ? (
           <div className="iv-investor-state" role="alert">
             <div className="iv-investor-state-icon"><FiRefreshCw size={23} aria-hidden="true" /></div>
-            <h2>Couldn't load the directory</h2><p>{error}</p>
+            <h2>Couldn&apos;t load the directory</h2><p>{error}</p>
             <button className="iv-investor-state-button" type="button" onClick={() => setRetryKey((key) => key + 1)}><FiRefreshCw size={16} aria-hidden="true" /> Try again</button>
           </div>
         ) : visibleInvestors.length ? (

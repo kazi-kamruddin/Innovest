@@ -10,21 +10,21 @@ const createToken = (id) => {
 // Login
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
-    if (!email || !password) {
+    if (typeof email !== "string" || !email.trim() || typeof password !== "string" || !password) {
       return res.status(400).json({ error: "Email and password required" });
     }
 
     const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
     if (rows.length === 0) {
-      return res.status(400).json({ error: "Incorrect email" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const user = rows[0];
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(400).json({ error: "Incorrect password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const token = createToken(user.id);
@@ -35,25 +35,22 @@ const loginUser = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Login failed:", error);
+    res.status(500).json({ error: "Login failed" });
   }
 };
 
 // Signup
 const signUpUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
+    if (typeof name !== "string" || !name.trim() || typeof email !== "string" || !email.trim() || typeof password !== "string" || !password) {
+      return res.status(400).json({ error: "Name, email and password required" });
     }
     if (!validator.isEmail(email)) {
       return res.status(400).json({ error: "Invalid email" });
     }
-    // if (!validator.isStrongPassword(password)) {
-    //   return res.status(400).json({ error: "Weak password" });
-    // }
-
     const [exists] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
     if (exists.length > 0) {
       return res.status(400).json({ error: "Email already in use" });
@@ -75,7 +72,8 @@ const signUpUser = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Signup failed:", error);
+    res.status(500).json({ error: "Signup failed" });
   }
 };
 

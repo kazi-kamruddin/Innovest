@@ -348,7 +348,7 @@ export default function InvestorRequest() {
             <h1>Investor <em>requests.</em></h1>
             <p className="iv-ir-subtitle">
               Discover what investors are looking for, respond with your pitch,
-              or manage requests you've shared.
+              or manage requests you&apos;ve shared.
             </p>
           </div>
 
@@ -455,7 +455,7 @@ export default function InvestorRequest() {
             ) : fetchError ? (
               <div className="iv-ir-state" role="alert">
                 <span className="iv-ir-state-icon"><FiRefreshCw size={23} aria-hidden="true" /></span>
-                <h2>Requests aren't loading</h2>
+                <h2>Requests aren&apos;t loading</h2>
                 <p>{fetchError}</p>
                 <button type="button" className="iv-ir-primary-button" onClick={() => setRetryKey((key) => key + 1)}>
                   <FiRefreshCw size={16} aria-hidden="true" /> Try again

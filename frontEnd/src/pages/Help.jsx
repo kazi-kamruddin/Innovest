@@ -35,16 +35,16 @@ export default function Help() {
     <main className="iv-help">
       <div className="iv-help-container">
         <header className="iv-help-page-heading">
-          <p className="iv-help-eyebrow"><span aria-hidden="true" /> WE'RE HERE TO HELP</p>
-          <h1>Let's start a <em>conversation.</em></h1>
-          <p>Have a question about Innovest? Send us a message and we'll be glad to hear from you.</p>
+          <p className="iv-help-eyebrow"><span aria-hidden="true" /> WE&apos;RE HERE TO HELP</p>
+          <h1>Let&apos;s start a <em>conversation.</em></h1>
+          <p>Have a question about Innovest? Send us a message and we&apos;ll be glad to hear from you.</p>
         </header>
 
         <div className="iv-help-layout">
           <section className="iv-help-form-card" aria-labelledby="iv-help-form-title">
             <div className="iv-help-card-heading">
               <span className="iv-help-card-icon" aria-hidden="true"><FiMail size={21} /></span>
-              <div><h2 id="iv-help-form-title">Get in touch</h2><p>Tell us what you'd like to know.</p></div>
+              <div><h2 id="iv-help-form-title">Get in touch</h2><p>Tell us what you&apos;d like to know.</p></div>
             </div>
 
             {submitted ? (
@@ -75,7 +75,7 @@ export default function Help() {
                   <FiSend size={16} aria-hidden="true" /> {sending ? "Sending message..." : "Send message"}
                   {!sending && <FiArrowRight size={16} aria-hidden="true" />}
                 </button>
-                <p className="iv-help-form-note">Your message is sent through Innovest's existing contact form service.</p>
+                <p className="iv-help-form-note">Your message is sent through Innovest&apos;s existing contact form service.</p>
               </form>
             )}
           </section>
@@ -91,7 +91,7 @@ export default function Help() {
             <div className="iv-help-side-copy">
               <span className="iv-help-side-kicker"><FiShield size={14} aria-hidden="true" /> CONTACT INNOVEST</span>
               <h2>Every good connection starts somewhere.</h2>
-              <p>Whether you're exploring an idea or need help with the platform, use the form to share your question with the team.</p>
+              <p>Whether you&apos;re exploring an idea or need help with the platform, use the form to share your question with the team.</p>
             </div>
           </aside>
         </div>

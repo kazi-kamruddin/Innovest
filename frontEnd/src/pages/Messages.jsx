@@ -571,7 +571,7 @@ export default function Messages() {
                 <div className="iv-msg-list-feedback">
                   <FiInbox size={23} aria-hidden="true" />
                   <p>{search ? "No matching conversations." : "No conversations yet."}</p>
-                  {!search && <span>Visit a member's profile and use Knock to start a chat.</span>}
+                  {!search && <span>Visit a member&apos;s profile and use Knock to start a chat.</span>}
                   {!search && <Link to="/investor-list">Find people <FiArrowRight size={14} aria-hidden="true" /></Link>}
                 </div>
               ) : (
@@ -758,7 +758,7 @@ export default function Messages() {
                         <div className="iv-msg-interests"><h4>Interests</h4><div>{interestTags.map((tag) => <span key={tag}>{tag}</span>)}</div></div>
                       )}
                       {!partnerInfo?.location && !partnerInfo?.user?.email && !partnerInfo?.about && interestTags.length === 0 && (
-                        <p className="iv-msg-profile-loading">Visit the member's profile to learn more.</p>
+                        <p className="iv-msg-profile-loading">Visit the member&apos;s profile to learn more.</p>
                       )}
                     </>
                   )}
@@ -768,7 +768,7 @@ export default function Messages() {
               <div className="iv-msg-detail-placeholder">
                 <span><FiUser size={23} aria-hidden="true" /></span>
                 <h2>Connection details</h2>
-                <p>Select a conversation to see more about the person you're chatting with.</p>
+                <p>Select a conversation to see more about the person you&apos;re chatting with.</p>
               </div>
             )}
           </aside>

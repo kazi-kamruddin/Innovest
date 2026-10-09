@@ -220,7 +220,7 @@ export default function RegLogin() {
               </form>
 
               <p className="mb-0! mt-5! text-center! text-[12px]! text-[#77857B]!">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link to="/signup"
                   className="font-semibold! text-[#345C3D]! no-underline! hover:underline!">
                   Sign up

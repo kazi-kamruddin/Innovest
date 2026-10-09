@@ -133,7 +133,7 @@ export default function ProfileInvestorInfo() {
                 <div className="iv-profile-fields">
                   <div className="iv-profile-field">
                     <span id="iv-profile-industry-label"><FiBriefcase size={15} /> Preferred industries</span>
-                    <p className="iv-profile-field-help">Select any industries you'd like to invest in.</p>
+                    <p className="iv-profile-field-help">Select any industries you&apos;d like to invest in.</p>
                     <div role="group" aria-labelledby="iv-profile-industry-label"><InterestPicker options={industriesOptions} selected={industries} onToggle={(option) => toggle(option, setIndustries)} /></div>
                   </div>
                   <div className="iv-profile-field">

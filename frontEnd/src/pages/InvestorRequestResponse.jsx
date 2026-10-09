@@ -240,7 +240,7 @@ export default function InvestorRequestResponse() {
         <section className="iv-irf-target" aria-label="Investor request being answered">
           <div className="iv-irf-target-symbol"><FiCheckCircle size={21} aria-hidden="true" /></div>
           <div className="iv-irf-target-details">
-            <span>YOU'RE RESPONDING TO REQUEST #{requestId}</span>
+            <span>YOU&apos;RE RESPONDING TO REQUEST #{requestId}</span>
             <h2>{request.title}</h2>
             <p>{request.category || "Investment opportunity"} · {investmentRange(request)}</p>
           </div>
