@@ -1,0 +1,131 @@
+/* Scoped only to the Response Pitches page */
+.resp-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  color: #1f2937;
+}
+
+.resp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.resp-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.resp-header h2 span {
+  color: #1173d4;
+}
+
+.resp-loading {
+  text-align: center;
+  font-size: 16px;
+  color: #6b7280;
+  margin-top: 40px;
+}
+
+.resp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.resp-card {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.resp-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.resp-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.resp-card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.resp-badge {
+  background: rgba(17,115,212,0.1);
+  color: #1173d4;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.resp-desc {
+  font-size: 14px;
+  color: #374151;
+  margin: 8px 0 12px;
+}
+
+.resp-meta {
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.resp-meta p {
+  margin: 4px 0;
+}
+
+.resp-empty {
+  text-align: center;
+  font-size: 15px;
+  color: #6b7280;
+  margin-top: 40px;
+}
+
+/* Buttons (scoped styles) */
+.resp-container .btn {
+  appearance: none;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.resp-container .btn-primary {
+  background: #1173d4;
+  border-color: #1173d4;
+  color: #fff;
+}
+.resp-container .btn-primary:hover {
+  background: #0f64b6;
+  border-color: #0f64b6;
+}
+
+.resp-container .btn-secondary {
+  background: #fff;
+  color: #374151;
+}
+.resp-container .btn-secondary:hover {
+  border-color: #1173d4;
+  color: #1173d4;
+}
