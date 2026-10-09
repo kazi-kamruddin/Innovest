@@ -1,321 +1,212 @@
-import { useEffect, useRef, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
-import { Link } from "react-router-dom";
-import Typewriter from 'typewriter-effect';
-import '../styles/landing-page.css';
 
-const images = import.meta.glob('../images/*', { eager: true, query: '?url', import: 'default' });
+import { useEffect, useRef, useState } from "react";
+import { useInView } from "react-intersection-observer";
+import Typewriter from "typewriter-effect";
+
+import "../styles/landing-page.css";
+
+import LandingHero from "../components/LandingHero";
+import InvestorShowcase from "../components/InvestorShowcase";
+import HowInnovestWorks from "../components/HowInnovestWorks";
+import SectionDivider from "../components/SectionDivider";
+
+// Existing project images
+const images = import.meta.glob("../images/*", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
 const image = (name) => images[`../images/${name}`];
 
-const orangeStats = [
-  { number: '2k+', label: 'Trusted Users' },
-  { number: '1k+', label: 'Entrepreneurs Joined' },
-  { number: '500+', label: 'Community Connections' },
+// Power of Investment cards
+const powerCards = [
+  {
+    src: image("power1.jpg"),
+    alt: "Creator Communities",
+    title: "Creator Communities",
+    bubbles: [
+      "Support creators with multiple marketplaces and direct engagement with their audience.",
+      "Build brand identity with authentic interactions.",
+      "Drive monetization through loyal audiences.",
+    ],
+  },
+  {
+    src: image("power2.jpeg"),
+    alt: "Financial Institutions",
+    title: "Financial Institutions",
+    bubbles: [
+      "Technology enables secure, fast and advanced financial transactions.",
+      "AI-driven insights for risk management.",
+      "Revolutionize finance through automation.",
+    ],
+  },
+  {
+    src: image("power3.jpg"),
+    alt: "Supply Chain Management",
+    title: "Supply Chain Management",
+    bubbles: [
+      "Enhance traceability, transparency, and operational efficiency across global supply chains.",
+      "Track products in real-time from source to shelf.",
+      "Optimize logistics with smart tech.",
+    ],
+  },
 ];
-
-const purpleStats = [
-  { number: '70%', label: 'Investor Retention Rate' },
-  { number: '78%', label: 'Repeat Investment' },
-  { number: '82%', label: 'Funding Success' },
-];
-
-function AnimatedStatCard({ stats, className }) {
-  const [index, setIndex] = useState(0);
-  const [fade, setFade] = useState(true);
-  const current = stats[index];
-
-  useEffect(() => {
-    let timeout;
-    const interval = setInterval(() => {
-      setFade(false);
-      timeout = setTimeout(() => {
-        setIndex((prev) => (prev + 1) % stats.length);
-        setFade(true);
-      }, 500);
-    }, 2500);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, [stats]);
-
-  return (
-    <div className={`stat-card ${className}`}>
-      <h2>
-        <span className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
-          {current.number}
-        </span>
-      </h2>
-      <p className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
-        {current.label}
-      </p>
-    </div>
-  );
-}
 
 function LandingPage() {
-  const cardRefs = useRef([]);
   const powerImgRefs = useRef([]);
   const [typewriterKey, setTypewriterKey] = useState(0);
 
-  const { ref: powerHeaderRef, inView: powerHeaderInView } = useInView({ threshold: 0.3 });
-  const { ref: statsRef } = useInView({ threshold: 0.3, triggerOnce: false });
-  const { ref: bannerHeaderRef, inView: bannerHeaderInView } = useInView({ threshold: 0.3 });
+  // Detect when the Power of Investment heading is visible
+  const {
+    ref: powerHeaderRef,
+    inView: powerHeaderInView,
+  } = useInView({
+    threshold: 0.3,
+  });
 
+  // Preserve scroll-triggered image animations
   useEffect(() => {
-    const cards = cardRefs.current.filter(Boolean);
+    const imageElements = powerImgRefs.current.filter(Boolean);
+    const timeouts = [];
+
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          const index = cardRefs.current.indexOf(entry.target);
-          if (entry.isIntersecting) {
-            setTimeout(() => entry.target.classList.add('visible'), index * 600);
-          } else {
-            entry.target.classList.remove('visible');
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    cards.forEach(card => observer.observe(card));
-
-    return () => {
-      cards.forEach(card => observer.unobserve(card));
-    };
-  }, []);
-
-  useEffect(() => {
-    const images = powerImgRefs.current.filter(Boolean);
-    const imgObserver = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           const index = powerImgRefs.current.indexOf(entry.target);
+
           if (entry.isIntersecting) {
-            setTimeout(() => entry.target.classList.add('visible'), index * 600);
+            const timeout = setTimeout(() => {
+              entry.target.classList.add("visible");
+            }, index * 600);
+
+            timeouts.push(timeout);
           } else {
-            entry.target.classList.remove('visible');
+            entry.target.classList.remove("visible");
           }
         });
       },
-      { threshold: 0.3 }
+      {
+        threshold: 0.3,
+      }
     );
 
-    images.forEach(img => imgObserver.observe(img));
+    imageElements.forEach((img) => observer.observe(img));
 
     return () => {
-      images.forEach(img => imgObserver.unobserve(img));
+      observer.disconnect();
+      timeouts.forEach(clearTimeout);
     };
   }, []);
 
+  // Preserve heading typewriter animation
   useEffect(() => {
     if (powerHeaderInView) {
-      setTypewriterKey(prev => prev + 1);
+      setTypewriterKey((prev) => prev + 1);
     }
   }, [powerHeaderInView]);
 
   return (
     <>
-      {/* Banner */}
-      <div className="hero">
-        <div className="hero-main-content">
-          <div className="hero-left">
-            <h1 className="hero-heading" ref={bannerHeaderRef}>
-              Connecting Investors and Innovation together here in{' '}
-              <span className="highlight-word typewriter-inline">
-                {bannerHeaderInView && (
-                  <Typewriter
-                    key={typewriterKey}
-                    onInit={(typewriter) => {
-                      typewriter.typeString('Innovest').pauseFor(2000).start();
-                    }}
-                    options={{
-                      autoStart: false,
-                      loop: true,
-                      delay: 250,
-                      cursor: '',
-                    }}
-                  />
-                )}
-              </span>
-            </h1>
-            <p className="hero-subtext">
-              Where great businesses and great people meet. We bring together businesses
-              looking for investment and investors with capital, contacts and knowledge
-              to help them succeed.
-            </p>
-            <div className="hero-buttons">
-              <Link to="/fundraise-dashboard">
-                <button className="btn modern">GET STARTED NOW</button>
-              </Link>
-            </div>
+      {/* ==========================================
+          01. HERO SECTION
+      ========================================== */}
 
-            <div className="hero-stats-section">
-              <div className="hero-stats-left">
-                <img src={image('avatar.jpeg')} alt="Business" className="main-woman-img" />
-                <div className="text-overlay">
-                  <h3>What We Do</h3>
-                  <p>Link investors<br />with visionary entrepreneurs</p>
-                </div>
-              </div>
-              <div className="hero-stats-right" ref={statsRef}>
-                <AnimatedStatCard stats={orangeStats} className="orange" />
-                <AnimatedStatCard stats={purpleStats} className="purple" />
-              </div>
-            </div>
-          </div>
+      <LandingHero />
 
-          <div className="hero-right">
-            <div className="circle-wrapper">
-              <img src={image('first.png')} alt="Business" className="circle-photo" />
-              <img src={image('financial7.jpg')} alt="Square 3" className="square-photo3 top" />
-              <img src={image('financial6.jpg')} alt="Square 1" className="square-photo top-left" />
-              <img src={image('financial8.gif')} alt="Square 2" className="square-photo2 bottom-right" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <SectionDivider number="01" label="Explore" />
 
-      {/* View */}
-      <div className="slideshow-section">
-        <div className="slideshow-wrapper">
-          <h2 className="slideshow-headline">Investor and Entrepreneurs</h2>
-          <p className="slideshow-subline">
-            Empowering connections that spark innovation and drive growth.
-          </p>
-          <div className="slideshow-container">
-            {[1, 2, 3, 4, 5].map((num, index) => (
-              <img
-                key={index}
-                src={image(`financial${num}.jpg`)}
-                alt={`Slide ${num}`}
-                className="slideshow-image"
-                style={{ animationDelay: `${index * 6}s` }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* ==========================================
+          02. INVESTOR & ENTREPRENEUR SHOWCASE
+      ========================================== */}
 
-      {/* Investment Future */}
-      <div className="future">
-        <section className="blockchain-section">
-          <h1>Innovest: The Foundation of the Future</h1>
-          <p>
-            Innovest is more than just a platform—it&apos;s the foundation where groundbreaking ideas
-            transform into successful ventures.<br />
-            By bridging the gap between ambitious entrepreneurs and visionary investors, we create
-            an ecosystem where innovation thrives and opportunities flourish.
-          </p>
-          <div className="future-container">
-            {["future1.jpeg", "future2.jpeg", "future3.jpeg"].map((img, index) => (
-              <div
-                className="fade-in-card"
-                key={index}
-                ref={el => cardRefs.current[index] = el}
-                style={{ animationDelay: `${index * 0.4}s` }}
-              >
-                <div className="future-card">
-                  <div className="image-container">
-                    <img
-                      src={image(img)}
-                      alt={`Image ${index + 1}`}
-                      className="image-placeholder"
-                    />
-                  </div>
-                  <div className="description-container">
-                    <p className="description">
-                      {[
-                        "Empowering businesses to grow, expand, and thrive globally.",
-                        "A thriving network of entrepreneurs, investors, and industry leaders.",
-                        "Connecting startups with capital, mentorship, and opportunities."
-                      ][index]}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+      <InvestorShowcase />
 
-      {/* Power of Investment */}
-      <div className="power">
+      <SectionDivider number="02" label="Connect" />
+
+      {/* ==========================================
+          03. HOW INNOVEST WORKS
+      ========================================== */}
+
+      <HowInnovestWorks />
+
+      <SectionDivider number="03" label="Grow" />
+
+      {/* ==========================================
+          04. POWER OF INVESTMENT
+      ========================================== */}
+
+      <section className="power">
         <div className="power-content">
+
+          {/* Animated section heading */}
           <div className="header" ref={powerHeaderRef}>
             {powerHeaderInView && (
               <Typewriter
                 key={typewriterKey}
                 onInit={(typewriter) => {
                   typewriter
-                    .typeString('Explore the Power of Investment')
-                    .callFunction(() => {})
+                    .typeString("Explore the Power of Investment")
                     .start();
                 }}
                 options={{
                   autoStart: false,
                   loop: false,
                   delay: 50,
-                  cursor: '',
+                  cursor: "",
                 }}
               />
             )}
           </div>
-          <div className="sub-header">Who can benefit from investment?</div>
-          <div className="cards">
-            {[
-              {
-                src: image("power1.jpg"),
-                alt: "power logo 1",
-                title: "Creator Communities",
-                bubbles: [
-                  "Support creators with multiple marketplaces and direct engagement with their audience.",
-                  "Build brand identity with authentic interactions.",
-                  "Drive monetization through loyal audiences.",
-                ]
-              },
-              {
-                src: image("power2.jpeg"),
-                alt: "power logo 2",
-                title: "Financial Institutions",
-                bubbles: [
-                  "Technology enables secure, fast and advanced financial transactions.",
-                  "AI-driven insights for risk management.",
-                  "Revolutionize finance through automation.",
-                ]
-              },
-              {
-                src: image("power3.jpg"),
-                alt: "power logo 3",
-                title: "Supply Chain Management",
-                bubbles: [
-                  "Enhance traceability, transparency, and operational efficiency across global supply chains.",
-                  "Track products in real-time from source to shelf.",
-                  "Optimize logistics with smart tech.",
-                ]
-              }
-            ].map(({ src, alt, title, bubbles }, i) => (
-              <div className="card" key={i}>
-                <img
-                  src={src}
-                  alt={alt}
-                  ref={el => powerImgRefs.current[i] = el}
-                  className="power-card-img"
-                />
-                <div className="card-title">{title}</div>
-                <div className="card-text">
-                  <div className="bubble-sliderr">
-                    {bubbles.map((text, idx) => (
-                      <div className="bubble-slidee" key={idx}>{text}</div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+
+          {/* Section subtitle */}
+          <div className="sub-header">
+            Who can benefit from investment?
           </div>
+
+          {/* Investment cards */}
+          <div className="cards">
+            {powerCards.map(
+              ({ src, alt, title, bubbles }, index) => (
+                <div className="card" key={title}>
+
+                  {/* Scroll-triggered animated image */}
+                  <img
+                    src={src}
+                    alt={alt}
+                    loading="lazy"
+                    ref={(el) => {
+                      powerImgRefs.current[index] = el;
+                    }}
+                    className="power-card-img"
+                  />
+
+                  {/* Card title */}
+                  <div className="card-title">
+                    {title}
+                  </div>
+
+                  {/* Animated card descriptions */}
+                  <div className="card-text">
+                    <div className="bubble-sliderr">
+                      {bubbles.map((text, bubbleIndex) => (
+                        <div
+                          className="bubble-slidee"
+                          key={bubbleIndex}
+                        >
+                          {text}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )
+            )}
+          </div>
+
         </div>
-      </div>
+      </section>
     </>
   );
 }

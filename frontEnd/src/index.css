@@ -1,0 +1,30 @@
+
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+
+/* Smooth authentication page transition */
+
+@keyframes authPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-page-enter {
+  animation: authPageEnter 1000ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page-enter {
+    animation: none;
+  }
+}

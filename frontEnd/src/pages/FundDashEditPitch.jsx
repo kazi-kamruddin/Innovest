@@ -1,257 +1,228 @@
-import { useState, useEffect } from "react";
-import { useAuthContext } from "../hooks/useAuthContext";
-import { useParams,useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FiCheckCircle } from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../styles/fund-dash-create-pitch.css";
+import { useAuthContext } from "../hooks/useAuthContext";
 
-const FundDashEditPitch = () => {
+import PitchEditorForm, {
+  EMPTY_PITCH,
+  normalizePitch,
+  PitchEditorStatus,
+  validatePitch,
+} from "../components/PitchEditorForm";
+
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+
+export default function FundDashEditPitch() {
   const { id } = useParams();
-  const { user } = useAuthContext();
   const navigate = useNavigate();
+  const { user } = useAuthContext();
 
-  const API_BASE = import.meta.env.VITE_API_URL;
-
-  const [formData, setFormData] = useState({
-    title: "",
-    company_location: "",
-    country: "",
-    cell_number: "",
-    industry: "",
-    stage: "",
-    ideal_investor_role: "",
-    total_raising_amount: "",
-    minimum_investment: "",
-    the_business: "",
-    the_market: "",
-    progress: "",
-    objective: "",
-  });
-
+  const [formData, setFormData] = useState({ ...EMPTY_PITCH });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
-
-  const industryOptions = [
-    "Technology", "Healthcare", "Finance", "Real Estate", "Education", "Food & Beverage", "Other"
-  ];
-  const stageOptions = [
-    "Idea", "Prototype", "Early Revenue", "Scaling", "Profitable"
-  ];
-  const investorRoleOptions = [
-    "Silent Investor", "Active Partner", "Advisor", "Board Member"
-  ];
-  const countryOptions = [
-    "Afghanistan",
-    "Bangladesh",
-    "Bhutan",
-    "India",
-    "Maldives",
-    "Nepal",
-    "Pakistan",
-    "Sri Lanka"
-  ];
+  const [submitting, setSubmitting] = useState(false);
+  const cancelRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/pitches/${id}`)
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to fetch pitch data");
-        return response.json();
-      })
-      .then((data) => {
-        setFormData({
-          title: data.title || "",
-          company_location: data.company_location || "",
-          country: data.country || "",
-          cell_number: data.cell_number || "",
-          industry: data.industry || "",
-          stage: data.stage || "",
-          ideal_investor_role: data.ideal_investor_role || "",
-          total_raising_amount: data.total_raising_amount || "",
-          minimum_investment: data.minimum_investment || "",
-          the_business: data.the_business || "",
-          the_market: data.the_market || "",
-          progress: data.progress || "",
-          objective: data.objective || "",
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching pitch:", error);
-        toast.error("Failed to load pitch details.");
-      });
-  }, [id, API_BASE]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setShowModal(true); 
-  };
-
-  const confirmUpdate = () => {
-    setShowModal(false);
-
-    const token = localStorage.getItem("token");
-    const userId = user.id;
-
-    if (!token || !userId) {
-        toast.error("You are not authorized. Please log in again.");
-        return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
     }
 
+    const controller = new AbortController();
 
-    fetch(`${API_BASE}/pitches/users/${userId}/pitches/${id}`, {
-        method: "PUT",
-        headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-    })
-        .then((res) => {
-        if (!res.ok) {
-            return res.json().then((err) => {
-            throw new Error(err?.error || "Failed to update pitch");
-            });
+    async function loadPitch() {
+      setLoading(true);
+      setLoadError("");
+
+      try {
+        if (!API_BASE) throw new Error("The API URL is not configured.");
+
+        const response = await fetch(
+          `${API_BASE}/pitches/${encodeURIComponent(id)}`,
+          { signal: controller.signal }
+        );
+
+        if (response.status === 404) throw new Error("This pitch could not be found.");
+        if (!response.ok) throw new Error("Failed to load the pitch details.");
+
+        const data = await response.json();
+
+        if (!data || typeof data !== "object" || Array.isArray(data)) {
+          throw new Error("Unexpected API response.");
         }
-        return res.json();
-        })
-        .then(() => {
-        toast.success("Pitch updated successfully!");
-        setTimeout(() => navigate("/fundraise-dashboard"), 1500);
-        })
-        .catch((error) => {
-        toast.error(error.message || "Update failed.");
-        });
+        if (String(data.user_id) !== String(user.id)) {
+          throw new Error("You can only edit pitches created by your account.");
+        }
+
+        if (!controller.signal.aborted) setFormData(normalizePitch(data));
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Error loading pitch:", error);
+          setLoadError(error.message || "Failed to load pitch details.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+
+    loadPitch();
+    return () => controller.abort();
+  }, [id, user?.id, retryKey]);
+
+  useEffect(() => {
+    if (!showModal) return;
+    cancelRef.current?.focus();
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape" && !submitting) setShowModal(false);
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [showModal, submitting]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((current) => ({ ...current, [name]: value }));
   };
 
-  const cancelUpdate = () => {
-    setShowModal(false);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const validationError = validatePitch(formData);
+    if (validationError) return toast.error(validationError);
+    setShowModal(true);
   };
+
+  const confirmUpdate = async () => {
+    if (submitting || !user?.id) return;
+
+    const token = localStorage.getItem("token")?.trim();
+    if (!token) {
+      toast.error("Your session has expired. Please sign in again.");
+      setShowModal(false);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await fetch(
+        `${API_BASE}/pitches/users/${user.id}/pitches/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Failed to update pitch.");
+
+      setShowModal(false);
+      toast.success("Pitch updated successfully!");
+      setTimeout(() => navigate("/fundraise-dashboard"), 1300);
+    } catch (error) {
+      console.error("Pitch update failed:", error);
+      toast.error(error.message || "Failed to update pitch.");
+      setShowModal(false);
+      setSubmitting(false);
+    }
+  };
+
+  if (!user?.id) {
+    return (
+      <PitchEditorStatus
+        signIn
+        title="Sign in to edit your pitch"
+        message="You must be signed in to edit a fundraising pitch."
+      />
+    );
+  }
+
+  if (loading) {
+    return (
+      <PitchEditorStatus
+        loading
+        title="Loading your pitch"
+        message="Getting the details ready for editing..."
+      />
+    );
+  }
+
+  if (loadError) {
+    return (
+      <PitchEditorStatus
+        title="Couldn't open this pitch"
+        message={loadError}
+        retry={() => setRetryKey((count) => count + 1)}
+      />
+    );
+  }
+
+  const dialog = showModal ? (
+    <div
+      className="iv-pe-overlay"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !submitting) {
+          setShowModal(false);
+        }
+      }}
+    >
+      <div
+        className="iv-pe-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="iv-pe-dialog-title"
+        aria-describedby="iv-pe-dialog-description"
+      >
+        <span className="iv-pe-dialog-icon">
+          <FiCheckCircle size={22} aria-hidden="true" />
+        </span>
+        <h2 id="iv-pe-dialog-title">Save your changes?</h2>
+        <p id="iv-pe-dialog-description">
+          Your updated pitch details will be available to investors.
+        </p>
+        <div className="iv-pe-dialog-actions">
+          <button
+            type="button"
+            className="iv-pe-cancel"
+            ref={cancelRef}
+            onClick={() => setShowModal(false)}
+            disabled={submitting}
+          >
+            Go back
+          </button>
+          <button
+            type="button"
+            className="iv-pe-primary"
+            disabled={submitting}
+            onClick={confirmUpdate}
+          >
+            {submitting ? "Saving..." : "Save changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
-    <div className="investment-pitches">
-      <h2 className="text-center mb-4">Pitch Editor</h2>
-      <form className="p-4 border rounded shadow" onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Pitch Title</label>
-          <input type="text" name="title" className="form-control" value={formData.title} onChange={handleChange} required />
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Company Location</label>
-            <input type="text" name="company_location" className="form-control" value={formData.company_location} onChange={handleChange} />
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Country</label>
-            <select name="country" className="form-control" value={formData.country} onChange={handleChange} required>
-              <option value="">Select Country</option>
-              {countryOptions.map((country) => (
-                <option key={country} value={country}>{country}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Cell Number</label>
-          <input type="text" name="cell_number" className="form-control" value={formData.cell_number} onChange={handleChange} />
-        </div>
-
-        <div className="row">
-          <div className="col-md-4 mb-3">
-            <label className="form-label">Industry</label>
-            <select name="industry" className="form-control" value={formData.industry} onChange={handleChange} required>
-              <option value="">Select Industry</option>
-              {industryOptions.map((industry) => (
-                <option key={industry} value={industry}>{industry}</option>
-              ))}
-            </select>
-          </div>
-          <div className="col-md-4 mb-3">
-            <label className="form-label">Stage</label>
-            <select name="stage" className="form-control" value={formData.stage} onChange={handleChange}>
-              <option value="">Select Stage</option>
-              {stageOptions.map((stage) => (
-                <option key={stage} value={stage}>{stage}</option>
-              ))}
-            </select>
-          </div>
-          <div className="col-md-4 mb-3">
-            <label className="form-label">Ideal Investor Role</label>
-            <select name="ideal_investor_role" className="form-control" value={formData.ideal_investor_role} onChange={handleChange}>
-              <option value="">Select Role</option>
-              {investorRoleOptions.map((role) => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Total Raising Amount</label>
-            <input type="number" name="total_raising_amount" className="form-control" value={formData.total_raising_amount} onChange={handleChange} />
-          </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Minimum Investment</label>
-            <input type="number" name="minimum_investment" className="form-control" value={formData.minimum_investment} onChange={handleChange} />
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">The Business</label>
-          <textarea name="the_business" className="form-control" rows="3" value={formData.the_business} onChange={handleChange}></textarea>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">The Market</label>
-          <textarea name="the_market" className="form-control" rows="3" value={formData.the_market} onChange={handleChange}></textarea>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Progress</label>
-          <textarea name="progress" className="form-control" rows="3" value={formData.progress} onChange={handleChange}></textarea>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Objective</label>
-          <textarea name="objective" className="form-control" rows="3" value={formData.objective} onChange={handleChange}></textarea>
-        </div>
-        <button type="submit" className="btn btn-primary w-100">
-          Update Pitch
-        </button>
-      </form>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h5>Are you sure you want to update this pitch?</h5>
-            <div className="modal-buttons">
-              <button className="confirm-btn" onClick={confirmUpdate}>
-                Yes, Update
-              </button>
-              <button className="cancel-btn" onClick={cancelUpdate}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
+    <>
+      <PitchEditorForm
+        mode="edit"
+        formData={formData}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        busy={submitting}
+        dialog={dialog}
       />
-    </div>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   );
-};
-
-export default FundDashEditPitch;
+}
