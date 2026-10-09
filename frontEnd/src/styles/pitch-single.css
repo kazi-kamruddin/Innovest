@@ -1,167 +1,770 @@
-.pitch-details-container1 {
-  padding: 0; 
-  background-color: #f9f9f9;
+
+/* =========================================
+   INNOVEST - PITCH DETAILS
+========================================= */
+
+.innovest-pitch-single {
+  --ps-ink: #24352e;
+  --ps-green: #176d5d;
+  --ps-dark: #243e30;
+  --ps-muted: #728579;
+  --ps-border: #8faf98;
+
+  width: 100%;
+  min-height: calc(100svh - 86px);
+  background: #fcfdfb;
+  color: var(--ps-ink);
+  font-family: "Outfit", sans-serif;
+}
+
+.innovest-pitch-single *,
+.innovest-pitch-single *::before,
+.innovest-pitch-single *::after {
+  box-sizing: border-box;
+}
+
+.innovest-pitch-single .ps-page-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 27px 32px 78px;
+}
+
+/* =========================================
+   BREADCRUMB
+========================================= */
+
+.innovest-pitch-single .ps-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8b9a90;
+}
+
+.innovest-pitch-single .ps-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #426a51;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.innovest-pitch-single .ps-breadcrumb a:hover {
+  color: #176d5d;
+  text-decoration: none;
+}
+
+.innovest-pitch-single .ps-breadcrumb-divider {
+  color: #b6c8ba;
+}
+
+/* =========================================
+   COMPACT HEADER
+========================================= */
+
+.innovest-pitch-single .ps-hero {
+  position: relative;
+  isolation: isolate;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+
+  overflow: hidden;
+  padding: 28px 34px;
+
+  border: 1.5px solid var(--ps-border);
+  border-radius: 22px;
+
+  background: linear-gradient(
+    115deg,
+    rgba(226, 239, 228, 0.84),
+    rgba(248, 251, 248, 0.98)
+  );
+}
+
+.innovest-pitch-single .ps-hero-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.innovest-pitch-single .ps-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  color: var(--ps-green);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.innovest-pitch-single .ps-eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #2e9070;
+}
+
+.innovest-pitch-single .ps-hero h1 {
+  max-width: 900px;
+  margin: 12px 0 0;
+
+  color: var(--ps-ink);
+  font-size: clamp(27px, 3vw, 40px);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+
+  overflow-wrap: anywhere;
+}
+
+.innovest-pitch-single .ps-hero-intro {
+  margin: 9px 0 0;
+  color: #6d8172;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.innovest-pitch-single .ps-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.innovest-pitch-single .ps-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  min-width: 0;
+  max-width: 100%;
+  padding: 7px 11px;
+
+  border: 1px solid #c6d9c9;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.75);
+
+  color: #477155;
+  font-size: 11px;
+  font-weight: 600;
+
+  overflow-wrap: anywhere;
+}
+
+.innovest-pitch-single .ps-tag-main {
+  background: #dcecdf;
+  border-color: #bad4c0;
+  color: #226747;
+}
+
+/* HEADER ILLUSTRATION */
+
+.innovest-pitch-single .ps-hero-symbol {
+  position: relative;
+
+  display: grid;
+  width: 142px;
+  height: 142px;
+  flex: 0 0 142px;
+  place-items: center;
+
+  border: 1px solid #cadfcc;
+  border-radius: 50%;
+  background: rgba(193, 219, 197, 0.27);
+}
+
+.innovest-pitch-single .ps-hero-symbol::before,
+.innovest-pitch-single .ps-hero-symbol::after {
+  position: absolute;
+  content: "";
+  inset: 12px;
+
+  border: 1px solid #bdd5c1;
+  border-radius: 50%;
+}
+
+.innovest-pitch-single .ps-hero-symbol::after {
+  inset: -22px;
+  border-color: rgba(156, 195, 164, 0.3);
+}
+
+.innovest-pitch-single .ps-hero-symbol-inner {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+
+  border: 1px solid #b6d2bd;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+
+  color: #2b7652;
+  transform: rotate(-8deg);
+}
+
+/* =========================================
+   MAIN LAYOUT
+========================================= */
+
+.innovest-pitch-single .ps-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.6fr) minmax(320px, 0.9fr);
+
+  align-items: start;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.innovest-pitch-single .ps-main-column {
   display: flex;
   flex-direction: column;
-  align-items: center; 
-  min-height: 10vh;
+  min-width: 0;
+  gap: 20px;
 }
 
-.pitch-image-container {
-  margin: 0; 
-  padding: 0; 
-  width: 100%; 
-  display: flex;           
-  justify-content: center; 
-  align-items: center;     
+.innovest-pitch-single .ps-content-card,
+.innovest-pitch-single .ps-investment-card {
+  min-width: 0;
+
+  border: 1.5px solid var(--ps-border);
+  border-radius: 20px;
+  background: #fff;
+
+  box-shadow:
+    0 6px 24px rgba(34, 72, 42, 0.045);
 }
 
-.pitch-image {
-  width: 1000px;           
-  max-width: 100%;       
-  height: 450px;         
-  object-fit: cover;    
-  margin-top: -1px;
-  margin-bottom: 16px;
+/* =========================================
+   CONTENT SECTIONS
+========================================= */
+
+.innovest-pitch-single .ps-content-card {
+  padding: 26px 28px;
 }
 
-.pitch-details-title1 {
-  font-size: 29px;
-  color: #bf0707;
-  margin-bottom: 10px; 
-  text-align: center;  
-  width: 100%;
-  font-weight: bold;
-  letter-spacing: 1px;
-  margin-bottom: 25px;
+.innovest-pitch-single .ps-content-card-heading,
+.innovest-pitch-single .ps-investment-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
 }
 
-.pitch-info-card1 {
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 30px;
-  width: 80%;
-  max-width: 1150px;
-  margin: 0 auto;
-  margin-bottom: 30px;
+.innovest-pitch-single .ps-section-icon,
+.innovest-pitch-single .ps-investment-icon {
   display: grid;
-  grid-template-columns: 1fr 1fr; 
-  gap: 4px; 
+
+  width: 41px;
+  height: 41px;
+  flex: 0 0 41px;
+
+  place-items: center;
+
+  border: 1px solid #c6ddca;
+  border-radius: 12px;
+  background: #e6f1e8;
+  color: var(--ps-green);
 }
 
-.pitch-info-title1 {
-  font-size: 33px;
-  color: #007bff;
-  margin-bottom: 15px;
-  font-weight: bold;
-  text-align: left;  
-  width: 100%;
-  margin-bottom: 15px;
-  grid-column: span 2; 
-}
+.innovest-pitch-single .ps-content-card-heading h2,
+.innovest-pitch-single .ps-investment-heading h2 {
+  margin: 0;
 
-.pitch-info-location1,
-.pitch-info-contact1,
-.pitch-info-industry1,
-.pitch-info-stage1,
-.pitch-info-investor-role1,
-.pitch-info-amount1,
-.pitch-info-investment1,
-.pitch-info-business1,
-.pitch-info-market1,
-.pitch-info-progress1,
-.pitch-info-objective1 {
-  font-size: 17px;
-  color: #555;
-  margin: 12px 0;
-  padding: 12px;
-  border: 1px solid #ddd; 
-  border-radius: 8px;
-  background-color: #f7f7f7; 
-  text-align: left;  
-  width: 94%;
-}
-
-.pitch-info-location1 strong,
-.pitch-info-contact1 strong,
-.pitch-info-industry1 strong,
-.pitch-info-stage1 strong,
-.pitch-info-investor-role1 strong,
-.pitch-info-amount1 strong,
-.pitch-info-investment1 strong,
-.pitch-info-business1 strong,
-.pitch-info-market1 strong,
-.pitch-info-progress1 strong,
-.pitch-info-objective1 strong {
-  color: #333;
-  font-weight: bold;
+  color: var(--ps-ink);
   font-size: 19px;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
 }
 
-
-.pitch-info-objective1 {
-  text-align: justify;  
-  grid-column: span 2; 
-  background-color: #fafafa; 
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+.innovest-pitch-single .ps-content-card-heading p {
+  margin: 4px 0 0;
+  color: #8b9b8f;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
+.innovest-pitch-single .ps-content-card-body {
+  margin-top: 22px;
+}
 
-.view-profile-button {
-  background-color: #cd1111;
-  color: white;
-  padding: 15px 30px;
-  border-radius: 8px;
+.innovest-pitch-single
+.ps-detail-block + .ps-detail-block {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid #e4ede5;
+}
+
+.innovest-pitch-single .ps-detail-block h3 {
+  margin: 0 0 9px;
+
+  color: #3d5e46;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.innovest-pitch-single .ps-detail-block p {
+  margin: 0;
+
+  color: #677b6d;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.85;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   INVESTMENT SIDEBAR
+========================================= */
+
+.innovest-pitch-single .ps-sidebar {
+  position: sticky;
+  top: 108px;
+  min-width: 0;
+}
+
+.innovest-pitch-single .ps-investment-card {
+  padding: 25px;
+}
+
+.innovest-pitch-single .ps-investment-heading h2 {
   font-size: 18px;
-  cursor: pointer;
+}
+
+/* RAISING AMOUNT */
+
+.innovest-pitch-single .ps-raising {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 25px;
+}
+
+.innovest-pitch-single .ps-raising span,
+.innovest-pitch-single .ps-minimum span {
+  color: #769081;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.innovest-pitch-single .ps-raising strong {
+  color: #234d35;
+
+  font-size: clamp(23px, 2.5vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.25;
+
+  overflow-wrap: anywhere;
+}
+
+/* MINIMUM INVESTMENT */
+
+.innovest-pitch-single .ps-minimum {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  margin-top: 18px;
+  padding: 14px 16px;
+
+  border: 1px solid #c9dfcd;
+  border-radius: 14px;
+
+  background: linear-gradient(
+    120deg,
+    rgba(220, 237, 222, 0.85),
+    rgba(246, 250, 245, 0.9)
+  );
+}
+
+.innovest-pitch-single .ps-minimum strong {
+  color: #235137;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+/* INVESTOR INFORMATION */
+
+.innovest-pitch-single .ps-summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+
+  margin-top: 20px;
+  padding-bottom: 20px;
+
+  border-bottom: 1px solid #e3ece5;
+}
+
+.innovest-pitch-single .ps-summary-details > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.innovest-pitch-single .ps-summary-details span {
+  flex: 0 0 115px;
+  color: #819386;
+}
+
+.innovest-pitch-single .ps-summary-details strong {
+  color: #385b43;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* FOUNDER */
+
+.innovest-pitch-single .ps-founder {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 19px 0 15px;
+}
+
+.innovest-pitch-single .ps-founder-avatar {
+  display: grid;
+
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+
+  place-items: center;
+
+  border: 1px solid #cbdfcd;
+  border-radius: 50%;
+  background: #ecf5ed;
+  color: #367552;
+}
+
+.innovest-pitch-single .ps-founder-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.innovest-pitch-single .ps-founder-info span {
+  color: #89988c;
+  font-size: 11px;
+}
+
+.innovest-pitch-single .ps-founder-info strong {
+  color: #2c4635;
+  font-size: 14px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+/* FOUNDER PROFILE BUTTON */
+
+.innovest-pitch-single .ps-profile-link {
+  display: flex;
+  min-height: 45px;
+
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 11px 16px;
+
+  border: 1px solid var(--ps-dark);
+  border-radius: 11px;
+  background: var(--ps-dark);
+
+  color: white;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease;
+}
+
+.innovest-pitch-single .ps-profile-link:hover {
+  border-color: var(--ps-green);
+  background: var(--ps-green);
+  color: white;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* PHONE CONTACT */
+
+.innovest-pitch-single .ps-phone-link {
+  display: flex;
+  min-height: 42px;
+
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  margin-top: 9px;
+  padding: 10px;
+
+  border: 1px solid #bbd3c0;
+  border-radius: 11px;
+  background: #f5faf5;
+
+  color: #36684a;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+
+  overflow-wrap: anywhere;
+  transition: background 200ms ease;
+}
+
+.innovest-pitch-single .ps-phone-link:hover {
+  background: #e8f3e9;
+  color: #24563a;
+  text-decoration: none;
+}
+
+.innovest-pitch-single .ps-disclaimer {
+  margin: 14px 0 0;
+
+  color: #91a094;
+  font-size: 10px;
+  line-height: 1.6;
   text-align: center;
-  margin-top: 10px;
-  width: 270px;
-  margin-bottom: 22px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  border: none;              
-  text-decoration: none;      
-  font-weight: normal;       
 }
 
-.view-profile-button:hover {
-  background-color: #c95052;
+/* =========================================
+   LOADING AND ERROR STATES
+========================================= */
+
+.innovest-pitch-single .ps-loading,
+.innovest-pitch-single .ps-feedback {
+  display: flex;
+  min-height: 330px;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 35px 20px;
+
+  border: 1.5px solid var(--ps-border);
+  border-radius: 22px;
+  background: white;
+
+  text-align: center;
 }
 
+.innovest-pitch-single .ps-loading {
+  gap: 15px;
+  color: #6e8774;
+  font-size: 14px;
+}
 
+.innovest-pitch-single .ps-loading-spinner {
+  width: 29px;
+  height: 29px;
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .pitch-info-card1 {
-    width: 90%;
-    padding: 15px;
-    grid-template-columns: 1fr; 
+  border: 3px solid #dceade;
+  border-top-color: #176d5d;
+  border-radius: 50%;
+
+  animation: ps-spin 750ms linear infinite;
+}
+
+.innovest-pitch-single .ps-feedback-icon {
+  display: grid;
+
+  width: 57px;
+  height: 57px;
+  place-items: center;
+
+  border-radius: 16px;
+  background: #eaf4eb;
+  color: #246f4d;
+}
+
+.innovest-pitch-single .ps-feedback h1 {
+  margin: 20px 0 0;
+  color: var(--ps-ink);
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.innovest-pitch-single .ps-feedback p {
+  max-width: 430px;
+  margin: 9px 0 0;
+
+  color: #728579;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.innovest-pitch-single .ps-feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+.innovest-pitch-single .ps-button {
+  display: inline-flex;
+  min-height: 42px;
+
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 10px 16px;
+
+  border: 1px solid #c0d5c3;
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+
+  transition:
+    background 200ms ease,
+    border-color 200ms ease;
+}
+
+.innovest-pitch-single .ps-button-primary {
+  border-color: #243e30;
+  background: #243e30;
+  color: white;
+}
+
+.innovest-pitch-single .ps-button-primary:hover {
+  border-color: #176d5d;
+  background: #176d5d;
+  color: white;
+  text-decoration: none;
+}
+
+.innovest-pitch-single .ps-button-outline {
+  background: #f7faf7;
+  color: #35674a;
+}
+
+.innovest-pitch-single .ps-button-outline:hover {
+  background: #e8f3e9;
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes ps-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 940px) {
+  .innovest-pitch-single .ps-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .pitch-details-title1 {
-    font-size: 1.6rem;
+  .innovest-pitch-single .ps-sidebar {
+    position: static;
+    grid-row: 1;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 640px) {
+  .innovest-pitch-single .ps-page-container {
+    padding: 21px 16px 60px;
   }
 
-  .pitch-info-title1 {
-    font-size: 1.5rem;
+  .innovest-pitch-single .ps-breadcrumb {
+    margin-bottom: 17px;
   }
 
-  .pitch-info-location1,
-  .pitch-info-contact1,
-  .pitch-info-industry1,
-  .pitch-info-stage1,
-  .pitch-info-investor-role1,
-  .pitch-info-amount1,
-  .pitch-info-investment1,
-  .pitch-info-business1,
-  .pitch-info-market1,
-  .pitch-info-progress1,
-  .pitch-info-objective1 {
-    font-size: 0.9rem;
+  .innovest-pitch-single .ps-hero {
+    padding: 24px 20px;
+  }
+
+  .innovest-pitch-single .ps-hero-symbol {
+    display: none;
+  }
+
+  .innovest-pitch-single .ps-hero h1 {
+    font-size: clamp(25px, 7vw, 32px);
+  }
+
+  .innovest-pitch-single .ps-layout {
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .innovest-pitch-single .ps-main-column {
+    gap: 16px;
+  }
+
+  .innovest-pitch-single .ps-content-card,
+  .innovest-pitch-single .ps-investment-card {
+    padding: 20px;
+    border-radius: 17px;
+  }
+
+  .innovest-pitch-single .ps-content-card-heading h2,
+  .innovest-pitch-single .ps-investment-heading h2 {
+    font-size: 17px;
+  }
+
+  .innovest-pitch-single
+  .ps-summary-details > div {
+    gap: 10px;
+  }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+  .innovest-pitch-single *,
+  .innovest-pitch-single *::before,
+  .innovest-pitch-single *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
   }
 }

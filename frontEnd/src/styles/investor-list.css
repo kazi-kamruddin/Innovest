@@ -1,125 +1,68 @@
-
-.investor-list-container {
-    padding: 40px;
-    background-color: #f4f7fc;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .investor-list-title {
-    font-size: 2.5rem;
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 30px;
-    text-align: center;
-    letter-spacing: 1px;
-  }
-  
-  .investor-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    width: 100%;
-    max-width: 1200px;
-    margin-top: 20px;
-    padding: 0 10px;
-  }
-
-  .investor-item {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    cursor: pointer;
-    border: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .investor-item:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    background-color: #f9f9f9;
-  }
-
-  .investor-header {
-    background: linear-gradient(45deg, #007bff, #00bcd4);
-    color: white;
-    padding: 20px;
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    border-bottom: 1px solid #ffffff;
-    transition: background 0.3s ease;
-  }
-  
-  .investor-header:hover {
-    background: linear-gradient(45deg, #00bcd4, #007bff);
-  }
-  
-  .investor-body {
-    padding: 20px;
-    font-size: 1rem;
-    color: #555;
-    line-height: 1.6;
-    transition: color 0.3s ease, padding 0.3s ease;
-  }
-  
-  .investor-body p {
-    margin: 10px 0;
-    transition: margin 0.3s ease;
-  }
-  
-  .investor-body strong {
-    color: #333;
-    font-weight: 600;
-  }
-  
-  .investor-item:hover .investor-body p {
-    margin: 15px 0;
-    /* color: #007bff; */
-  }
-  
-  .investor-item:hover .investor-body strong {
-    /* color: #00bcd4; */
-  }
-  
-  @media (max-width: 1200px) {
-    .investor-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  
-  @media (max-width: 900px) {
-    .investor-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  @media (max-width: 600px) {
-    .investor-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .Toastify__toast {
-    font-size: 1rem;
-    background-color: #28a745;
-    color: white;
-    border-radius: 10px;
-  }
-  
-  .Toastify__toast--error {
-    background-color: #dc3545;
-  }
-  
-  .nvestor-list-loading {
-    font-size: 1.2rem;
-    color: #777;
-    text-align: center;
-  }
-  
+/* Phase 11 / Investor Directory */
+.iv-investor { --ii-dark:#24352e; --ii-green:#176d5d; --ii-border:#8faf98; min-height:calc(100svh - 86px); background:#fcfdfb; color:var(--ii-dark); font-family:"Outfit",sans-serif; }
+.iv-investor *, .iv-investor *::before,.iv-investor *::after { box-sizing:border-box; }
+.iv-investor .iv-investor-container { max-width:1280px; margin:0 auto; padding:31px 32px 80px; }
+.iv-investor .iv-investor-intro { display:flex; align-items:end; justify-content:space-between; flex-wrap:wrap; gap:17px; margin-bottom:23px; }
+.iv-investor .iv-investor-eyebrow { display:inline-flex; align-items:center; gap:9px; margin:0; color:#176d5d; font-size:10px; font-weight:700; letter-spacing:.15em; }
+.iv-investor .iv-investor-eyebrow span { width:7px; height:7px; background:#2d9472; border-radius:50%; }
+.iv-investor .iv-investor-intro h1 { margin:9px 0 0; font-size:clamp(27px,3vw,39px); line-height:1.17; font-weight:650; letter-spacing:-.045em; color:#24352e; }
+.iv-investor .iv-investor-intro h1 em { font-style:normal; color:#176d5d; }
+.iv-investor .iv-investor-intro p:not(.iv-investor-eyebrow) { margin:9px 0 0; color:#728778; font-size:13px; line-height:1.65; }
+.iv-investor .iv-investor-pitch-link { display:inline-flex; align-items:center; gap:9px; min-height:42px; padding:9px 15px; border:1px solid #b2ccb8; border-radius:10px; background:#fff; color:#3b644a; font-size:12px; font-weight:650; text-decoration:none; transition:background .18s ease; }
+.iv-investor .iv-investor-pitch-link:hover { background:#eaf4eb; color:#176d5d; text-decoration:none; }
+.iv-investor .iv-investor-filters { padding:20px 21px; border:1.5px solid #a4c2ac; border-radius:19px; background:#fff; box-shadow:0 6px 23px rgba(30,70,38,.035); }
+.iv-investor .iv-investor-filter-title { display:flex; align-items:center; gap:10px; color:#277049; }
+.iv-investor .iv-investor-filter-title h2 { margin:0; font-size:14px; font-weight:650; color:#284c35; }
+.iv-investor .iv-investor-filter-grid { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr); gap:13px; margin-top:16px; }
+.iv-investor .iv-investor-field { display:flex; flex-direction:column; min-width:0; gap:7px; }
+.iv-investor .iv-investor-field > span { color:#486b54; font-size:11px; font-weight:650; }
+.iv-investor .iv-investor-field select,.iv-investor .iv-investor-field input { display:block; width:100%; height:42px; margin:0; padding:9px 12px; background:#fbfdfb; color:#294636; border:1px solid #b9d1bf; border-radius:10px; font-family:inherit; font-size:12px; font-weight:500; outline:0; }
+.iv-investor .iv-investor-field select:focus,.iv-investor .iv-investor-field input:focus { border-color:#5d9a70; box-shadow:0 0 0 3px rgba(48,128,80,.10); }
+.iv-investor .iv-investor-input-wrap { position:relative; }
+.iv-investor .iv-investor-input-wrap > svg { position:absolute; left:12px; top:13px; color:#719880; }
+.iv-investor .iv-investor-input-wrap input { padding-left:38px; }
+.iv-investor .iv-investor-input-wrap input::placeholder { color:#94a597; }
+.iv-investor .iv-investor-results-heading { display:flex; align-items:end; justify-content:space-between; gap:16px; margin:27px 0 17px; }
+.iv-investor .iv-investor-results-heading h2 { margin:0; font-size:23px; font-weight:650; letter-spacing:-.035em; color:#24352e; }
+.iv-investor .iv-investor-results-heading p { margin:5px 0 0; color:#7b8d80; font-size:12px; }
+.iv-investor .iv-investor-count { padding:7px 12px; border:1px solid #c9ddce; border-radius:30px; color:#397450; background:#eef6ef; font-size:11px; font-weight:650; white-space:nowrap; }
+.iv-investor .iv-investor-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:21px; }
+.iv-investor .iv-investor-card { display:flex; flex-direction:column; min-width:0; overflow:hidden; border:1.5px solid var(--ii-border); border-radius:20px; background:white; box-shadow:0 7px 25px rgba(32,77,45,.045); transition:transform .2s ease,box-shadow .2s ease; }
+.iv-investor .iv-investor-card:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(30,78,42,.1); }
+.iv-investor .iv-investor-card-head { display:flex; align-items:center; gap:13px; min-height:112px; padding:20px 22px; background:linear-gradient(120deg,#d5e9d9,#f1f7f1); border-bottom:1px solid #c5dbc9; }
+.iv-investor .iv-investor-avatar { display:grid; place-items:center; flex:0 0 55px; width:55px; height:55px; border:1px solid #9cbfa7; border-radius:16px; background:rgba(255,255,255,.9); color:#346549; font-size:19px; font-weight:700; letter-spacing:-.05em; }
+.iv-investor .iv-investor-identity { min-width:0; }
+.iv-investor .iv-investor-label { display:block; font-size:10px; font-weight:700; letter-spacing:.12em; color:#547b5d; }
+.iv-investor .iv-investor-identity h3 { margin:5px 0 0; color:#243e30; font-size:19px; font-weight:650; line-height:1.28; letter-spacing:-.026em; overflow-wrap:anywhere; }
+.iv-investor .iv-investor-corner-icon { margin-left:auto; display:grid; place-items:center; flex:0 0 35px; width:35px; height:35px; border-radius:11px; border:1px solid #c4d8c8; background:rgba(255,255,255,.55); color:#5c8366; }
+.iv-investor .iv-investor-card-body { display:flex; flex:1; flex-direction:column; padding:20px 22px 22px; }
+.iv-investor .iv-investor-range { display:flex; flex-direction:column; gap:7px; padding:16px 17px; border:1px solid #c9dfce; border-radius:13px; background:#e9f4eb; }
+.iv-investor .iv-investor-range > span { display:inline-flex; align-items:center; gap:5px; color:#5a7a60; font-size:10px; font-weight:750; letter-spacing:.1em; }
+.iv-investor .iv-investor-range strong { color:#205237; font-size:20px; font-weight:700; line-height:1.35; overflow-wrap:anywhere; letter-spacing:-.03em; }
+.iv-investor .iv-investor-card-section { padding-top:17px; margin-top:17px; border-top:1px solid #e7eee8; }
+.iv-investor .iv-investor-card-section h4 { margin:0 0 9px; color:#3c5e46; font-size:12px; font-weight:700; }
+.iv-investor .iv-investor-card-section p { margin:0; min-height:37px; color:#708574; font-size:12px; line-height:1.7; }
+.iv-investor .iv-investor-chips { display:flex; flex-wrap:wrap; gap:6px; min-height:29px; }
+.iv-investor .iv-investor-chip { display:inline-flex; align-items:center; padding:5px 9px; border-radius:30px; border:1px solid #c6dccb; background:#eef6ef; color:#416c4b; font-size:11px; font-weight:600; }
+.iv-investor .iv-investor-placeholder { color:#869589; font-size:12px; }
+.iv-investor .iv-investor-view-button { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:auto; padding:12px 14px; min-height:44px; border-radius:11px; background:#243e30; color:#fff; text-decoration:none; font-size:12px; font-weight:650; }
+.iv-investor .iv-investor-card-section + .iv-investor-view-button { margin-top:18px; }
+.iv-investor .iv-investor-view-button:hover { background:#176d5d; text-decoration:none; color:white; }
+.iv-investor .iv-investor-state { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:265px; padding:30px; border:1.5px solid #afcab6; border-radius:19px; background:#fff; text-align:center; }
+.iv-investor .iv-investor-state-icon { display:grid; place-items:center; width:54px; height:54px; border:1px solid #c9dfce; border-radius:16px; background:#e8f4ea; color:#347450; }
+.iv-investor .iv-investor-state h2 { margin:15px 0 0; font-size:20px; color:#24352e; font-weight:650; }
+.iv-investor .iv-investor-state p { max-width:410px; margin:8px 0 18px; color:#738777; font-size:13px; line-height:1.6; }
+.iv-investor .iv-investor-state-button { display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:11px 16px; border:1px solid #243e30; border-radius:10px; background:#243e30; color:white; text-decoration:none; font-size:12px; font-weight:650; cursor:pointer; }
+.iv-investor .iv-investor-state-button:hover { background:#176d5d; border-color:#176d5d; color:#fff; text-decoration:none; }
+.iv-investor .iv-investor-skeleton-block { display:block; border-radius:7px; background:linear-gradient(90deg,#dfece2,#f4f9f5,#dfece2); background-size:200% 100%; animation:iv-investor-shimmer 1.4s linear infinite; }
+.iv-investor .iv-investor-skeleton-avatar { width:55px; height:55px; border-radius:16px; }
+.iv-investor .iv-investor-skeleton-name { width:52%; height:22px; }
+.iv-investor .iv-investor-skeleton-line { width:54%; height:14px; margin:7px 0 0; }
+.iv-investor .iv-investor-skeleton-big { width:90%; height:51px; margin:16px 0; }
+.iv-investor .iv-investor-skeleton-button { width:100%; height:42px; margin:26px 0 0; }
+@keyframes iv-investor-shimmer { to { background-position:-200% 0; } }
+.iv-investor a:focus-visible,.iv-investor button:focus-visible { outline:3px solid rgba(23,109,93,.36); outline-offset:3px; }
+@media (max-width:890px) { .iv-investor .iv-investor-filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .iv-investor .iv-investor-field-search { grid-column:1 / -1; } .iv-investor .iv-investor-grid { gap:14px; } .iv-investor .iv-investor-card-head,.iv-investor .iv-investor-card-body { padding-left:17px; padding-right:17px; } }
+@media (max-width:680px) { .iv-investor .iv-investor-container { padding:24px 16px 58px; } .iv-investor .iv-investor-filters { padding:18px; } .iv-investor .iv-investor-grid { grid-template-columns:minmax(0,1fr); } .iv-investor .iv-investor-results-heading h2 { font-size:21px; } }
+@media (max-width:440px) { .iv-investor .iv-investor-filter-grid { grid-template-columns:minmax(0,1fr); } .iv-investor .iv-investor-field-search { grid-column:auto; } .iv-investor .iv-investor-corner-icon { display:none; } }
+@media (prefers-reduced-motion:reduce) { .iv-investor .iv-investor-card { transition:none; } .iv-investor .iv-investor-skeleton-block { animation:none; } }
