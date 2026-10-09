@@ -1,305 +1,232 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuthContext } from "../hooks/useAuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import {
+  FiArrowRight,
+  FiArrowUpRight,
+  FiBriefcase,
+  FiCalendar,
+  FiInbox,
+  FiLock,
+  FiRefreshCw,
+  FiRotateCcw,
+  FiSearch,
+  FiShield,
+  FiX,
+} from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../styles/investor-request-closed.css";
+import { useAuthContext } from "../hooks/useAuthContext";
+import {
+  InvestorRequestConfirmDialog,
+  InvestorRequestHeader,
+  InvestorRequestState,
+  investmentRange,
+  readableDate,
+} from "../components/InvestorRequestForm";
+import "../styles/investor-request-flow.css";
 
-const MyClosedRequests = () => {
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+
+function ClosedRequestCard({ request, onReopen }) {
+  return (
+    <article className="iv-irf-request-card">
+      <div className="iv-irf-request-banner">
+        <span className="iv-irf-category-badge"><FiBriefcase size={14} /> {request.category || "Other"}</span>
+        <span className="iv-irf-closed-badge"><FiLock size={13} /> Closed</span>
+      </div>
+      <div className="iv-irf-request-body">
+        <h3>{request.title || "Untitled request"}</h3>
+        <p className="iv-irf-request-description">{request.description || "No details provided."}</p>
+        <div className="iv-irf-request-budget">
+          <span>INVESTMENT RANGE</span>
+          <strong>{investmentRange(request)}</strong>
+        </div>
+        <div className="iv-irf-request-date"><FiCalendar size={14} /> Last updated {readableDate(request.updatedAt || request.createdAt)}</div>
+        <div className="iv-irf-request-actions">
+          <button type="button" className="iv-irf-request-main-button" onClick={() => onReopen(request)}>
+            <FiRotateCcw size={16} /> Reopen request <FiArrowRight size={16} />
+          </button>
+          <Link className="iv-irf-request-secondary-button" to={`/investor-request/${request.id}/response-pitches`}>
+            Responses <FiArrowUpRight size={16} />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export default function InvestorRequestClosed() {
   const { user } = useAuthContext();
-  const API_BASE = import.meta.env.VITE_API_URL;
-  const navigate = useNavigate();
-
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // UI enhancements (non-breaking)
+  const [loadError, setLoadError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("recent"); // recent | oldest | rangeAsc | rangeDesc
-
-  const [showModal, setShowModal] = useState(false);
+  const [sortBy, setSortBy] = useState("recent");
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [reopening, setReopening] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
+      setRequests([]);
       setLoading(false);
       return;
     }
-
-    const fetchClosedRequests = async () => {
+    const controller = new AbortController();
+    async function fetchRequests() {
+      setLoading(true);
+      setLoadError("");
       try {
-        const res = await fetch(`${API_BASE}/investor-request/my-closed`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+        const token = localStorage.getItem("token")?.trim();
+        if (!token || !API_BASE) throw new Error("Session or API configuration is unavailable.");
+        const response = await fetch(`${API_BASE}/investor-request/my-closed`, {
+          headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
         });
-
-        if (res.ok) {
-          const data = await res.json();
-          setRequests(Array.isArray(data) ? data : []);
-        } else {
-          console.error("Failed to fetch closed requests. Status:", res.status);
-          toast.error("Couldn't load your closed requests.");
-        }
+        const data = await response.json().catch(() => ([]));
+        if (!response.ok) throw new Error(data.error || "Could not load your closed requests.");
+        if (!Array.isArray(data)) throw new Error("Unexpected response from the server.");
+        if (!controller.signal.aborted) setRequests(data);
       } catch (error) {
-        console.error("Error fetching closed requests:", error);
-        toast.error("Network error while loading closed requests.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClosedRequests();
-  }, [user, API_BASE]);
-
-  const handleReopen = async () => {
-    if (!selectedRequest) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${API_BASE}/investor-request/${selectedRequest.id}/reopen`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+        if (!controller.signal.aborted) {
+          console.error("Closed request retrieval failed:", error);
+          setLoadError(error.message || "Could not load closed requests.");
         }
-      );
-
-      if (!res.ok) throw new Error("Failed to reopen");
-
-      toast.success("Request reopened!");
-      setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
-    } catch (error) {
-      console.error("Error reopening request:", error);
-      toast.error("Could not reopen request");
-    } finally {
-      setShowModal(false);
-      setSelectedRequest(null);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
     }
-  };
+    fetchRequests();
+    return () => controller.abort();
+  }, [user?.id, retryKey]);
 
-  // Helpers
-  const fmtMoney = (v) =>
-    typeof v === "number"
-      ? v.toLocaleString(undefined, {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-        })
-      : v;
+  const categories = useMemo(() =>
+    [...new Set(requests.map((request) => request.category).filter(Boolean))].sort(),
+  [requests]);
 
-  const categories = useMemo(() => {
-    const set = new Set(requests.map((r) => r.category).filter(Boolean));
-    return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [requests]);
-
-  const visible = useMemo(() => {
-    let out = [...requests];
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      out = out.filter(
-        (r) =>
-          r.title?.toLowerCase().includes(q) ||
-          r.description?.toLowerCase().includes(q) ||
-          r.category?.toLowerCase().includes(q)
-      );
-    }
-
-    if (category !== "all") {
-      out = out.filter((r) => r.category === category);
-    }
-
-    out.sort((a, b) => {
-      // Prefer closedAt for sorting if your API returns it; fallback to createdAt or id.
-      const aTime = new Date(a.closedAt || a.updatedAt || a.createdAt || a.id);
-      const bTime = new Date(b.closedAt || b.updatedAt || b.createdAt || b.id);
-
-      if (sortBy === "recent") return bTime - aTime;
-      if (sortBy === "oldest") return aTime - bTime;
-
-      const aRange = (a.maxInvestment ?? 0) - (a.minInvestment ?? 0);
-      const bRange = (b.maxInvestment ?? 0) - (b.minInvestment ?? 0);
-      if (sortBy === "rangeAsc") return aRange - bRange;
-      if (sortBy === "rangeDesc") return bRange - aRange;
-
-      return 0;
+  const visibleRequests = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    const filtered = requests.filter((request) => {
+      const matchText = !term || [request.title, request.description, request.category]
+        .some((value) => String(value ?? "").toLowerCase().includes(term));
+      return matchText && (category === "all" || request.category === category);
     });
-
-    return out;
+    const dateValue = (value) => {
+      const date = Date.parse(value.updatedAt || value.createdAt || "");
+      return Number.isFinite(date) ? date : Number(value.id) || 0;
+    };
+    const rangeWidth = (request) => {
+      const min = Number(request.minInvestment) || 0;
+      const max = Number(request.maxInvestment) || 0;
+      return max - min;
+    };
+    filtered.sort((a, b) => {
+      if (sortBy === "oldest") return dateValue(a) - dateValue(b);
+      if (sortBy === "rangeAsc") return rangeWidth(a) - rangeWidth(b);
+      if (sortBy === "rangeDesc") return rangeWidth(b) - rangeWidth(a);
+      return dateValue(b) - dateValue(a);
+    });
+    return filtered;
   }, [requests, query, category, sortBy]);
 
+  const hasFilters = Boolean(query.trim() || category !== "all" || sortBy !== "recent");
+  const clearFilters = () => { setQuery(""); setCategory("all"); setSortBy("recent"); };
+
+  async function reopenRequest() {
+    if (!selectedRequest || reopening) return;
+    setReopening(true);
+    try {
+      const token = localStorage.getItem("token")?.trim();
+      if (!token || !API_BASE) throw new Error("Session or API configuration is unavailable.");
+      const response = await fetch(`${API_BASE}/investor-request/${selectedRequest.id}/reopen`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not reopen this request.");
+      setRequests((current) => current.filter((request) => request.id !== selectedRequest.id));
+      setSelectedRequest(null);
+      toast.success("Request reopened. It's back in the open requests feed.");
+    } catch (error) {
+      console.error("Reopen request failed:", error);
+      toast.error(error.message || "Could not reopen this request.");
+    } finally {
+      setReopening(false);
+    }
+  }
+
   return (
-    <div className="my-closed-requests irc">
-      <div className="irc-header">
-        <div>
-          <h2 className="irc-title">My Closed Requests</h2>
-          <p className="irc-sub">Review your closed investment requests and reopen if needed.</p>
-        </div>
+    <main className="iv-irf-page">
+      <div className="iv-irf-container">
+        <InvestorRequestHeader eyebrow="INVESTOR WORKSPACE" title="Your closed" accent="requests."
+          description="Review previous requests and reopen them whenever you're ready to hear from entrepreneurs again."
+          actions={<Link className="iv-irf-secondary" to="/investor-request"><FiArrowRight size={16} /> Open requests</Link>} />
 
-        <div className="irc-actions">
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate("/investor-request")}
-          >
-            Back to All Requests
-          </button>
-        </div>
+        {!user?.id ? (
+          <InvestorRequestState icon={FiShield} title="Sign in to see your requests" description="Closed investment requests are available to their owners after sign-in."
+            action={<Link to="/login" className="iv-irf-primary">Sign in <FiArrowRight size={16} /></Link>} />
+        ) : (
+          <>
+            <section className="iv-irf-toolbar" aria-label="Filter closed requests">
+              <div className="iv-irf-toolbar-heading">
+                <h2>Closed requests</h2>
+                <span>{loading ? "Loading..." : `${requests.length} total`}</span>
+              </div>
+              <div className="iv-irf-filters">
+                <label className="iv-irf-search">
+                  <FiSearch size={17} aria-hidden="true" />
+                  <span className="iv-irf-sr-only">Search closed requests</span>
+                  <input type="search" placeholder="Search closed requests..." value={query} onChange={(event) => setQuery(event.target.value)} />
+                </label>
+                <label>
+                  <span className="iv-irf-sr-only">Filter by category</span>
+                  <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                    <option value="all">All categories</option>
+                    {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span className="iv-irf-sr-only">Sort closed requests</span>
+                  <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                    <option value="recent">Recently closed</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="rangeAsc">Narrowest range</option>
+                    <option value="rangeDesc">Widest range</option>
+                  </select>
+                </label>
+              </div>
+              {hasFilters && (
+                <button type="button" className="iv-irf-reset" onClick={clearFilters}><FiX size={14} /> Clear filters</button>
+              )}
+            </section>
+
+            {loading ? (
+              <div className="iv-irf-cards" aria-label="Loading requests" role="status">
+                {[0, 1].map((n) => <div key={n} className="iv-irf-loading-card" />)}
+              </div>
+            ) : loadError ? (
+              <InvestorRequestState icon={FiRefreshCw} title="Couldn't load closed requests" description={loadError} retry={() => setRetryKey((value) => value + 1)} />
+            ) : visibleRequests.length ? (
+              <div className="iv-irf-cards">
+                {visibleRequests.map((request) => <ClosedRequestCard key={request.id} request={request} onReopen={setSelectedRequest} />)}
+              </div>
+            ) : (
+              <InvestorRequestState icon={FiInbox} title={hasFilters ? "No matching requests" : "No closed requests yet"}
+                description={hasFilters ? "Try a different search or clear the filters." : "Requests you close will appear here. You can reopen them at any time."}
+                action={hasFilters ? <button type="button" className="iv-irf-primary" onClick={clearFilters}>Clear filters <FiArrowRight size={16} /></button>
+                  : <Link className="iv-irf-primary" to="/investor-request">Explore open requests <FiArrowRight size={16} /></Link>} />
+            )}
+          </>
+        )}
       </div>
-
-      {/* Toolbar: search / category / sort */}
-      <div className="irc-toolbar">
-        <div className="irc-search">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by title, description, or category…"
-            aria-label="Search closed requests"
-          />
-          <span className="irc-search-icon" aria-hidden>🔎</span>
-        </div>
-
-        <div className="irc-filter-row">
-          <select
-            className="irc-select"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            aria-label="Filter by category"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === "all" ? "All categories" : c}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="irc-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort"
-          >
-            <option value="recent">Recently Closed</option>
-            <option value="oldest">Oldest</option>
-            <option value="rangeAsc">Investment Range ↑</option>
-            <option value="rangeDesc">Investment Range ↓</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="irc-grid">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="irc-card irc-skeleton">
-              <div className="irc-skel-line w-2/3" />
-              <div className="irc-skel-line" />
-              <div className="irc-skel-line w-1/2" />
-              <div className="irc-skel-line w-1/3" />
-            </div>
-          ))}
-        </div>
-      ) : requests.length > 0 ? (
-        <div className="irc-grid">
-          {visible.map((r) => (
-            <div key={r.id} className="irc-card">
-              <div className="irc-card-top">
-                <div className="irc-chip irc-chip--category" title="Category">
-                  {r.category || "Uncategorized"}
-                </div>
-                <div className="irc-chip irc-chip--closed">Closed</div>
-              </div>
-
-              <h4 className="irc-card-title" title={r.title}>{r.title}</h4>
-              <p className="irc-card-desc">{r.description}</p>
-
-              <div className="irc-meta">
-                <div className="irc-meta-row">
-                  <span className="irc-label">Investment Range</span>
-                  <span className="irc-value">
-                    {fmtMoney(r.minInvestment)} – {fmtMoney(r.maxInvestment)}
-                  </span>
-                </div>
-                <div className="irc-meta-row">
-                  <span className="irc-label">Status</span>
-                  <span className="irc-value">{r.status || "Closed"}</span>
-                </div>
-                {(r.closedAt || r.updatedAt || r.createdAt) && (
-                  <div className="irc-meta-row">
-                    <span className="irc-label">Closed</span>
-                    <span className="irc-value">
-                      {new Date(r.closedAt || r.updatedAt || r.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="irc-actions">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setSelectedRequest(r);
-                    setShowModal(true);
-                  }}
-                >
-                  Reopen
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="irc-empty">
-          <div className="irc-empty-emoji" aria-hidden>🗂️</div>
-          <h4>You have no closed requests.</h4>
-          <p>Once you close a request, it will show up here.</p>
-          <button className="btn btn-secondary" onClick={() => navigate("/investor-request")}>
-            Back to All Requests
-          </button>
-        </div>
+      {selectedRequest && (
+        <InvestorRequestConfirmDialog
+          icon={FiRotateCcw} title="Reopen this request?"
+          description={`“${selectedRequest.title || "This request"}” will become visible in the open requests feed again.`}
+          confirmLabel="Reopen request" busy={reopening} onConfirm={reopenRequest}
+          onCancel={() => setSelectedRequest(null)} />
       )}
-
-      {/* Confirmation Modal (same behavior, styled) */}
-      {showModal && selectedRequest && (
-        <div
-          className="irc-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="irc-modal-title"
-        >
-          <div
-            className="irc-modal__backdrop"
-            onClick={() => setShowModal(false)}
-          />
-          <div className="irc-modal__content">
-            <h5 id="irc-modal-title" className="irc-modal__title">
-              Reopen this request?
-            </h5>
-            <p className="irc-modal__body">
-              Are you sure you want to reopen <strong>&quot;{selectedRequest.title}&quot;</strong>?
-            </p>
-            <div className="irc-modal__actions">
-              <button className="btn btn-primary" onClick={handleReopen}>
-                Yes, Reopen
-              </button>
-              <button
-                className="btn btn-ghost"
-                onClick={() => setShowModal(false)}
-              >
-                No, Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <ToastContainer />
-    </div>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </main>
   );
-};
-
-export default MyClosedRequests;
+}

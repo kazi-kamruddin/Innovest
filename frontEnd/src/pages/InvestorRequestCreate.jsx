@@ -1,251 +1,86 @@
 import { useState } from "react";
-import { useAuthContext } from "../hooks/useAuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FiArrowRight, FiShield } from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../styles/investor-request-create.css";
+import { useAuthContext } from "../hooks/useAuthContext";
+import InvestorRequestForm, {
+  EMPTY_INVESTOR_REQUEST,
+  getInvestorRequestPayload,
+  InvestorRequestConfirmDialog,
+  InvestorRequestState,
+  validateInvestorRequest,
+} from "../components/InvestorRequestForm";
 
-const CreateInvestorRequest = () => {
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
+export default function InvestorRequestCreate() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  const API_BASE = import.meta.env.VITE_API_URL;
+  const [formData, setFormData] = useState({ ...EMPTY_INVESTOR_REQUEST });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    minInvestment: "",
-    maxInvestment: "",
-  });
-
-  const [showModal, setShowModal] = useState(false);
-
-  const categoryOptions = [
-    "Technology",
-    "Healthcare",
-    "Finance",
-    "Real Estate",
-    "Education",
-    "Food & Beverage",
-    "Other",
-  ];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    // keep numbers non-negative (client hint; server is source of truth)
-    if (name === "minInvestment" || name === "maxInvestment") {
-      const v = value === "" ? "" : Math.max(0, Number(value || 0));
-      setFormData((s) => ({ ...s, [name]: v }));
-      return;
-    }
-    setFormData((s) => ({ ...s, [name]: value }));
+  const handleReview = (event) => {
+    event.preventDefault();
+    const error = validateInvestorRequest(formData);
+    if (error) return toast.error(error);
+    setConfirmOpen(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // soft client checks for nicer UX
-    if (!formData.title.trim()) return toast.error("Please enter a title.");
-    if (!formData.description.trim())
-      return toast.error("Please add a short description.");
-    if (!formData.category) return toast.error("Please choose a category.");
-    if (
-      formData.minInvestment !== "" &&
-      formData.maxInvestment !== "" &&
-      Number(formData.minInvestment) > Number(formData.maxInvestment)
-    ) {
-      return toast.error("Minimum investment cannot exceed maximum.");
-    }
-
-    setShowModal(true);
-  };
-
-  const confirmSubmit = async () => {
-    setShowModal(false);
-
-    const token = localStorage.getItem("token");
-    if (!token || !user) {
-      toast.error("You are not authorized. Please log in again.");
+  async function createRequest() {
+    if (saving) return;
+    const token = localStorage.getItem("token")?.trim();
+    if (!token || !user?.id) {
+      toast.error("Please sign in again to create an investor request.");
       return;
     }
+    if (!API_BASE) return toast.error("API URL is not configured.");
 
-    const endpoint = `${API_BASE}/investor-request/create-new-request`;
-
-    const payload = {
-      investorId: user.id,
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      minInvestment: formData.minInvestment,
-      maxInvestment: formData.maxInvestment,
-    };
-
-
+    setSaving(true);
     try {
-      const res = await fetch(endpoint, {
+      const response = await fetch(`${API_BASE}/investor-request/create-new-request`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ investorId: user.id, ...getInvestorRequestPayload(formData) }),
       });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Unable to create investor request.");
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to create request");
-      }
-
-      toast.success("Investor request created successfully!");
-      setTimeout(() => navigate("/investor-request"), 900);
-    } catch (err) {
-      console.error("Error creating request:", err);
-      toast.error(err.message || "Creation failed");
+      setConfirmOpen(false);
+      toast.success("Investor request created successfully.");
+      navigate("/investor-request");
+    } catch (error) {
+      console.error("Investor request creation failed:", error);
+      toast.error(error.message || "Unable to create the request.");
+    } finally {
+      setSaving(false);
     }
-  };
+  }
 
-  const cancelSubmit = () => setShowModal(false);
+  if (!user?.id) {
+    return (
+      <main className="iv-irf-page"><div className="iv-irf-container">
+        <InvestorRequestState icon={FiShield} title="Sign in to create a request" description="You need an account to publish investment requests."
+          action={<Link className="iv-irf-primary" to="/login">Sign in <FiArrowRight size={16} /></Link>} />
+      </div></main>
+    );
+  }
 
   return (
-    <div className="investment-pitches irc-create">
-      <div className="irc-header">
-        <div>
-          <h2 className="irc-title">Create Investor Request</h2>
-          <p className="irc-sub">
-            Describe what you’re looking to invest in and your preferred range.
-          </p>
-        </div>
-
-        <div className="irc-actions">
-          <button className="btn btn-ghost" onClick={() => navigate(-1)}>
-            Back
-          </button>
-        </div>
-      </div>
-
-      <form className="irc-card" onSubmit={handleSubmit}>
-        <fieldset className="irc-group">
-          <legend>Details</legend>
-
-          <div className="irc-row">
-            <div className="irc-col-full">
-              <label className="form-label">Title</label>
-              <input
-                type="text"
-                name="title"
-                className="form-control"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                placeholder="e.g., Seed funding for AI tutoring platform"
-              />
-            </div>
-          </div>
-
-          <div className="irc-row">
-            <div className="irc-col-full">
-              <label className="form-label">Description</label>
-              <textarea
-                name="description"
-                className="form-control"
-                rows="4"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                placeholder="What opportunity are you looking for? Any constraints or preferences?"
-              />
-            </div>
-          </div>
-
-          <div className="irc-row">
-            <div className="irc-col">
-              <label className="form-label">Category</label>
-              <select
-                name="category"
-                className="form-control"
-                value={formData.category}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Category</option>
-                {categoryOptions.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="irc-col">
-              <label className="form-label">Minimum Investment</label>
-              <input
-                type="number"
-                min="0"
-                name="minInvestment"
-                className="form-control"
-                value={formData.minInvestment}
-                onChange={handleChange}
-                placeholder="e.g., 25000"
-              />
-            </div>
-
-            <div className="irc-col">
-              <label className="form-label">Maximum Investment</label>
-              <input
-                type="number"
-                min="0"
-                name="maxInvestment"
-                className="form-control"
-                value={formData.maxInvestment}
-                onChange={handleChange}
-                placeholder="e.g., 150000"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        <div className="irc-submit">
-          <button type="submit" className="btn btn-primary w-100">
-            Create Request
-          </button>
-        </div>
-      </form>
-
-      {/* Confirmation Modal */}
-      {showModal && (
-        <div
-          className="modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="irc-modal-title"
-        >
-          <div className="modal-content">
-            <h5 id="irc-modal-title">Create this request?</h5>
-            <p className="modal-body">
-              Your request will be visible to entrepreneurs who can respond with
-              pitches.
-            </p>
-            <div className="modal-buttons">
-              <button className="confirm-btn" onClick={confirmSubmit}>
-                Yes, Create
-              </button>
-              <button className="cancel-btn" onClick={cancelSubmit}>
-                No, Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+    <>
+      <InvestorRequestForm mode="create" formData={formData} onChange={setFormData} onSubmit={handleReview} busy={saving} />
+      {confirmOpen && (
+          <InvestorRequestConfirmDialog
+            title="Publish this request?"
+            description="Your investment request will appear in the open requests feed, where entrepreneurs can respond with pitches."
+            confirmLabel="Publish request"
+            busy={saving}
+            onConfirm={createRequest}
+            onCancel={() => setConfirmOpen(false)}
+          />
       )}
-
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-      />
-    </div>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   );
-};
-
-export default CreateInvestorRequest;
+}

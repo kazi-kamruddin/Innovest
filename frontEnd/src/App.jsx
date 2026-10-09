@@ -47,9 +47,11 @@ function App() {
   return (
     <>
       <Navbar /> 
-      <ScrollToTop />
       
+      <ScrollToTop />
+
       <div className="main-section">
+
         <Routes >
           <Route path="/" element={<LandingPage />} />
           <Route path="/help" element={<Help />} />

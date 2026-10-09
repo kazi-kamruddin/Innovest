@@ -1,236 +1,826 @@
-.fundraise-dashboard-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    background-color: #f8f9fa;
-    position: relative;
-    padding: 20px;
+
+/* =========================================
+   INNOVEST — FUNDRAISE DASHBOARD
+========================================= */
+
+.iv-fd-page {
+  --iv-fd-dark: #24352e;
+  --iv-fd-green: #176d5d;
+  --iv-fd-border: #8faf98;
+
+  min-height: calc(100svh - 86px);
+  background: #fcfdfb;
+  color: var(--iv-fd-dark);
+  font-family: "Outfit", sans-serif;
 }
 
-
-.fundraise-box-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 30px; 
-    margin-top: 50px;
-    flex-wrap: wrap; 
+.iv-fd-page *,
+.iv-fd-page *::before,
+.iv-fd-page *::after {
+  box-sizing: border-box;
 }
 
-
-.fundraise-box {
-    width: 320px;
-    height: 400px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-    transition: transform 0.3s ease;
-}
-
-.fundraise-box:hover {
-    transform: translateY(-5px);
-}
-
-
-.add-fundraise {
-    background-color: #eef2f7;
-    border: 2px dashed #007bff;
-}
-
-.add-fundraise-button {
-    position: relative; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 75px;
-    height: 75px;
-    cursor: pointer;
-    margin-top: 120px;
-}
-
-
-.plus-sign {
-    position: absolute;
-    top: 47%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
-    font-size: 37px;  
-    font-weight: bold;
-    line-height: 1;
-}
-
-.hit{
-    margin-bottom: 70px;
-    font-size: 18px;
-}
-
-
-.existing-fundraise {
-    position: relative;
-    border-top: 5px solid red;
-    display: flex;
-    flex-direction: column;
-    padding: 25px;
-}
-
-.fundraise-header {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.fundraise-icon {
-    font-size: 30px;
-}
-
-.fundraise-body h3 {
-    margin: 10px 0;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.location {
-    font-size: 14px;
-    color: gray;
-}
-
-.fundraise-body ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 10px 0;
-}
-
-.fundraise-body li {
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-
-
-.funding-info {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-
-.fundraise-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin-top: auto;
-}
-
-.manage-fundraise-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.delete-fundraise-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+.iv-fd-page .iv-fd-container {
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 34px 32px 80px;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.iv-fd-page .iv-fd-header {
   display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e2ebe3;
+}
+
+.iv-fd-page .iv-fd-intro {
+  min-width: 0;
+}
+
+.iv-fd-page .iv-fd-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #176d5d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.iv-fd-page .iv-fd-eyebrow > span {
+  width: 7px;
+  height: 7px;
+  background: #1d8c66;
+  border-radius: 50%;
+}
+
+.iv-fd-page .iv-fd-header h1 {
+  margin: 10px 0 0;
+  color: #24352e;
+  font-size: clamp(25px, 2.9vw, 37px);
+  font-weight: 650;
+  line-height: 1.18;
+  letter-spacing: -0.045em;
+}
+
+.iv-fd-page .iv-fd-header h1 em {
+  color: #176d5d;
+  font-style: normal;
+}
+
+.iv-fd-page .iv-fd-header p {
+  max-width: 620px;
+  margin: 9px 0 0;
+  color: #7a8b7e;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.iv-fd-page .iv-fd-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.iv-fd-page .iv-fd-primary-action,
+.iv-fd-page .iv-fd-secondary-action {
+  display: inline-flex;
+  min-height: 43px;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  gap: 9px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font: 600 13px "Outfit", sans-serif;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
 }
 
-.modal-content {
+.iv-fd-page .iv-fd-primary-action {
+  background: #243e30;
+  color: white;
+}
+
+.iv-fd-page .iv-fd-primary-action:hover {
+  background: #176d5d;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.iv-fd-page .iv-fd-secondary-action {
+  border-color: #b9d0be;
   background: white;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #345d41;
 }
 
-.modal-buttons {
-  margin-top: 15px;
+.iv-fd-page .iv-fd-secondary-action:hover {
+  border-color: #8faf98;
+  background: #edf5ee;
+  color: #176d5d;
+  text-decoration: none;
+}
+
+/* =========================================
+   OVERVIEW METRICS
+========================================= */
+
+.iv-fd-page .iv-fd-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.iv-fd-page .iv-fd-stat {
   display: flex;
-  justify-content: center;
-  gap: 15px;
+  min-width: 0;
+  align-items: center;
+  gap: 13px;
+  padding: 18px;
+
+  border: 1.5px solid #b4ceb9;
+  border-radius: 17px;
+
+  background: linear-gradient(
+    120deg,
+    rgba(226, 239, 228, 0.64),
+    rgba(251, 253, 251, 0.98)
+  );
 }
 
-.confirm-btn,
-.cancel-btn {
-  padding: 8px 16px;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
+.iv-fd-page .iv-fd-stat-icon {
+  display: grid;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+
+  border: 1px solid #c9decf;
+  border-radius: 13px;
+  background: white;
+  color: #2c7652;
+}
+
+.iv-fd-page .iv-fd-stat > div {
+  min-width: 0;
+}
+
+.iv-fd-page .iv-fd-stat-label {
+  display: block;
+  color: #6d8774;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.iv-fd-page .iv-fd-stat strong {
+  display: block;
+  margin-top: 4px;
+  color: #234c35;
+  font-size: clamp(19px, 2vw, 25px);
+  font-weight: 650;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   SECTION HEADING
+========================================= */
+
+.iv-fd-page .iv-fd-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 29px 0 16px;
+}
+
+.iv-fd-page .iv-fd-section-heading h2 {
+  margin: 0;
+  color: #24352e;
+  font-size: 23px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.iv-fd-page .iv-fd-section-heading p {
+  margin: 5px 0 0;
+  color: #7d8e81;
+  font-size: 12px;
+}
+
+.iv-fd-page .iv-fd-count {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border: 1px solid #cadfcf;
+  border-radius: 100px;
+  background: #eef6ef;
+  color: #3c7350;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+/* =========================================
+   PITCH GRID AND CARDS
+========================================= */
+
+.iv-fd-page .iv-fd-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 22px;
+}
+
+.iv-fd-page .iv-fd-pitch-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+
+  border: 1.5px solid var(--iv-fd-border);
+  border-radius: 20px;
+  background: white;
+
+  box-shadow:
+    0 7px 24px rgba(35, 78, 48, 0.06);
+
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.iv-fd-page .iv-fd-pitch-card:hover {
+  transform: translateY(-3px);
+  border-color: #659878;
+  box-shadow: 0 16px 36px rgba(35, 78, 48, 0.10);
+}
+
+/* CARD HEADER */
+
+.iv-fd-page .iv-fd-card-top {
+  display: flex;
+  min-height: 75px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px;
+
+  background: linear-gradient(
+    115deg,
+    rgba(190, 217, 194, 0.65),
+    rgba(229, 241, 230, 0.77)
+  );
+
+  border-bottom: 1px solid #c9ddcd;
+}
+
+.iv-fd-page .iv-fd-industry,
+.iv-fd-page .iv-fd-stage {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+
+  border: 1px solid #b9d5c0;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.78);
+
+  color: #285a40;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.iv-fd-page .iv-fd-stage {
+  flex: 0 0 auto;
+  border-color: #c7ddcb;
+  color: #4a7556;
+}
+
+/* CARD BODY */
+
+.iv-fd-page .iv-fd-card-content {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  padding: 21px 22px 22px;
+}
+
+.iv-fd-page .iv-fd-card-content h3 {
+  margin: 0;
+  color: #24352e;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.32;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.iv-fd-page .iv-fd-location,
+.iv-fd-page .iv-fd-contact {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 9px 0 0;
+  color: #7a8e7e;
+  font-size: 12px;
+}
+
+.iv-fd-page .iv-fd-contact {
+  margin-top: 5px;
+}
+
+.iv-fd-page .iv-fd-location svg,
+.iv-fd-page .iv-fd-contact svg {
+  flex: 0 0 auto;
+  color: #5b9171;
+}
+
+/* MARKET DESCRIPTION */
+
+.iv-fd-page .iv-fd-market {
+  margin-top: 17px;
+  padding-top: 15px;
+  border-top: 1px solid #e5eee6;
+}
+
+.iv-fd-page .iv-fd-market > span {
+  color: #66816d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.iv-fd-page .iv-fd-market p {
+  display: -webkit-box;
+  min-height: 43px;
+  margin: 7px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+
+  color: #738577;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+/* FUNDING AMOUNTS */
+
+.iv-fd-page .iv-fd-funding {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-top: auto;
+  padding: 15px 16px;
+
+  border: 1px solid #cddfce;
+  border-radius: 13px;
+  background: rgba(224, 239, 227, 0.61);
+}
+
+.iv-fd-page .iv-fd-market + .iv-fd-funding {
+  margin-top: 18px;
+}
+
+.iv-fd-page .iv-fd-funding > div {
+  min-width: 0;
+}
+
+.iv-fd-page .iv-fd-funding > div + div {
+  margin-left: 13px;
+  padding-left: 13px;
+  border-left: 1px solid #cbded0;
+}
+
+.iv-fd-page .iv-fd-funding span {
+  display: block;
+  color: #6a856e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.iv-fd-page .iv-fd-funding strong {
+  display: block;
+  margin-top: 6px;
+  color: #1d5238;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   VIEW / EDIT / DELETE BUTTONS
+========================================= */
+
+.iv-fd-page .iv-fd-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.iv-fd-page .iv-fd-card-actions a,
+.iv-fd-page .iv-fd-card-actions button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: 600 12px "Outfit", sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.iv-fd-page .iv-fd-card-actions .iv-fd-view {
+  flex: 1;
+  justify-content: space-between;
+  padding: 9px 14px;
+  background: #243e30;
+  color: white;
+}
+
+.iv-fd-page .iv-fd-card-actions .iv-fd-view:hover {
+  background: #176d5d;
+  color: white;
+  text-decoration: none;
+}
+
+.iv-fd-page .iv-fd-card-actions .iv-fd-edit {
+  padding: 9px 14px;
+  border-color: #bdd5c2;
+  background: #f4f9f4;
+  color: #316846;
+}
+
+.iv-fd-page .iv-fd-card-actions .iv-fd-edit:hover {
+  border-color: #8faf98;
+  background: #e8f4e9;
+  color: #235839;
+  text-decoration: none;
+}
+
+.iv-fd-page .iv-fd-card-actions .iv-fd-delete {
+  width: 42px;
+  flex: 0 0 42px;
+  border-color: #f0d6d1;
+  background: #fff7f5;
+  color: #b1534c;
+}
+
+.iv-fd-page .iv-fd-card-actions .iv-fd-delete:hover {
+  background: #fce9e6;
+  border-color: #dbaba3;
+  color: #9d3631;
+}
+
+/* =========================================
+   LOADING AND EMPTY STATES
+========================================= */
+
+.iv-fd-page .iv-fd-state {
+  display: flex;
+  min-height: 270px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 35px 20px;
+
+  border: 1.5px solid #b4ceb9;
+  border-radius: 20px;
+  background: white;
+  text-align: center;
+}
+
+.iv-fd-page .iv-fd-state-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 16px;
+  background: #e8f3e9;
+  color: #307450;
+}
+
+.iv-fd-page .iv-fd-state h2 {
+  margin: 16px 0 0;
+  color: #24352e;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.iv-fd-page .iv-fd-state p {
+  max-width: 420px;
+  margin: 7px 0 19px;
+  color: #748677;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* SKELETON LOADING */
+
+.iv-fd-page .iv-fd-skeleton .iv-fd-card-content {
+  gap: 13px;
+}
+
+.iv-fd-page .iv-fd-skeleton-line {
+  display: block;
+  height: 14px;
+  border-radius: 6px;
+
+  background: linear-gradient(
+    90deg,
+    #e4eee6,
+    #f4f8f4,
+    #e4eee6
+  );
+
+  background-size: 210% 100%;
+  animation: iv-fd-shimmer 1.4s ease-in-out infinite;
+}
+
+.iv-fd-page .iv-fd-skeleton-short {
+  width: 38%;
+}
+
+.iv-fd-page .iv-fd-skeleton-title {
+  width: 75%;
+  height: 24px;
+}
+
+.iv-fd-page .iv-fd-skeleton-paragraph {
+  width: 96%;
+}
+
+.iv-fd-page .iv-fd-skeleton-box {
+  width: 100%;
+  height: 80px;
+  margin-top: 25px;
+}
+
+@keyframes iv-fd-shimmer {
+  to {
+    background-position: -210% 0;
+  }
+}
+
+/* =========================================
+   DELETE CONFIRMATION MODAL
+========================================= */
+
+.iv-fd-page .iv-fd-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: grid;
+  place-items: center;
+  padding: 20px;
+
+  background: rgba(18, 35, 26, 0.55);
+  backdrop-filter: blur(5px);
+}
+
+.iv-fd-page .iv-fd-modal {
+  position: relative;
+  width: 100%;
+  max-width: 445px;
+  padding: 30px;
+
+  border: 1px solid #dce7de;
+  border-radius: 20px;
+  background: #fff;
+
+  box-shadow: 0 20px 80px rgba(8, 30, 16, 0.25);
+}
+
+.iv-fd-page .iv-fd-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+
+  border: 0;
+  border-radius: 9px;
+  background: #f3f7f4;
+  color: #58715e;
   cursor: pointer;
 }
 
-.confirm-btn {
-  background-color: #e63946;
+.iv-fd-page .iv-fd-warning-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+
+  border: 1px solid #f0d5ce;
+  border-radius: 14px;
+  background: #fff1ee;
+  color: #b7554a;
+}
+
+.iv-fd-page .iv-fd-modal h2 {
+  margin: 18px 0 0;
+  color: #24352e;
+  font-size: 23px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.iv-fd-page .iv-fd-modal p {
+  margin: 8px 0 0;
+  color: #708274;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.iv-fd-page .iv-fd-modal p strong {
+  color: #263f30;
+  overflow-wrap: anywhere;
+}
+
+.iv-fd-page .iv-fd-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.iv-fd-page .iv-fd-modal-actions button {
+  display: inline-flex;
+  min-height: 43px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: 600 13px "Outfit", sans-serif;
+  cursor: pointer;
+}
+
+.iv-fd-page .iv-fd-cancel {
+  background: #f4f8f4;
+  color: #365c40;
+  border-color: #c6d8c9 !important;
+}
+
+.iv-fd-page .iv-fd-cancel:hover {
+  background: #eaf3eb;
+}
+
+.iv-fd-page .iv-fd-confirm-delete {
+  background: #a73b37;
   color: white;
 }
 
-.cancel-btn {
-  background-color: #6c757d;
+.iv-fd-page .iv-fd-confirm-delete:hover {
+  background: #912f2d;
   color: white;
 }
 
-
-
-.fundraise-bottom {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+.iv-fd-page .iv-fd-modal button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.fundraise-pitch-button {
-    background-color: #0d8813;
-    color: white;
-    font-size: 18px;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-weight: bold;
-    margin-bottom: 90px;
+/* =========================================
+   RESPONSIVE LAYOUT
+========================================= */
+
+@media (max-width: 960px) {
+  .iv-fd-page .iv-fd-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .iv-fd-page .iv-fd-header-actions {
+    width: 100%;
+  }
 }
 
-.fundraise-pitch-button:hover {
-    background-color: #5ca76f;
+@media (max-width: 780px) {
+  .iv-fd-page .iv-fd-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .iv-fd-page .iv-fd-stats .iv-fd-stat:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .iv-fd-page .iv-fd-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-@media (max-width: 768px) {
-    .fundraise-box-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
+@media (max-width: 560px) {
+  .iv-fd-page .iv-fd-container {
+    padding: 25px 16px 55px;
+  }
 
-    .fundraise-box {
-        width: 90%;
-    }
+  .iv-fd-page .iv-fd-header h1 {
+    font-size: 28px;
+  }
+
+  .iv-fd-page .iv-fd-header-actions {
+    flex-direction: column;
+  }
+
+  .iv-fd-page .iv-fd-header-actions a {
+    width: 100%;
+  }
+
+  .iv-fd-page .iv-fd-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .iv-fd-page .iv-fd-stats .iv-fd-stat:last-child {
+    grid-column: auto;
+  }
+
+  .iv-fd-page .iv-fd-stat {
+    padding: 13px 16px;
+  }
+
+  .iv-fd-page .iv-fd-section-heading h2 {
+    font-size: 20px;
+  }
+
+  .iv-fd-page .iv-fd-card-top {
+    padding: 16px;
+  }
+
+  .iv-fd-page .iv-fd-card-content {
+    padding: 17px;
+  }
+
+  .iv-fd-page .iv-fd-card-content h3 {
+    font-size: 19px;
+  }
+
+  .iv-fd-page .iv-fd-funding {
+    padding: 13px 11px;
+  }
+
+  .iv-fd-page .iv-fd-funding > div + div {
+    padding-left: 11px;
+    margin-left: 11px;
+  }
+
+  .iv-fd-page .iv-fd-funding strong {
+    font-size: 16px;
+  }
+
+  .iv-fd-page .iv-fd-modal {
+    padding: 23px;
+  }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+  .iv-fd-page .iv-fd-pitch-card,
+  .iv-fd-page .iv-fd-primary-action,
+  .iv-fd-page .iv-fd-secondary-action {
+    transition: none;
+  }
+
+  .iv-fd-page .iv-fd-skeleton-line {
+    animation: none;
+  }
 }

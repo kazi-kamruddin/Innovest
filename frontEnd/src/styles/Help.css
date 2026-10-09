@@ -1,95 +1,54 @@
-.contact {
-  padding: 40px 0;
-  background-color: #f8f8f8;
-  display: flex;
-  justify-content: center;
-}
-
-.contact-container {
-  display: flex;
-  width: 80%;
-  max-width: 1200px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  margin-top: -19px;
-}
-
-.image-section {
-  width: 50%;
-}
-
-.image-section img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.form-section {
-  width: 50%;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.form-section h2 {
-  font-size: 35px;
-  margin-bottom: 18px;
-  margin-left: 175px;
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: bold;
-  color: #af1246e2;
-}
-
-.input-field {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.input-field label {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.input-field input,
-.input-field textarea {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
-}
-
-.send-button {
-  padding: 12px 20px;
-  background-color: #66a93c;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.send-button:hover {
-  background-color: #116309;
-}
-
-/* Responsive */
-@media screen and (max-width: 768px) {
-  .contact-container {
-    flex-direction: column;
-    width: 90%;
-  }
-
-  .image-section,
-  .form-section {
-    width: 100%;
-  }
-
-  .form-section h2 {
-    font-size: 24px;
-  }
-}
+/* Phase 11 / Help & Contact. EmailJS uses existing form names unchanged. */
+.iv-help { --ih-dark:#24352e; --ih-green:#176d5d; --ih-border:#8faf98; min-height:calc(100svh - 86px); background:#fcfdfb; color:var(--ih-dark); font-family:"Outfit",sans-serif; }
+.iv-help *, .iv-help *::before,.iv-help *::after { box-sizing:border-box; }
+.iv-help .iv-help-container { width:100%; max-width:1280px; margin:0 auto; padding:34px 32px 80px; }
+.iv-help .iv-help-page-heading { margin-bottom:24px; }
+.iv-help .iv-help-eyebrow { display:inline-flex; align-items:center; gap:9px; margin:0; font-size:10px; font-weight:700; letter-spacing:.15em; color:#176d5d; }
+.iv-help .iv-help-eyebrow > span { width:7px; height:7px; border-radius:50%; background:#25916d; }
+.iv-help .iv-help-page-heading h1 { margin:9px 0 0; font-size:clamp(27px,3vw,39px); font-weight:650; letter-spacing:-.045em; color:#24352e; }
+.iv-help .iv-help-page-heading h1 em { color:#176d5d; font-style:normal; }
+.iv-help .iv-help-page-heading > p:not(.iv-help-eyebrow) { margin:8px 0 0; color:#718474; font-size:13px; line-height:1.7; }
+.iv-help .iv-help-layout { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(310px,.95fr); gap:22px; align-items:stretch; }
+.iv-help .iv-help-form-card,.iv-help .iv-help-side { border:1.5px solid var(--ih-border); border-radius:20px; min-width:0; overflow:hidden; }
+.iv-help .iv-help-form-card { background:#fff; padding:27px; box-shadow:0 8px 28px rgba(31,70,42,.04); }
+.iv-help .iv-help-card-heading { display:flex; align-items:center; gap:13px; margin-bottom:23px; }
+.iv-help .iv-help-card-icon { display:grid; place-items:center; flex:0 0 43px; width:43px; height:43px; border:1px solid #c6dfcc; border-radius:13px; color:#2e7950; background:#e8f3ea; }
+.iv-help .iv-help-card-heading h2 { margin:0; color:#24352e; font-size:19px; font-weight:650; }
+.iv-help .iv-help-card-heading p { margin:4px 0 0; color:#859688; font-size:12px; }
+.iv-help .iv-help-form { display:flex; flex-direction:column; gap:16px; }
+.iv-help .iv-help-field { display:flex; flex-direction:column; gap:7px; width:100%; margin:0; }
+.iv-help .iv-help-field > span { font-size:12px; color:#456c50; font-weight:650; }
+.iv-help .iv-help-field b { color:#ac4f45; }
+.iv-help .iv-help-field input,.iv-help .iv-help-field textarea { display:block; width:100%; margin:0; padding:12px 13px; border:1px solid #b9d1bf; border-radius:11px; background:#fbfdfb; color:#284332; font-family:inherit; font-size:13px; line-height:1.6; resize:vertical; outline:0; }
+.iv-help .iv-help-field input { height:44px; }
+.iv-help .iv-help-field textarea { min-height:139px; }
+.iv-help .iv-help-field input::placeholder,.iv-help .iv-help-field textarea::placeholder { color:#9bab9e; }
+.iv-help .iv-help-field input:focus,.iv-help .iv-help-field textarea:focus { border-color:#639f76; box-shadow:0 0 0 3px rgba(23,109,93,.10); }
+.iv-help .iv-help-button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:45px; padding:11px 16px; border-radius:11px; border:1px solid transparent; font-family:inherit; font-size:12px; font-weight:650; text-decoration:none; cursor:pointer; }
+.iv-help .iv-help-button--solid { background:#243e30; color:white; }
+.iv-help .iv-help-button--solid:hover:not(:disabled) { background:#176d5d; color:white; }
+.iv-help .iv-help-button--outline { border-color:#aecbb6; background:#f2f8f3; color:#2e6946; }
+.iv-help .iv-help-button--outline:hover { background:#e6f2e8; }
+.iv-help .iv-help-button:disabled { opacity:.64; cursor:wait; }
+.iv-help .iv-help-form-note { margin:-4px 0 0; font-size:10px; color:#94a497; line-height:1.6; text-align:center; }
+.iv-help .iv-help-form-error { margin:0; padding:11px 13px; border:1px solid #ecc2bc; border-radius:9px; background:#fff5f3; color:#a34139; font-size:12px; }
+.iv-help .iv-help-success { display:flex; flex-direction:column; align-items:center; text-align:center; padding:34px 10px 23px; }
+.iv-help .iv-help-success-icon { display:grid; place-items:center; width:63px; height:63px; border-radius:18px; background:#e5f3e9; color:#2c8453; }
+.iv-help .iv-help-success h3 { margin:19px 0 0; font-size:22px; font-weight:650; color:#24352e; }
+.iv-help .iv-help-success p { max-width:300px; margin:10px 0 19px; color:#6f8778; font-size:13px; line-height:1.7; }
+.iv-help .iv-help-side { display:flex; flex-direction:column; justify-content:space-between; padding:25px; background:linear-gradient(135deg,#d5e8d8,#edf6ed 70%,#fbfdfb); }
+.iv-help .iv-help-visual { position:relative; isolation:isolate; display:grid; place-items:center; width:100%; height:310px; }
+.iv-help .iv-help-visual-ring { position:absolute; border-radius:50%; border:1px solid rgba(79,146,99,.35); }
+.iv-help .iv-help-visual-ring--outer { width:264px; height:264px; }
+.iv-help .iv-help-visual-ring--inner { width:196px; height:196px; background:rgba(255,255,255,.13); }
+.iv-help .iv-help-visual-center { display:grid; place-items:center; width:123px; height:123px; border:1.5px solid #9ec6a9; border-radius:31px; background:rgba(255,255,255,.88); color:#267c55; box-shadow:0 13px 39px rgba(34,95,54,.08); transform:rotate(-8deg); }
+.iv-help .iv-help-visual-chip { position:absolute; display:inline-flex; align-items:center; gap:8px; padding:9px 13px; border:1px solid #afd0b8; border-radius:50px; background:#fafdFA; font-size:11px; font-weight:700; color:#477354; box-shadow:0 6px 19px rgba(37,90,52,.06); }
+.iv-help .iv-help-visual-chip--a { left:18px; top:65px; }
+.iv-help .iv-help-visual-chip--b { right:18px; bottom:55px; }
+.iv-help .iv-help-side-copy { padding:0 10px 8px; }
+.iv-help .iv-help-side-kicker { display:inline-flex; gap:8px; align-items:center; color:#438052; font-size:10px; letter-spacing:.12em; font-weight:700; }
+.iv-help .iv-help-side-copy h2 { max-width:395px; margin:9px 0 0; color:#284b35; font-size:clamp(23px,2.8vw,32px); font-weight:650; letter-spacing:-.04em; line-height:1.25; }
+.iv-help .iv-help-side-copy p { max-width:410px; margin:10px 0 0; color:#618069; font-size:13px; line-height:1.8; }
+.iv-help button:focus-visible { outline:3px solid rgba(23,109,93,.35); outline-offset:3px; }
+@media (max-width:850px) { .iv-help .iv-help-layout { grid-template-columns:minmax(0,1fr); } .iv-help .iv-help-side { flex-direction:row; align-items:center; gap:18px; } .iv-help .iv-help-visual { flex:0 0 38%; height:200px; } .iv-help .iv-help-visual-ring--outer { width:177px; height:177px; } .iv-help .iv-help-visual-ring--inner { width:130px; height:130px; } .iv-help .iv-help-visual-center { width:83px; height:83px; border-radius:20px; } .iv-help .iv-help-visual-chip { display:none; } }
+@media (max-width:600px) { .iv-help .iv-help-container { padding:25px 16px 58px; } .iv-help .iv-help-form-card { padding:21px; } .iv-help .iv-help-side { padding:24px; } .iv-help .iv-help-visual { display:none; } .iv-help .iv-help-side-copy { padding:0; } }

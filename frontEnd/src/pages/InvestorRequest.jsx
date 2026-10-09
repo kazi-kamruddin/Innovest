@@ -1,455 +1,526 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuthContext } from "../hooks/useAuthContext";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  FiArrowRight,
+  FiArrowUpRight,
+  FiBriefcase,
+  FiCalendar,
+  FiCheckCircle,
+  FiChevronDown,
+  FiEdit2,
+  FiFileText,
+  FiInbox,
+  FiLock,
+  FiPlus,
+  FiRefreshCw,
+  FiSearch,
+  FiSliders,
+  FiX,
+} from "react-icons/fi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuthContext } from "../hooks/useAuthContext";
 import "../styles/investor-request.css";
 
-const InvestorRequests = () => {
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+});
 
+function formatMoney(value) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return null;
+  }
+  const raw = String(value).trim();
+  const amount = Number(raw.replace(/[$,\s]/g, ""));
+  return Number.isFinite(amount) ? `$${currencyFormatter.format(amount)}` : raw;
+}
+
+function investmentRange(request) {
+  const minimum = formatMoney(request.minInvestment);
+  const maximum = formatMoney(request.maxInvestment);
+  if (minimum && maximum) return `${minimum} – ${maximum}`;
+  if (minimum) return `From ${minimum}`;
+  if (maximum) return `Up to ${maximum}`;
+  return "Flexible budget";
+}
+
+function timeValue(request) {
+  const timestamp = Date.parse(request.createdAt || "");
+  return Number.isFinite(timestamp) ? timestamp : Number(request.id) || 0;
+}
+
+function rangeWidth(request) {
+  const min = Number(request.minInvestment);
+  const max = Number(request.maxInvestment);
+  return Number.isFinite(max) && Number.isFinite(min) ? max - min : 0;
+}
+
+function requestDate(dateString) {
+  if (!dateString) return "Recently posted";
+  const date = new Date(dateString);
+  return Number.isNaN(date.getTime())
+    ? "Recently posted"
+    : date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
+function RequestCard({ request, mine, onClose }) {
+  const responsesLink = `/investor-request/${request.id}/response-pitches`;
+
+  return (
+    <article className="iv-ir-card">
+      <div className="iv-ir-card-band">
+        <span className="iv-ir-category">
+          <FiBriefcase size={14} aria-hidden="true" />
+          {request.category || "Other"}
+        </span>
+        <span className="iv-ir-open-badge">
+          <span aria-hidden="true" /> Open
+        </span>
+        <div className="iv-ir-band-ring" aria-hidden="true" />
+      </div>
+
+      <div className="iv-ir-card-body">
+        <h3>{request.title || "Untitled investment request"}</h3>
+        <p className="iv-ir-description">
+          {request.description || "No description was provided."}
+        </p>
+
+        <div className="iv-ir-card-details">
+          <div className="iv-ir-card-investment">
+            <span>INVESTMENT RANGE</span>
+            <strong>{investmentRange(request)}</strong>
+          </div>
+          <div className="iv-ir-card-meta">
+            <span>
+              <FiCalendar size={14} aria-hidden="true" />
+              {requestDate(request.createdAt)}
+            </span>
+            {request.name && (
+              <span className="iv-ir-investor-name" title={request.name}>
+                {mine ? "Posted by you" : `By ${request.name}`}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="iv-ir-card-actions">
+          {mine ? (
+            <>
+              <Link
+                to={`/investor-request/edit-request/${request.id}`}
+                className="iv-ir-card-main-action"
+              >
+                <FiEdit2 size={15} aria-hidden="true" /> Edit request
+              </Link>
+              <Link to={responsesLink} className="iv-ir-card-secondary-action">
+                Responses <FiArrowUpRight size={16} aria-hidden="true" />
+              </Link>
+              <button
+                type="button"
+                className="iv-ir-card-close-action"
+                aria-label={`Close request: ${request.title || "Untitled request"}`}
+                title="Mark as closed"
+                onClick={() => onClose(request)}
+              >
+                <FiX size={18} aria-hidden="true" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to={`/investor-request/create-response-pitch/${request.id}`}
+                className="iv-ir-card-main-action"
+              >
+                Respond with a pitch
+                <FiArrowRight size={16} aria-hidden="true" />
+              </Link>
+              <Link to={responsesLink} className="iv-ir-card-secondary-action">
+                Responses <FiArrowUpRight size={16} aria-hidden="true" />
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function EmptyState({ title, description, action, onClear }) {
+  return (
+    <div className="iv-ir-state">
+      <span className="iv-ir-state-icon"><FiInbox size={24} aria-hidden="true" /></span>
+      <h2>{title}</h2>
+      <p>{description}</p>
+      {onClear ? (
+        <button type="button" className="iv-ir-primary-button" onClick={onClear}>
+          Clear filters <FiArrowRight size={16} aria-hidden="true" />
+        </button>
+      ) : action}
+    </div>
+  );
+}
+
+function LoadingCards() {
+  return (
+    <div className="iv-ir-card-grid" role="status" aria-label="Loading investor requests">
+      {[0, 1, 2, 3].map((index) => (
+        <div key={index} className="iv-ir-card iv-ir-skeleton" aria-hidden="true">
+          <div className="iv-ir-card-band" />
+          <div className="iv-ir-card-body">
+            <span className="iv-ir-placeholder iv-ir-placeholder-title" />
+            <span className="iv-ir-placeholder" />
+            <span className="iv-ir-placeholder iv-ir-placeholder-half" />
+            <span className="iv-ir-placeholder iv-ir-placeholder-large" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function InvestorRequest() {
   const { user } = useAuthContext();
-  const navigate = useNavigate();
-  const API_BASE = import.meta.env.VITE_API_URL;
-
-  const [isInvestor, setIsInvestor] = useState(false);
   const [requests, setRequests] = useState([]);
+  const [isInvestor, setIsInvestor] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // UI state (enhancements are additive; originals preserved)
-  const [activeTab, setActiveTab] = useState("all");
+  const [fetchError, setFetchError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
+  const [activeTab, setActiveTab] = useState("others");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-
-  const [showModal, setShowModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [closing, setClosing] = useState(false);
+  const cancelRef = useRef(null);
 
   useEffect(() => {
-    const checkInvestorStatus = async () => {
-      if (!user) {
+    const controller = new AbortController();
+    if (!user?.id) {
+      setRequests([]);
+      setIsInvestor(false);
+      setLoading(false);
+      return () => controller.abort();
+    }
+
+    const token = localStorage.getItem("token")?.trim();
+    const headers = { Authorization: `Bearer ${token}` };
+
+    async function fetchData() {
+      setLoading(true);
+      setFetchError("");
+      setIsInvestor(false);
+      setActiveTab("others");
+
+      if (!API_BASE || !token) {
+        setFetchError("Your session or API configuration is unavailable. Please sign in again if needed.");
         setLoading(false);
         return;
       }
 
-      const token = localStorage.getItem("token");
-
-      try {
-        const endpoint = `${API_BASE}/investor-info/${user.id}`;
-        const res = await fetch(endpoint, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && Object.keys(data).length > 0) {
+      // The investor-info endpoint determines whether the user can post requests.
+      // A missing investor profile is normal for an entrepreneur.
+      async function fetchInvestorStatus() {
+        try {
+          const response = await fetch(`${API_BASE}/investor-info/${user.id}`, {
+            headers,
+            signal: controller.signal,
+          });
+          if (!response.ok) return;
+          const data = await response.json();
+          if (!controller.signal.aborted && data && Object.keys(data).length > 0) {
             setIsInvestor(true);
-            setActiveTab("my");
-          } else {
-            setActiveTab("all");
+            setActiveTab("mine");
           }
-        } else {
-          console.error("Failed to fetch investor info. Status:", res.status);
+        } catch (error) {
+          if (!controller.signal.aborted) console.warn("Investor status unavailable:", error);
         }
-      } catch (error) {
-        console.error("Error checking investor status:", error);
       }
-    };
 
-    const fetchRequests = async () => {
-      try {
-        const endpoint = `${API_BASE}/investor-request`;
-        const res = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setRequests(Array.isArray(data) ? data : []);
-        } else {
-          console.error("Failed to fetch investor requests. Status:", res.status);
-          toast.error("Couldn't load investor requests.");
+      async function fetchOpenRequests() {
+        try {
+          const response = await fetch(`${API_BASE}/investor-request`, {
+            headers,
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          if (!Array.isArray(data)) throw new Error("Unexpected requests response");
+          if (!controller.signal.aborted) setRequests(data);
+        } catch (error) {
+          if (!controller.signal.aborted) {
+            console.error("Unable to load investor requests:", error);
+            setFetchError("We couldn't load the requests right now. Please try again.");
+          }
+        } finally {
+          if (!controller.signal.aborted) setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching investor requests:", error);
-        toast.error("Network error while loading requests.");
-      } finally {
-        setLoading(false);
       }
-    };
 
-    checkInvestorStatus();
-    fetchRequests();
-  }, [user, API_BASE]);
+      fetchInvestorStatus();
+      fetchOpenRequests();
+    }
 
-  // same semantics as your original lists
+    fetchData();
+    return () => controller.abort();
+  }, [user?.id, retryKey]);
+
   const myRequests = useMemo(
-    () => (user ? requests.filter((r) => r.investorId === user.id) : []),
-    [requests, user]
+    () => requests.filter((request) => String(request.investorId) === String(user?.id)),
+    [requests, user?.id]
   );
+
   const otherRequests = useMemo(
-    () => (user ? requests.filter((r) => r.investorId !== user.id) : requests),
-    [requests, user]
+    () => requests.filter((request) => String(request.investorId) !== String(user?.id)),
+    [requests, user?.id]
   );
 
-  // Build category list for filter (non-breaking addition)
-  const categories = useMemo(() => {
-    const set = new Set(requests.map((r) => r.category).filter(Boolean));
-    return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [requests]);
+  const categories = useMemo(
+    () => [...new Set(requests.map((request) => request.category).filter(Boolean))].sort(),
+    [requests]
+  );
 
-  // helpers
-  const fmtMoney = (v) =>
-    typeof v === "number"
-      ? v.toLocaleString(undefined, {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-        })
-      : v;
-
-  const applyFilters = (list) => {
-    let out = [...list];
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      out = out.filter(
-        (r) =>
-          r.title?.toLowerCase().includes(q) ||
-          r.description?.toLowerCase().includes(q) ||
-          r.category?.toLowerCase().includes(q)
-      );
-    }
-
-    if (category !== "all") {
-      out = out.filter((r) => r.category === category);
-    }
-
-    out.sort((a, b) => {
-      if (sortBy === "newest")
-        return new Date(b.createdAt || b.id) - new Date(a.createdAt || a.id);
-      if (sortBy === "oldest")
-        return new Date(a.createdAt || a.id) - new Date(b.createdAt || b.id);
-      const aRange = (a.maxInvestment ?? 0) - (a.minInvestment ?? 0);
-      const bRange = (b.maxInvestment ?? 0) - (b.minInvestment ?? 0);
-      if (sortBy === "rangeAsc") return aRange - bRange;
-      if (sortBy === "rangeDesc") return bRange - aRange;
-      return 0;
-    });
-
-    return out;
+  const hasFilters = Boolean(query.trim() || category !== "all" || sortBy !== "newest");
+  const clearFilters = () => {
+    setQuery("");
+    setCategory("all");
+    setSortBy("newest");
   };
 
-  const visibleMy = applyFilters(myRequests);
-  const visibleOthers = applyFilters(otherRequests);
+  const visibleRequests = useMemo(() => {
+    const source = activeTab === "mine" && isInvestor ? myRequests : otherRequests;
+    const term = query.trim().toLowerCase();
 
-  const handleCloseRequest = async () => {
+    return source
+      .filter((request) => {
+        const matchesText = !term || [request.title, request.description, request.category]
+          .some((value) => String(value || "").toLowerCase().includes(term));
+        return matchesText && (category === "all" || request.category === category);
+      })
+      .sort((a, b) => {
+        if (sortBy === "oldest") return timeValue(a) - timeValue(b);
+        if (sortBy === "rangeAsc") return rangeWidth(a) - rangeWidth(b);
+        if (sortBy === "rangeDesc") return rangeWidth(b) - rangeWidth(a);
+        return timeValue(b) - timeValue(a);
+      });
+  }, [activeTab, isInvestor, myRequests, otherRequests, query, category, sortBy]);
+
+  useEffect(() => {
     if (!selectedRequest) return;
+    cancelRef.current?.focus();
+    const onKeyDown = (event) => {
+      if (event.key === "Escape" && !closing) setSelectedRequest(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [selectedRequest, closing]);
 
+  async function closeRequest() {
+    if (!selectedRequest || closing || !user?.id) return;
+    const token = localStorage.getItem("token")?.trim();
+    if (!token) return toast.error("Your session has expired. Please sign in again.");
+
+    setClosing(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
+      const response = await fetch(
         `${API_BASE}/investor-request/${selectedRequest.id}/close`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (!res.ok) {
-        throw new Error("Failed to close request");
-      }
-
-      toast.success("Request marked as closed!");
-      setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
-    } catch (error) {
-      console.error("Error closing request:", error);
-      toast.error("Failed to close request.");
-    } finally {
-      setShowModal(false);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Couldn't close request.");
+      setRequests((current) => current.filter((r) => String(r.id) !== String(selectedRequest.id)));
       setSelectedRequest(null);
+      toast.success("Request marked as closed.");
+    } catch (error) {
+      console.error("Closing request failed:", error);
+      toast.error(error.message || "Couldn't close request.");
+    } finally {
+      setClosing(false);
     }
-  };
-
-  // shared card renderer; actions remain identical to your original
-  const renderCard = (r, isMine = false) => (
-    <div key={r.id} className="ir-card">
-      <div className="ir-card-top">
-        <div className="ir-chip ir-chip--category" title="Category">
-          {r.category || "Uncategorized"}
-        </div>
-        <div className="ir-chip ir-chip--status">Open</div>
-      </div>
-
-      <h4 className="ir-title" title={r.title}>
-        {r.title}
-      </h4>
-      <p className="ir-desc">{r.description}</p>
-
-      <div className="ir-meta">
-        <div className="ir-meta-row">
-          <span className="ir-label">Investment Range</span>
-          <span className="ir-value">
-            {fmtMoney(r.minInvestment)} – {fmtMoney(r.maxInvestment)}
-          </span>
-        </div>
-        {r.createdAt && (
-          <div className="ir-meta-row">
-            <span className="ir-label">Posted</span>
-            <span className="ir-value">
-              {new Date(r.createdAt).toLocaleDateString()}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="ir-actions">
-        {isMine ? (
-          <>
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate(`/investor-request/edit-request/${r.id}`)}
-            >
-              Edit Request
-            </button>
-            <button
-              className="btn btn-danger"
-              onClick={() => {
-                setSelectedRequest(r);
-                setShowModal(true);
-              }}
-            >
-              Mark as Closed
-            </button>
-            <button
-              className="btn btn-ghost"
-              onClick={() =>
-                navigate(`/investor-request/${r.id}/response-pitches`)
-              }
-            >
-              Response Pitches
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              className="btn btn-primary"
-              onClick={() =>
-                navigate(`/investor-request/create-response-pitch/${r.id}`)
-              }
-            >
-              Respond to Request
-            </button>
-            <button
-              className="btn btn-ghost"
-              onClick={() =>
-                navigate(`/investor-request/${r.id}/response-pitches`)
-              }
-            >
-              Response Pitches
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
+  }
 
   return (
-    <div className="ir">
-      {/* Header (keeps your primary/secondary actions) */}
-      <div className="ir-header">
-        <div>
-          <h2 className="ir-page-title">Investor Requests</h2>
-          <p className="ir-page-sub">
-            Discover opportunities, respond with pitches, or manage your own
-            requests.
-          </p>
-        </div>
-
-        {isInvestor && (
-          <div className="ir-header-actions">
-            <button
-              onClick={() => navigate("/investor-request/create-new-request")}
-              className="btn btn-primary"
-            >
-              Create New Request
-            </button>
-
-            <button
-              onClick={() => navigate("/investor-request/my-closed-requests")}
-              className="btn btn-secondary"
-            >
-              View Closed Requests
-            </button>
+    <main className="iv-ir-page">
+      <div className="iv-ir-container">
+        <header className="iv-ir-header">
+          <div className="iv-ir-heading">
+            <p className="iv-ir-eyebrow"><span aria-hidden="true" /> INVESTOR CONNECTIONS</p>
+            <h1>Investor <em>requests.</em></h1>
+            <p className="iv-ir-subtitle">
+              Discover what investors are looking for, respond with your pitch,
+              or manage requests you've shared.
+            </p>
           </div>
-        )}
-      </div>
 
-      {/* Toolbar (tabs + non-invasive filters) */}
-      <div className="ir-toolbar">
-        <div className="ir-tabs" role="tablist" aria-label="Request owner tabs">
           {isInvestor && (
-            <button
-              role="tab"
-              aria-selected={activeTab === "my"}
-              className={`ir-tab ${activeTab === "my" ? "is-active" : ""}`}
-              onClick={() => setActiveTab("my")}
-            >
-              My Requests ({myRequests.length})
-            </button>
-          )}
-          <button
-            role="tab"
-            aria-selected={activeTab === "all"}
-            className={`ir-tab ${activeTab === "all" ? "is-active" : ""}`}
-            onClick={() => setActiveTab("all")}
-          >
-            Other Investors ({otherRequests.length})
-          </button>
-        </div>
-
-        <div className="ir-filters">
-          <div className="ir-search">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by title, description, or category..."
-              aria-label="Search requests"
-            />
-            <span className="ir-search-icon" aria-hidden>
-              🔎
-            </span>
-          </div>
-
-          <select
-            className="ir-select"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            aria-label="Filter by category"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === "all" ? "All categories" : c}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="ir-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort"
-          >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="rangeAsc">Investment Range ↑</option>
-            <option value="rangeDesc">Investment Range ↓</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Content: retains your original loading + sections + actions */}
-      {loading ? (
-        <div className="ir-grid">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="ir-card ir-skeleton">
-              <div className="ir-skel-line w-2/3" />
-              <div className="ir-skel-line" />
-              <div className="ir-skel-line w-1/2" />
-              <div className="ir-skel-line w-1/3" />
+            <div className="iv-ir-header-actions">
+              <Link to="/investor-request/my-closed-requests" className="iv-ir-outline-button">
+                <FiFileText size={16} aria-hidden="true" /> Closed requests
+              </Link>
+              <Link to="/investor-request/create-new-request" className="iv-ir-primary-button">
+                <FiPlus size={17} aria-hidden="true" /> Create request
+              </Link>
             </div>
-          ))}
-        </div>
-      ) : (
-        <>
-          {activeTab === "my" && isInvestor && (
-            <>
-              {visibleMy.length > 0 ? (
-                <div className="ir-grid">
-                  {visibleMy.map((r) => renderCard(r, true))}
-                </div>
-              ) : (
-                <div className="ir-empty">
-                  <div className="ir-empty-emoji" aria-hidden>
-                    🗂️
-                  </div>
-                  <h4>No matching requests</h4>
-                  <p>Try adjusting your filters or create a new request.</p>
+          )}
+        </header>
+
+        {!user?.id ? (
+          <EmptyState
+            title="Sign in to explore investor requests"
+            description="Connect with investors and view opportunities after you sign in."
+            action={<Link to="/login" className="iv-ir-primary-button">Sign in <FiArrowRight size={16} /></Link>}
+          />
+        ) : (
+          <>
+            <section className="iv-ir-toolbar" aria-label="Find investor requests">
+              <div className="iv-ir-toolbar-heading">
+                <div className="iv-ir-toolbar-title"><FiSliders size={17} aria-hidden="true" /> Explore requests</div>
+                <span>{loading ? "Loading..." : `${myRequests.length + otherRequests.length} open requests`}</span>
+              </div>
+
+              <div className="iv-ir-tabs" aria-label="Choose which requests to see">
+                {isInvestor && (
                   <button
-                    className="btn btn-primary"
-                    onClick={() =>
-                      navigate("/investor-request/create-new-request")
-                    }
+                    type="button"
+                    className={`iv-ir-tab ${activeTab === "mine" ? "is-active" : ""}`}
+                    aria-pressed={activeTab === "mine"}
+                    onClick={() => setActiveTab("mine")}
                   >
-                    Create New Request
+                    My requests <span>{myRequests.length}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={`iv-ir-tab ${activeTab === "others" ? "is-active" : ""}`}
+                  aria-pressed={activeTab === "others"}
+                  onClick={() => setActiveTab("others")}
+                >
+                  Other investors <span>{otherRequests.length}</span>
+                </button>
+              </div>
+
+              <div className="iv-ir-filters">
+                <label className="iv-ir-search">
+                  <FiSearch size={18} aria-hidden="true" />
+                  <span className="iv-ir-visually-hidden">Search investor requests</span>
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    type="search"
+                    placeholder="Search requests..."
+                  />
+                </label>
+
+                <label className="iv-ir-select-wrap">
+                  <span className="iv-ir-visually-hidden">Filter by category</span>
+                  <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                    <option value="all">All categories</option>
+                    {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+                  </select>
+                  <FiChevronDown size={16} aria-hidden="true" />
+                </label>
+
+                <label className="iv-ir-select-wrap">
+                  <span className="iv-ir-visually-hidden">Sort investor requests</span>
+                  <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="rangeAsc">Narrowest range</option>
+                    <option value="rangeDesc">Widest range</option>
+                  </select>
+                  <FiChevronDown size={16} aria-hidden="true" />
+                </label>
+              </div>
+
+              {hasFilters && (
+                <div className="iv-ir-clear-row">
+                  <button type="button" onClick={clearFilters}>
+                    <FiX size={14} aria-hidden="true" /> Clear filters
                   </button>
                 </div>
               )}
-            </>
-          )}
+            </section>
 
-          {activeTab === "all" && (
-            <>
-              {visibleOthers.length > 0 ? (
-                <div className="ir-grid">
-                  {visibleOthers.map((r) =>
-                    renderCard(r, false)
-                  )}
-                </div>
-              ) : (
-                <div className="ir-empty">
-                  <div className="ir-empty-emoji" aria-hidden>
-                    🔍
-                  </div>
-                  <h4>No investor requests available.</h4>
-                  <p>Try a different search or clear the category filter.</p>
-                </div>
-              )}
-            </>
-          )}
-        </>
-      )}
+            <div className="iv-ir-results-heading">
+              <div>
+                <h2>{activeTab === "mine" && isInvestor ? "Your open requests" : "Open opportunities"}</h2>
+                <p aria-live="polite">
+                  {loading ? "Loading requests..." : fetchError ? "Unable to load requests" : `${visibleRequests.length} ${visibleRequests.length === 1 ? "request" : "requests"} found`}
+                </p>
+              </div>
+            </div>
 
-      {/* Confirmation Modal (preserved behavior) */}
-      {showModal && selectedRequest && (
+            {loading ? (
+              <LoadingCards />
+            ) : fetchError ? (
+              <div className="iv-ir-state" role="alert">
+                <span className="iv-ir-state-icon"><FiRefreshCw size={23} aria-hidden="true" /></span>
+                <h2>Requests aren't loading</h2>
+                <p>{fetchError}</p>
+                <button type="button" className="iv-ir-primary-button" onClick={() => setRetryKey((key) => key + 1)}>
+                  <FiRefreshCw size={16} aria-hidden="true" /> Try again
+                </button>
+              </div>
+            ) : visibleRequests.length ? (
+              <div className="iv-ir-card-grid">
+                {visibleRequests.map((request) => (
+                  <RequestCard
+                    key={request.id}
+                    request={request}
+                    mine={activeTab === "mine" && isInvestor}
+                    onClose={setSelectedRequest}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title={hasFilters ? "No matching requests" : activeTab === "mine" && isInvestor ? "No open requests yet" : "No investor requests available"}
+                description={hasFilters ? "Try another search or clear your filters." : activeTab === "mine" && isInvestor ? "When you publish an investment request, it will appear here." : "New investor requests will appear here when they're posted."}
+                onClear={hasFilters ? clearFilters : undefined}
+                action={activeTab === "mine" && isInvestor ? (
+                  <Link to="/investor-request/create-new-request" className="iv-ir-primary-button">
+                    <FiPlus size={16} aria-hidden="true" /> Create a request
+                  </Link>
+                ) : null}
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      {selectedRequest && (
         <div
-          className="ir-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ir-modal-title"
+          className="iv-ir-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !closing) setSelectedRequest(null);
+          }}
         >
           <div
-            className="ir-modal__backdrop"
-            onClick={() => setShowModal(false)}
-          />
-          <div className="ir-modal__content">
-            <h5 id="ir-modal-title" className="ir-modal__title">
-              Mark request as closed?
-            </h5>
-            <p className="ir-modal__body">
-              Are you sure you want to mark{" "}
-              <strong>&quot;{selectedRequest.title}&quot;</strong> as closed? This will
-              hide it from the main feed.
+            className="iv-ir-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="iv-ir-modal-title"
+            aria-describedby="iv-ir-modal-description"
+          >
+            <span className="iv-ir-modal-icon"><FiLock size={22} aria-hidden="true" /></span>
+            <h2 id="iv-ir-modal-title">Close this request?</h2>
+            <p id="iv-ir-modal-description">
+              <strong>{selectedRequest.title}</strong> will disappear from the open requests feed.
+              You can reopen it later from Closed requests.
             </p>
-            <div className="ir-modal__actions">
-              <button className="btn btn-danger" onClick={handleCloseRequest}>
-                Yes, Close
+            <div className="iv-ir-modal-actions">
+              <button type="button" ref={cancelRef} onClick={() => setSelectedRequest(null)} disabled={closing} className="iv-ir-modal-cancel">
+                Keep open
               </button>
-              <button className="btn btn-ghost" onClick={() => setShowModal(false)}>
-                No, Cancel
+              <button type="button" onClick={closeRequest} disabled={closing} className="iv-ir-modal-confirm">
+                <FiCheckCircle size={16} aria-hidden="true" /> {closing ? "Closing..." : "Close request"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <ToastContainer />
-    </div>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </main>
   );
-};
-
-export default InvestorRequests;
+}
