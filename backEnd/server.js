@@ -28,6 +28,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/", (req, res) => {
+  res.json({ service: "Innovest API", status: "ok" });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 (async () => {
   try {
     const conn = await db.getConnection();

@@ -26,4 +26,6 @@ Create a Web Service linked to the GitHub repository with these settings:
 
 Render builds the image from the Dockerfile and starts it with its `CMD`. The server reads Render's `PORT` automatically. Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `SECRET`, and `FRONTEND_URL` as Render environment variables. Set `DB_SSL_CA` to the full PEM contents of the Aiven CA certificate, including the BEGIN and END lines; do not set `DB_SSL_CA_PATH` to a path on your computer. Set `FRONTEND_URL` to the final Vercel production origin (for example, `https://innovest.vercel.app`) without a trailing slash. Never commit the `.env` file, certificate, or credentials.
 
+The root endpoint (`/`) returns a small API status response, and `/health` is available as a liveness check for Render. Set Render's health check path to `/health`. The health check confirms that the web process is responding; it does not query MySQL.
+
 The Dockerfile does not include or start MySQL. Aiven remains the database service, and Vercel builds the frontend separately.
