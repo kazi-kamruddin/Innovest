@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/pitch-single.css";
 import pitchImage from "../assets/pitch_investor.jpg";
@@ -16,7 +16,7 @@ const PitchSingle = () => {
       .then((response) => response.json())
       .then((data) => setPitch(data))
       .catch((error) => console.error("Error fetching pitch:", error));
-  }, [id]);
+  }, [id, API_BASE]);
 
   if (!pitch) {
     return <div>Loading...</div>;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLogin } from '../hooks/useLogin';
 import "../styles/reg-login.css";
@@ -10,26 +10,16 @@ function RegLogin() {
   const { login, error, isLoading } = useLogin();
   const navigate = useNavigate();
 
-  const API_BASE = import.meta.env.VITE_API_URL;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMsg('');
-    console.log('handleSubmit called');
 
     const success = await login(email, password);
-    console.log('login returned:', success);
 
     if (success) {
-      console.log('Login succeeded, setting success message');
       setSuccessMsg('Login successful!');
-      console.log('Waiting 1.5s before navigating...');
       await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Navigating now');
       navigate('/');
-    }
-    else {
-      console.log('Login failed or no success returned');
     }
   };
 
@@ -78,7 +68,7 @@ function RegLogin() {
     
         <div className="right">
           <h2>Welcome to login</h2>
-          <p>Don't have an account?</p>
+          <p>Don&apos;t have an account?</p>
      
           <button className="btn-signup" onClick={() => navigate('/signup')}>Sign Up</button>
         </div>

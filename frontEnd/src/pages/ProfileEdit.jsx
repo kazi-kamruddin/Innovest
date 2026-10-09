@@ -43,7 +43,6 @@ const ProfileEdit = () => {
         const data = await response.json();
         if (response.ok) {
           if (!data || Object.keys(data).length === 0) {
-            console.log("No existing profile data found. Initializing empty form.");
             setFormData({
               location: "",
               areas_of_interest: "",
@@ -69,7 +68,7 @@ const ProfileEdit = () => {
     };
 
     fetchProfileData();
-  }, [user]);
+  }, [user, API_BASE]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -131,6 +130,8 @@ const ProfileEdit = () => {
   const selectedInterests = formData.areas_of_interest
     ? formData.areas_of_interest.split(",").map((i) => i.trim())
     : [];
+
+  if (loading) return <div>Loading profile...</div>;
 
   return (
     <div className="edit-profile-container">

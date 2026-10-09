@@ -49,7 +49,7 @@ const startConversation = async (req, res) => {
 
     res.status(201).json({
       id: result.insertId,
-      user1_id: userId,
+      user_one_id: userId,
       user_two_id: targetUserId,
     });
   } catch (error) {
@@ -108,7 +108,7 @@ const sendMessage = async (req, res) => {
     }
 
     const [result] = await db.execute(
-      "INSERT INTO messages (conversation_id, sender_id, content, created_at) VALUES (?, ?, ?, NOW())",
+      "INSERT INTO messages (conversation_id, sender_id, body, created_at) VALUES (?, ?, ?, NOW())",
       [id, userId, content]
     );
 

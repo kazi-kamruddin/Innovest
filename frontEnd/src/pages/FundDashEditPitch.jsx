@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useParams,useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -29,7 +29,6 @@ const FundDashEditPitch = () => {
   });
 
   const [showModal, setShowModal] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const industryOptions = [
     "Technology", "Healthcare", "Finance", "Real Estate", "Education", "Food & Beverage", "Other"
@@ -54,7 +53,6 @@ const FundDashEditPitch = () => {
   useEffect(() => {
     fetch(`${API_BASE}/pitches/${id}`)
       .then((response) => {
-        console.log("GET /api/pitches/" + id, response);
         if (!response.ok) throw new Error("Failed to fetch pitch data");
         return response.json();
       })
@@ -79,7 +77,7 @@ const FundDashEditPitch = () => {
         console.error("Error fetching pitch:", error);
         toast.error("Failed to load pitch details.");
       });
-  }, [id]);
+  }, [id, API_BASE]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -101,8 +99,6 @@ const FundDashEditPitch = () => {
         return;
     }
 
-    console.log("PUT /api/users/" + userId + "/pitches/" + id);
-    console.log("Payload:", formData);
 
     fetch(`${API_BASE}/pitches/users/${userId}/pitches/${id}`, {
         method: "PUT",
@@ -113,7 +109,6 @@ const FundDashEditPitch = () => {
         body: JSON.stringify(formData),
     })
         .then((res) => {
-        console.log("Response:", res);
         if (!res.ok) {
             return res.json().then((err) => {
             throw new Error(err?.error || "Failed to update pitch");
@@ -121,7 +116,7 @@ const FundDashEditPitch = () => {
         }
         return res.json();
         })
-        .then((data) => {
+        .then(() => {
         toast.success("Pitch updated successfully!");
         setTimeout(() => navigate("/fundraise-dashboard"), 1500);
         })

@@ -1,9 +1,8 @@
-import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthContext } from "./hooks/useAuthContext";
 
 import LandingPage from "./pages/LandingPage";
-import AboutUs from "./pages/AboutUs.jsx";
+import AboutUs from "./pages/aboutUs.jsx";
 import Messages from "./pages/Messages.jsx";
 
 import RegSignUp from "./pages/RegSignUp.jsx";
@@ -50,7 +49,7 @@ function App() {
         <Routes >
           <Route path="/" element={<LandingPage />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/messages" element={<Messages />} /> 
+          <Route path="/messages" element={user ? <Messages /> : <Navigate to="/login" />} />
 
           <Route path="/login" element={!user ? <RegLogin /> : <Navigate to={"/"} />} />
           <Route path="/signup" element={!user ? <RegSignUp /> : <Navigate to={"/"} />} />

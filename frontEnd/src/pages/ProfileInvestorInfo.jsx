@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthContext } from '../hooks/useAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -73,7 +73,7 @@ const ProfileInvestorInfo = () => {
     };
 
     fetchInvestorInfo();
-  }, [user]);
+  }, [user, API_BASE]);
 
   const handleMinChange = (e) => {
     const value = e.target.value;

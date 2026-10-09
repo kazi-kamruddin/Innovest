@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import "../styles/profile-others.css";
@@ -6,9 +6,8 @@ import profileImage from "../assets/profile.jpeg";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { io } from "socket.io-client";
 
-let socket;
-
 const ProfileOthers = () => {
+  const socketRef = useRef(null);
   const [userInfo, setUserInfo] = useState(null);
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -17,30 +16,12 @@ const ProfileOthers = () => {
   const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    if (!socket) {
-      socket = io(API_BASE, { auth: { token } });
-    }
+    if (!user || !token) return;
 
-    if (user) {
-      socket.emit("user_connected", user.id);
-    }
-  }, [user, API_BASE, token]);
+    const socket = io(API_BASE, { auth: { token } });
+    socketRef.current = socket;
 
-  const handleKnock = () => {
-    if (!user) return alert("You need to be logged in to knock!");
-    if (!userInfo || !socket) return;
-
-    socket.emit("knock_user", {
-      senderId: user.id,
-      receiverId: userInfo.user.id,
-    });
-  };
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("new_conversation", ({ conversationId }) => {
-      console.log("Knock successful! Conversation:", conversationId);
+    socket.on("new_conversation", () => {
       navigate("/messages");
     });
 
@@ -49,10 +30,19 @@ const ProfileOthers = () => {
     });
 
     return () => {
-      socket.off("new_conversation");
-      socket.off("knock_error");
+      socket.disconnect();
+      if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [navigate]);
+  }, [user, API_BASE, token, navigate]);
+
+  const handleKnock = () => {
+    if (!user) return alert("You need to be logged in to knock!");
+    if (!userInfo || !socketRef.current) return;
+
+    socketRef.current.emit("knock_user", {
+      receiverId: userInfo.user.id,
+    });
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {

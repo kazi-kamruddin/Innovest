@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 const db = require("./config/database");
 
 const userRoutes = require("./routes/userRoutes");
@@ -13,7 +14,6 @@ const investorRequestRoutes = require("./routes/investorRequestRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
-const onlineUsers = new Map();
 
 app.use(
   cors({
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 (async () => {
   try {
     const conn = await db.getConnection();
-    console.log("Connected to RAILWAY MySQL");
+    console.log("Connected to MySQL");
     conn.release();
   } catch (err) {
     console.error("Database connection failed:", err);
@@ -56,31 +56,39 @@ const io = new Server(server, {
   },
 });
 
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Authentication required"));
+    socket.data.userId = jwt.verify(token, process.env.SECRET).id;
+    next();
+  } catch {
+    next(new Error("Invalid or expired token"));
+  }
+});
+
 io.on("connection", (socket) => {
+  const userId = socket.data.userId;
+  socket.join(`user:${userId}`);
   console.log("A user connected, socket id:", socket.id);
 
-  socket.on("user_connected", (userId) => {
-    onlineUsers.set(userId, socket.id);
-    console.log(`User ${userId} is online.`);
-  });
-
   socket.on("disconnect", () => {
-    for (let [key, value] of onlineUsers.entries()) {
-      if (value === socket.id) {
-        console.log(`User ${key} disconnected.`);
-        onlineUsers.delete(key);
-        break;
-      }
-    }
+    console.log(`User ${userId} disconnected.`);
   });
 
-  socket.on("knock_user", async ({ senderId, receiverId }) => {
+  socket.on("knock_user", async ({ receiverId }) => {
     try {
+      const senderId = userId;
+      const targetId = Number(receiverId);
+      if (!Number.isInteger(targetId) || targetId <= 0 || targetId === senderId) {
+        return socket.emit("knock_error", { message: "Invalid recipient" });
+      }
+
       const [existing] = await db.execute(
         `SELECT * FROM conversations 
          WHERE (user_one_id = ? AND user_two_id = ?) 
             OR (user_one_id = ? AND user_two_id = ?)`,
-        [senderId, receiverId, receiverId, senderId]
+        [senderId, targetId, targetId, senderId]
       );
 
       let conversationId;
@@ -89,19 +97,16 @@ io.on("connection", (socket) => {
       } else {
         const [result] = await db.execute(
           "INSERT INTO conversations (user_one_id, user_two_id, created_at) VALUES (?, ?, NOW())",
-          [senderId, receiverId]
+          [senderId, targetId]
         );
         conversationId = result.insertId;
       }
 
-      [senderId, receiverId].forEach((id) => {
-        const socketId = onlineUsers.get(id);
-        if (socketId) {
-          io.to(socketId).emit("new_conversation", {
-            conversationId,
-            partnerId: id === senderId ? receiverId : senderId,
-          });
-        }
+      [senderId, targetId].forEach((id) => {
+        io.to(`user:${id}`).emit("new_conversation", {
+          conversationId,
+          partnerId: id === senderId ? targetId : senderId,
+        });
       });
 
     } catch (err) {
@@ -112,9 +117,22 @@ io.on("connection", (socket) => {
 
   socket.on(
     "send_message",
-    async ({ conversationId, senderId, content, timestamp }) => {
+    async ({ conversationId, content }) => {
       try {
-        const createdAt = timestamp || new Date();
+        const senderId = userId;
+        if (typeof content !== "string" || !content.trim()) {
+          return socket.emit("send_message_error", { message: "Message content is required" });
+        }
+
+        const [rows] = await db.execute(
+          "SELECT user_one_id, user_two_id FROM conversations WHERE id = ?",
+          [conversationId]
+        );
+        if (rows.length === 0 || ![rows[0].user_one_id, rows[0].user_two_id].includes(senderId)) {
+          return socket.emit("send_message_error", { message: "Not authorized for this conversation" });
+        }
+
+        const createdAt = new Date();
 
         const [result] = await db.execute(
           "INSERT INTO messages (conversation_id, sender_id, body, created_at) VALUES (?, ?, ?, ?)",
@@ -129,19 +147,10 @@ io.on("connection", (socket) => {
           created_at: createdAt,
         };
 
-        const [rows] = await db.execute(
-          "SELECT user_one_id, user_two_id FROM conversations WHERE id = ?",
-          [conversationId]
-        );
-
-        if (rows.length === 0) return;
         const { user_one_id, user_two_id } = rows[0];
         const receiverId = senderId === user_one_id ? user_two_id : user_one_id;
 
-        const receiverSocketId = onlineUsers.get(receiverId);
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("receive_message", messageData);
-        }
+        io.to(`user:${receiverId}`).emit("receive_message", messageData);
 
         socket.emit("receive_message", messageData);
 

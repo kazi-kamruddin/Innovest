@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -45,10 +45,10 @@ const InvestorRequestsAllResponses = () => {
         pitches.map((p) => (
           <div key={p.id} className="pitch-card" style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}>
             <h3>{p.title}</h3>
-            <p>{p.description}</p>
+            <p>{p.the_business}</p>
             <p><strong>Industry:</strong> {p.industry}</p>
             <p><strong>Stage:</strong> {p.stage}</p>
-            <p><strong>Amount Needed:</strong> ${p.amount_needed}</p>
+            <p><strong>Raising Amount:</strong> ${p.total_raising_amount}</p>
             <p><strong>Entrepreneur:</strong> {p.name} ({p.email})</p>
             
             <button 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -6,7 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "../styles/investor-request-create.css"; 
 
 const CreateInvestorRequest = () => {
-  console.log("\n\n----------------- Create Investor Request Page --------------------");
 
   const { user } = useAuthContext();
   const navigate = useNavigate();
@@ -55,9 +54,6 @@ const CreateInvestorRequest = () => {
       maxInvestment: formData.maxInvestment,
     };
 
-    console.log(`POST ${endpoint}`);
-    console.log("Payload:", payload);
-    console.log("User token:", token);
 
     try {
       const res = await fetch(endpoint, {
@@ -74,8 +70,6 @@ const CreateInvestorRequest = () => {
         throw new Error(errorData.error || "Failed to create request");
       }
 
-      const result = await res.json();
-      console.log("API response:", result);
       toast.success("Investor request created successfully!");
       setTimeout(() => navigate("/investor-request"), 1000);
     } catch (err) {

@@ -124,8 +124,8 @@ const reopenRequest = async (req, res) => {
     const userId = req.user.id;
 
     const [check] = await db.execute(
-      `SELECT * FROM investor_requests 
-       WHERE id = ? AND investorId = (SELECT id FROM investor_info WHERE user_id = ?)`,
+      `SELECT * FROM investor_requests
+       WHERE id = ? AND investorId = ? AND status = 'closed'`,
       [id, userId]
     );
 

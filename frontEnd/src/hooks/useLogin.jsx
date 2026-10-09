@@ -32,7 +32,7 @@ export const useLogin = () => {
       setIsLoading(false);
       return false; 
     } catch (err) {
-      const message = err.response?.data?.message || 'Invalid credentials';
+      const message = err.response?.data?.error || 'Invalid credentials';
       setError(message);
       setIsLoading(false);
       return false; 

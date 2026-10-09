@@ -1,8 +1,58 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { Link } from "react-router-dom";
 import Typewriter from 'typewriter-effect';
 import '../styles/landing-page.css';
+
+const images = import.meta.glob('../images/*', { eager: true, query: '?url', import: 'default' });
+const image = (name) => images[`../images/${name}`];
+
+const orangeStats = [
+  { number: '2k+', label: 'Trusted Users' },
+  { number: '1k+', label: 'Entrepreneurs Joined' },
+  { number: '500+', label: 'Community Connections' },
+];
+
+const purpleStats = [
+  { number: '70%', label: 'Investor Retention Rate' },
+  { number: '78%', label: 'Repeat Investment' },
+  { number: '82%', label: 'Funding Success' },
+];
+
+function AnimatedStatCard({ stats, className }) {
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+  const current = stats[index];
+
+  useEffect(() => {
+    let timeout;
+    const interval = setInterval(() => {
+      setFade(false);
+      timeout = setTimeout(() => {
+        setIndex((prev) => (prev + 1) % stats.length);
+        setFade(true);
+      }, 500);
+    }, 2500);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [stats]);
+
+  return (
+    <div className={`stat-card ${className}`}>
+      <h2>
+        <span className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
+          {current.number}
+        </span>
+      </h2>
+      <p className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
+        {current.label}
+      </p>
+    </div>
+  );
+}
 
 function LandingPage() {
   const cardRefs = useRef([]);
@@ -10,53 +60,11 @@ function LandingPage() {
   const [typewriterKey, setTypewriterKey] = useState(0);
 
   const { ref: powerHeaderRef, inView: powerHeaderInView } = useInView({ threshold: 0.3 });
-  const { ref: statsRef, inView: statsInView } = useInView({ threshold: 0.3, triggerOnce: false });
+  const { ref: statsRef } = useInView({ threshold: 0.3, triggerOnce: false });
   const { ref: bannerHeaderRef, inView: bannerHeaderInView } = useInView({ threshold: 0.3 });
 
-  const orangeStats = [
-    { number: '2k+', label: 'Trusted Users' },
-    { number: '1k+', label: 'Entrepreneurs Joined' },
-    { number: '500+', label: 'Community Connections' },
-  ];
-
-  const purpleStats = [
-    { number: '70%', label: 'Investor Retention Rate' },
-    { number: '78%', label: 'Repeat Investment' },
-    { number: '82%', label: 'Funding Success' },
-  ];
-
-  function AnimatedStatCard({ stats, className }) {
-    const [index, setIndex] = useState(0);
-    const [fade, setFade] = useState(true);
-    const current = stats[index];
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setFade(false);
-        setTimeout(() => {
-          setIndex((prev) => (prev + 1) % stats.length);
-          setFade(true);
-        }, 500);
-      }, 2500);
-
-      return () => clearInterval(interval);
-    }, [stats]);
-
-    return (
-      <div className={`stat-card ${className}`}>
-        <h2>
-          <span className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
-            {current.number}
-          </span>
-        </h2>
-        <p className={`animated-stat-cycle ${fade ? 'fade-in' : 'fade-out'}`}>
-          {current.label}
-        </p>
-      </div>
-    );
-  }
-
   useEffect(() => {
+    const cards = cardRefs.current.filter(Boolean);
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -71,18 +79,15 @@ function LandingPage() {
       { threshold: 0.3 }
     );
 
-    cardRefs.current.forEach(card => {
-      if (card) observer.observe(card);
-    });
+    cards.forEach(card => observer.observe(card));
 
     return () => {
-      cardRefs.current.forEach(card => {
-        if (card) observer.unobserve(card);
-      });
+      cards.forEach(card => observer.unobserve(card));
     };
   }, []);
 
   useEffect(() => {
+    const images = powerImgRefs.current.filter(Boolean);
     const imgObserver = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -97,14 +102,10 @@ function LandingPage() {
       { threshold: 0.3 }
     );
 
-    powerImgRefs.current.forEach(img => {
-      if (img) imgObserver.observe(img);
-    });
+    images.forEach(img => imgObserver.observe(img));
 
     return () => {
-      powerImgRefs.current.forEach(img => {
-        if (img) imgObserver.unobserve(img);
-      });
+      images.forEach(img => imgObserver.unobserve(img));
     };
   }, []);
 
@@ -152,7 +153,7 @@ function LandingPage() {
 
             <div className="hero-stats-section">
               <div className="hero-stats-left">
-                <img src="/src/images/avatar.jpeg" alt="Business" className="main-woman-img" />
+                <img src={image('avatar.jpeg')} alt="Business" className="main-woman-img" />
                 <div className="text-overlay">
                   <h3>What We Do</h3>
                   <p>Link investors<br />with visionary entrepreneurs</p>
@@ -167,10 +168,10 @@ function LandingPage() {
 
           <div className="hero-right">
             <div className="circle-wrapper">
-              <img src="src/images/first.png" alt="Business" className="circle-photo" />
-              <img src="src/images/financial7.jpg" alt="Square 3" className="square-photo3 top" />
-              <img src="src/images/financial6.jpg" alt="Square 1" className="square-photo top-left" />
-              <img src="src/images/financial8.gif" alt="Square 2" className="square-photo2 bottom-right" />
+              <img src={image('first.png')} alt="Business" className="circle-photo" />
+              <img src={image('financial7.jpg')} alt="Square 3" className="square-photo3 top" />
+              <img src={image('financial6.jpg')} alt="Square 1" className="square-photo top-left" />
+              <img src={image('financial8.gif')} alt="Square 2" className="square-photo2 bottom-right" />
             </div>
           </div>
         </div>
@@ -187,7 +188,7 @@ function LandingPage() {
             {[1, 2, 3, 4, 5].map((num, index) => (
               <img
                 key={index}
-                src={`src/images/financial${num}.jpg`}
+                src={image(`financial${num}.jpg`)}
                 alt={`Slide ${num}`}
                 className="slideshow-image"
                 style={{ animationDelay: `${index * 6}s` }}
@@ -202,7 +203,7 @@ function LandingPage() {
         <section className="blockchain-section">
           <h1>Innovest: The Foundation of the Future</h1>
           <p>
-            Innovest is more than just a platform—it's the foundation where groundbreaking ideas
+            Innovest is more than just a platform—it&apos;s the foundation where groundbreaking ideas
             transform into successful ventures.<br />
             By bridging the gap between ambitious entrepreneurs and visionary investors, we create
             an ecosystem where innovation thrives and opportunities flourish.
@@ -218,7 +219,7 @@ function LandingPage() {
                 <div className="future-card">
                   <div className="image-container">
                     <img
-                      src={`src/images/${img}`}
+                      src={image(img)}
                       alt={`Image ${index + 1}`}
                       className="image-placeholder"
                     />
@@ -265,7 +266,7 @@ function LandingPage() {
           <div className="cards">
             {[
               {
-                src: "src/images/power1.jpg",
+                src: image("power1.jpg"),
                 alt: "power logo 1",
                 title: "Creator Communities",
                 bubbles: [
@@ -275,7 +276,7 @@ function LandingPage() {
                 ]
               },
               {
-                src: "src/images/power2.jpeg",
+                src: image("power2.jpeg"),
                 alt: "power logo 2",
                 title: "Financial Institutions",
                 bubbles: [
@@ -285,7 +286,7 @@ function LandingPage() {
                 ]
               },
               {
-                src: "src/images/power3.jpg",
+                src: image("power3.jpg"),
                 alt: "power logo 3",
                 title: "Supply Chain Management",
                 bubbles: [

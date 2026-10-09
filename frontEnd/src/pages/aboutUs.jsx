@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import '../styles/about-us.css';
 
 import sakib from '../assets/sakib.jpg';
@@ -7,14 +6,13 @@ import sadik from '../assets/sadik.jpg';
 import kazi from '../assets/kazi.jpg';
 
 export default function AboutUs() {
-  const [teamMembers, setTeamMembers] = useState([
+  const teamMembers = [
     { name: 'Kazi Kamruddin Ahmed', position: 'Project Leader', image: kazi },
     { name: 'Sadik Rahman', position: 'FrontEnd + BackEnd', image: sadik },
     { name: 'Sumit Majumder', position: 'FrontEnd + BackEnd', image: sumit },
     { name: 'Abdullah Ishtiaq', position: 'FrontEnd', image: sakib },
-  ]);
+  ];
 
-  console.log("\n\n\nAbout Us Page");
 
   return (
     <div className="about-us-container">

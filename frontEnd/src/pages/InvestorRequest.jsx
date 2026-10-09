@@ -1,5 +1,5 @@
 // src/pages/InvestorRequests.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "../styles/investor-request.css";
 
 const InvestorRequests = () => {
-  console.log("\n\n----------------- Investor Requests Page --------------------");
 
   const { user } = useAuthContext();
   const navigate = useNavigate();
@@ -23,13 +22,11 @@ const InvestorRequests = () => {
   useEffect(() => {
     const checkInvestorStatus = async () => {
       if (!user) {
-        console.log("No user logged in.");
         setLoading(false);
         return;
       }
 
       const token = localStorage.getItem("token");
-      console.log("Checking investor status for user:", user);
 
       try {
         const endpoint = `${API_BASE}/investor-info/${user.id}`;
@@ -41,8 +38,6 @@ const InvestorRequests = () => {
           const data = await res.json();
           if (data && Object.keys(data).length > 0) {
             setIsInvestor(true);
-          } else {
-            console.log("User is NOT an investor.");
           }
         } else {
           console.error("Failed to fetch investor info. Status:", res.status);
@@ -53,7 +48,6 @@ const InvestorRequests = () => {
     };
 
     const fetchRequests = async () => {
-      console.log("Fetching all investor requests...");
       try {
         const endpoint = `${API_BASE}/investor-request`;
         const res = await fetch(endpoint, {
@@ -64,7 +58,6 @@ const InvestorRequests = () => {
 
         if (res.ok) {
           const data = await res.json();
-          console.log("Fetched requests:", data);
           setRequests(data);
         } else {
           console.error("Failed to fetch investor requests. Status:", res.status);
@@ -78,7 +71,7 @@ const InvestorRequests = () => {
 
     checkInvestorStatus();
     fetchRequests();
-  }, [user]);
+  }, [user, API_BASE]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -190,7 +183,7 @@ const InvestorRequests = () => {
       {/* Other Requests Section */}
       {otherRequests.length > 0 && (
         <div style={{ marginTop: "20px" }}>
-          <h3>Other Investors' Requests</h3>
+          <h3>Other Investors&apos; Requests</h3>
           {otherRequests.map((r) => (
             <div
               key={r.id}
@@ -234,7 +227,7 @@ const InvestorRequests = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <h5>
-              Are you sure you want to mark request "{selectedRequest.title}" as
+              Are you sure you want to mark request &quot;{selectedRequest.title}&quot; as
               closed?
             </h5>
             <div className="modal-buttons">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
@@ -58,12 +58,9 @@ const FundDashCreatePitch = () => {
 
     const token = localStorage.getItem("token")?.trim();
 
-    console.log(`[INFO] Submitting pitch | user_id=${user.id}`);
-    console.log("[DEBUG] Payload:", formData);
-    console.log("[DEBUG] Token present:", Boolean(token));
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE}/pitches`,
         { ...formData, user_id: user.id },
         {
@@ -74,7 +71,6 @@ const FundDashCreatePitch = () => {
         }
       );
 
-      console.log("[SUCCESS] Pitch submitted | pitch_id:", response.data?.id);
       toast.success("Pitch submitted successfully!");
 
       setTimeout(() => {

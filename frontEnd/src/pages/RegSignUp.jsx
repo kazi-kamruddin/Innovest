@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignup } from '../hooks/useSignUp';
 import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
@@ -13,15 +13,11 @@ function RegSignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Signup form submitted with:', { name, email, password });
     
     const success = await signup(name, email, password);
-    console.log('Signup returned:', success);
 
     if (success) {
       navigate('/'); 
-    } else {
-      console.log('Signup failed or user already exists, staying on signup page.');
     }
   };
 
@@ -71,7 +67,7 @@ function RegSignUp() {
             />
           </div>
         </div>
-        {error && <div className="signup-alert-danger">This email is already registered</div>}
+        {error && <div className="signup-alert-danger">{error}</div>}
         <button type="submit" className="signup-btn" disabled={isLoading}>Sign Up</button>
       </form>
     </div>

@@ -1,5 +1,5 @@
 // src/pages/CreatePitchInResponse.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuthContext } from "../hooks/useAuthContext";
@@ -77,7 +77,7 @@ const CreatePitchInResponse = () => {
     const token = localStorage.getItem("token")?.trim();
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE}/pitches/in-response/${requestId}`,
         { ...formData, user_id: user.id },
         {

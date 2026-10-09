@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; 
+import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext"; 
 import { Link } from "react-router-dom";
 import "../styles/fund-dash.css";
@@ -17,7 +17,6 @@ const FundDash = () => {
   const [pitchToDelete, setPitchToDelete] = useState(null);
 
   useEffect(() => {
-    console.log("\n\nUser AuthContext:", user);
 
     if (!user || !user.id) {
       setError("User not logged in");
@@ -31,10 +30,6 @@ const FundDash = () => {
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
     };
 
-    console.log("\n\nFetching pitches");
-    console.log("Endpoint:", endpoint);
-    console.log("Method: GET");
-    console.log("Headers:", headers);
 
     fetch(endpoint, { headers })
       .then((response) => {
@@ -57,13 +52,6 @@ const FundDash = () => {
   const deletePitch = async (id) => {
     const token = localStorage.getItem("token");
 
-    console.log("\n\n\nDeleting pitch");
-    console.log("Endpoint:", `${API_BASE}/pitches/users/${user.id}/pitches/${id}`);
-    console.log("Method: DELETE");
-    console.log("Headers:", {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    });
 
     try {
       const response = await fetch(`${API_BASE}/pitches/users/${user.id}/pitches/${id}`, {
@@ -75,8 +63,6 @@ const FundDash = () => {
       });
 
       const data = await response.json();
-      console.log("\nResponse status:", response.status);
-      console.log("Response data:", data);
 
       if (!response.ok) {
         console.warn("Error deleting pitch:", data.error);

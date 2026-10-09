@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -26,7 +26,6 @@ const EditInvestorRequest = () => {
     "Technology", "Healthcare", "Finance", "Real Estate", "Education", "Food & Beverage", "Other"
   ];
 
-  console.log("\n\n----------------- Edit Request Page --------------------");
 
   useEffect(() => {
     if (!id) return;
@@ -48,7 +47,6 @@ const EditInvestorRequest = () => {
           minInvestment: data.minInvestment || "",
           maxInvestment: data.maxInvestment || "",
         });
-        console.log(data);
       } catch (err) {
         console.error("Error fetching request:", err);
         toast.error("Failed to load request details.");
@@ -58,7 +56,7 @@ const EditInvestorRequest = () => {
     };
 
     fetchRequest();
-  }, [id]);
+  }, [id, API_BASE]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const AnimatedHeaderText = ({ pitch }) => {
-  if (!pitch) return null;
-
   const messages = [
-    ` ${pitch.industry || "N/A"} Industry`,
-    `In ${pitch.stage || "N/A"} Stage`,
-    `Raising: $${pitch.total_raising_amount || "0"}`
+    ` ${pitch?.industry || "N/A"} Industry`,
+    `In ${pitch?.stage || "N/A"} Stage`,
+    `Raising: $${pitch?.total_raising_amount || "0"}`
   ];
 
   const [index, setIndex] = useState(0);
@@ -17,6 +15,8 @@ const AnimatedHeaderText = ({ pitch }) => {
     }, 6000);
     return () => clearInterval(interval);
   }, [messages.length]);
+
+  if (!pitch) return null;
 
   return (
     <div className="animated-header-text">

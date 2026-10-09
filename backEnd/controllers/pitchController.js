@@ -61,7 +61,11 @@ const getPitchById = async (req, res) => {
 
 const getUserPitches = async (req, res) => {
   try {
-    const [userRows] = await db.execute("SELECT * FROM users WHERE id = ?", [
+    if (Number(req.params.id) !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const [userRows] = await db.execute("SELECT id FROM users WHERE id = ?", [
       req.params.id,
     ]);
 
@@ -101,10 +105,14 @@ const createPitch = async (req, res) => {
       objective,
     } = req.body;
 
-    if (!user_id || !title || !industry) {
+    if (!title || !industry) {
       return res
         .status(400)
-        .json({ error: "user_id, title, and industry are required" });
+        .json({ error: "title and industry are required" });
+    }
+
+    if (user_id != null && Number(user_id) !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
 
     const [result] = await db.execute(
@@ -113,7 +121,7 @@ const createPitch = async (req, res) => {
         total_raising_amount, minimum_investment, the_business, the_market, progress, objective) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        user_id,
+        req.user.id,
         title,
         company_location || null,
         country || null,
@@ -163,10 +171,28 @@ const createPitchInResponse = async (req, res) => {
       objective,
     } = req.body;
 
-    if (!user_id || !title || !industry) {
+    if (!title || !industry) {
       return res
         .status(400)
-        .json({ error: "user_id, title, and industry are required" });
+        .json({ error: "title and industry are required" });
+    }
+
+    if (user_id != null && Number(user_id) !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const [requests] = await db.execute(
+      "SELECT investorId, status FROM investor_requests WHERE id = ?",
+      [requestId]
+    );
+    if (requests.length === 0) {
+      return res.status(404).json({ error: "Investor request not found" });
+    }
+    if (requests[0].status !== "open") {
+      return res.status(400).json({ error: "Investor request is closed" });
+    }
+    if (requests[0].investorId === req.user.id) {
+      return res.status(403).json({ error: "Cannot respond to your own request" });
     }
 
     const [result] = await db.execute(
@@ -175,7 +201,7 @@ const createPitchInResponse = async (req, res) => {
          total_raising_amount, minimum_investment, the_business, the_market, progress, objective, forRequestId) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        user_id,
+        req.user.id,
         title,
         company_location || null,
         country || null,
@@ -210,6 +236,10 @@ const createPitchInResponse = async (req, res) => {
 const updatePitch = async (req, res) => {
   try {
     const { userId, pitchId } = req.params;
+
+    if (Number(userId) !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
 
     const [pitchRows] = await db.execute(
       "SELECT * FROM pitches WHERE id = ?",
@@ -282,6 +312,10 @@ const updatePitch = async (req, res) => {
 const deletePitch = async (req, res) => {
   try {
     const { userId, pitchId } = req.params;
+
+    if (Number(userId) !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
 
     const [pitchRows] = await db.execute(
       "SELECT * FROM pitches WHERE id = ?",

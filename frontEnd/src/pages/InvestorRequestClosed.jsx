@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -118,7 +118,7 @@ const MyClosedRequests = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <h5>
-              Are you sure you want to reopen request "{selectedRequest.title}"?
+              Are you sure you want to reopen request &quot;{selectedRequest.title}&quot;?
             </h5>
             <div className="modal-buttons">
               <button className="confirm-btn" onClick={handleReopen}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/pitch-all.css";
 import AnimatedHeaderText from "./AnimatedHeaderText";
@@ -18,8 +18,9 @@ const PitchAll = () => {
     const fetchFilteredPitches = async () => {
       try {
         const response = await fetch(
-          `${API_BASE}/pitches?industry=${industryFilter}&stage=${stageFilter}&country=${countryFilter}`
+          `${API_BASE}/pitches?${new URLSearchParams({ industry: industryFilter, stage: stageFilter, country: countryFilter })}`
         );
+        if (!response.ok) throw new Error("Failed to fetch pitches");
         const data = await response.json();
         const filtered = data.filter(pitch => pitch.user_id !== user?.id);
         setPitches(filtered);
@@ -34,8 +35,8 @@ const PitchAll = () => {
 
   const filteredPitches = Array.isArray(pitches)
     ? pitches.filter((pitch) =>
-        pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pitch.country.toLowerCase().includes(searchTerm.toLowerCase())
+        (pitch.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (pitch.country || "").toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
 

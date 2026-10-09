@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import "../styles/navbar.css";
 import { useAuthContext } from "../hooks/useAuthContext";
@@ -24,7 +23,7 @@ function Navbar() {
               Fundraise
             </NavLink>
             <NavLink to="/investor-request" className={({ isActive }) => (isActive ? "active" : "")}>
-              Investors' Requests
+              Investors&apos; Requests
             </NavLink>
             <NavLink to="/messages" className={({ isActive }) => (isActive ? "active" : "")}>
               Messages

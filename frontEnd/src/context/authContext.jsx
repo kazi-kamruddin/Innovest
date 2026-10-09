@@ -1,18 +1,6 @@
-import { createContext, useReducer, useEffect, useState } from "react";
+import { useReducer, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-
-export const AuthContext = createContext();
-
-export const authReducer = (state, action) => {
-  switch (action.type) {
-    case "LOGIN":
-      return { user: action.payload };
-    case "LOGOUT":
-      return { user: null };
-    default:
-      return state;
-  }
-};
+import { AuthContext, authReducer } from "./authState.js";
 
 export const AuthContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, { user: null });
@@ -32,7 +20,10 @@ export const AuthContextProvider = ({ children }) => {
           localStorage.removeItem("user");
           dispatch({ type: "LOGOUT" });
         } else if (storedUser) {
-          dispatch({ type: "LOGIN", payload: JSON.parse(storedUser) });
+          const { id, name, email } = JSON.parse(storedUser);
+          const user = { id, name, email };
+          localStorage.setItem("user", JSON.stringify(user));
+          dispatch({ type: "LOGIN", payload: user });
         }
       } catch (error) {
         console.error("Invalid token:", error);
@@ -45,7 +36,6 @@ export const AuthContextProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  console.log("AuthContext state:", state);
 
   if (loading) return null;
 

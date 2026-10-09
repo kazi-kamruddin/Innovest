@@ -3,6 +3,7 @@ import { useAuthContext } from "../hooks/useAuthContext.jsx";
 import { useLogout } from "../hooks/useLogout.jsx";
 import { Link } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa"; 
+import profileImage from "../images/profile.jpeg";
 import "../styles/profile.css";
 
 const Profile = () => {    
@@ -49,7 +50,7 @@ const Profile = () => {
     };
 
     fetchUserInfo();
-  }, [user]);
+  }, [user, API_BASE]);
 
   const handleLogout = () => {
     logout();
@@ -65,7 +66,7 @@ const Profile = () => {
         )}
 
         <div className="profile-pic-wrapper">
-          <img src="src/images/profile.jpeg" alt="Profile" className="profile-pic" />
+          <img src={profileImage} alt="Profile" className="profile-pic" />
         </div>
         <h2 className="username">
            {user?.name

@@ -3,8 +3,6 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import { io } from "socket.io-client";
 import "../styles/messages.css";
 
-let socket;
-
 const Messages = () => {
   const { user } = useAuthContext();
   const [conversations, setConversations] = useState([]);
@@ -12,10 +10,17 @@ const Messages = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [partnerInfo, setPartnerInfo] = useState(null);
+  const [conversationVersion, setConversationVersion] = useState(0);
   const token = localStorage.getItem("token");
   const API_BASE = import.meta.env.VITE_API_URL;
 
   const messageHistoryRef = useRef(null);
+  const socketRef = useRef(null);
+  const selectedConversationIdRef = useRef(null);
+
+  useEffect(() => {
+    selectedConversationIdRef.current = selectedConversation?.id;
+  }, [selectedConversation]);
 
   const scrollToBottom = () => {
     if (messageHistoryRef.current) {
@@ -29,11 +34,10 @@ const Messages = () => {
   }, [messages, selectedConversation]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !token) return;
 
-    if (!socket) socket = io(API_BASE, { auth: { token } });
-
-    socket.emit("user_connected", user.id);
+    const socket = io(API_BASE, { auth: { token } });
+    socketRef.current = socket;
 
     socket.on("receive_message", (msg) => {
       const normalized = {
@@ -44,15 +48,20 @@ const Messages = () => {
 
       if (normalized.sender_id === user.id) return;
 
-      if (normalized.conversationId === selectedConversation?.id) {
+      if (normalized.conversationId === selectedConversationIdRef.current) {
         setMessages((prev) => [...prev, normalized]);
       }
     });
 
+    socket.on("new_conversation", () => {
+      setConversationVersion((version) => version + 1);
+    });
+
     return () => {
-      socket.off("receive_message");
+      socket.disconnect();
+      if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [user, selectedConversation]);
+  }, [user, API_BASE, token]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -67,7 +76,7 @@ const Messages = () => {
       }
     };
     fetchConversations();
-  }, [API_BASE, token]);
+  }, [API_BASE, token, conversationVersion]);
 
   const loadConversation = async (conversation) => {
     setSelectedConversation(conversation);
@@ -116,7 +125,8 @@ const Messages = () => {
       created_at: new Date(),
     };
 
-    socket.emit("send_message", msg);
+    if (!socketRef.current) return;
+    socketRef.current.emit("send_message", msg);
 
     setMessages((prev) => [...prev, msg]);
     setNewMessage("");
@@ -159,9 +169,9 @@ const Messages = () => {
                 {messages.length === 0 && (
                   <div className="no-messages">No messages yet</div>
                 )}
-                {messages.map((m) => (
+                {messages.map((m, index) => (
                   <div
-                    key={m.id || Math.random()}
+                    key={m.id ?? `pending-${index}`}
                     className={`message-bubble ${
                       m.sender_id === user.id ? "sent" : "received"
                     }`}
