@@ -23,11 +23,14 @@ export const useSignup = () => {
       
 
       const { token, user } = response.data;
+      if (response.data.verificationRequired) {
+        return response.data.emailSent === false ? 'verificationEmailFailed' : 'verificationRequired';
+      }
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         dispatch({ type: 'LOGIN', payload: user });
-        return true;
+        return 'authenticated';
       }
       return false; 
     } catch (err) {

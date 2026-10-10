@@ -2,9 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const { randomUUID } = require("node:crypto");
 const { Server } = require("socket.io");
-const jwt = require("jsonwebtoken");
 const db = require("./config/database");
+const { verifyAccessToken, hashToken } = require("./utils/authTokens");
+
+if (!process.env.SECRET) throw new Error("SECRET must be configured");
 
 const userRoutes = require("./routes/userRoutes");
 const pitchRoutes = require("./routes/pitchRoutes");
@@ -14,6 +17,7 @@ const investorRequestRoutes = require("./routes/investorRequestRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -22,9 +26,21 @@ app.use(
   })
 );
 app.use(express.json());
-
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
+  res.set("Referrer-Policy", "no-referrer");
+  res.set("X-Content-Type-Options", "nosniff");
+  const requestId = randomUUID();
+  const started = Date.now();
+  res.set("X-Request-Id", requestId);
+  res.on("finish", () => {
+    console.log(JSON.stringify({
+      requestId,
+      method: req.method,
+      path: req.path,
+      status: res.statusCode,
+      durationMs: Date.now() - started,
+    }));
+  });
   next();
 });
 
@@ -34,6 +50,19 @@ app.get("/", (req, res) => {
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
+});
+
+app.get("/ready", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    await db.query({ sql: "SELECT 1 FROM auth_account_state LIMIT 1", timeout: 3000 });
+    await db.query({ sql: "SELECT 1 FROM auth_action_tokens LIMIT 1", timeout: 3000 });
+    await db.query({ sql: "SELECT 1 FROM auth_revoked_tokens LIMIT 1", timeout: 3000 });
+    res.json({ status: "ready" });
+  } catch (error) {
+    console.error("Readiness check failed:", error.message);
+    res.status(503).json({ status: "unavailable" });
+  }
 });
 
 (async () => {
@@ -65,11 +94,12 @@ const io = new Server(server, {
 });
 app.set("io", io);
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("Authentication required"));
-    socket.data.userId = jwt.verify(token, process.env.SECRET).id;
+    socket.data.userId = await verifyAccessToken(token);
+    socket.data.tokenHash = hashToken(token);
     next();
   } catch {
     next(new Error("Invalid or expired token"));
@@ -79,6 +109,7 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   const userId = socket.data.userId;
   socket.join(`user:${userId}`);
+  socket.join(`token:${socket.data.tokenHash}`);
   console.log("A user connected, socket id:", socket.id);
 
   socket.on("disconnect", () => {

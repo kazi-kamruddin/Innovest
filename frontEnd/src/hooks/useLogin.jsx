@@ -4,6 +4,7 @@ import axios from 'axios';
 
 export const useLogin = () => {
   const [error, setError] = useState(null);
+  const [errorCode, setErrorCode] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useAuthContext();
 
@@ -12,6 +13,7 @@ export const useLogin = () => {
   const login = async (email, password) => {
     setIsLoading(true);
     setError(null);
+    setErrorCode(null);
 
     try {
       const response = await axios.post(
@@ -34,10 +36,11 @@ export const useLogin = () => {
     } catch (err) {
       const message = err.response?.data?.error || 'Invalid credentials';
       setError(message);
+      setErrorCode(err.response?.data?.code || `HTTP_${err.response?.status || 0}`);
       setIsLoading(false);
       return false; 
     }
   };
 
-  return { login, isLoading, error };
+  return { login, isLoading, error, errorCode };
 };

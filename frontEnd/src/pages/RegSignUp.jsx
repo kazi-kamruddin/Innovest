@@ -55,7 +55,9 @@ export default function RegSignUp() {
     if (isLoading) return;
 
     const success = await signup(name, email, password);
-    if (success) navigate("/");
+    if (success === "authenticated") navigate("/");
+    if (success === "verificationRequired") navigate("/check-email", { state: { email } });
+    if (success === "verificationEmailFailed") navigate("/check-email", { state: { email, deliveryFailed: true } });
   };
 
   return (
@@ -152,6 +154,8 @@ export default function RegSignUp() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
+                      minLength={12}
+                      maxLength={128}
                       placeholder="Create a password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -180,6 +184,7 @@ export default function RegSignUp() {
                       )}
                     </button>
                   </div>
+                  <p className="mb-0! mt-1! text-[11px]! text-[#758379]!">Use at least 12 characters.</p>
                 </div>
 
                 {error && (
