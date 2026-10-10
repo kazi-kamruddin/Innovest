@@ -8,6 +8,7 @@ const {
   reopenRequest,
   getSingleRequest,
   getPitchesForRequest,
+  updateResponseStatus,
   getAllInvestorRequests
 } = require("../controllers/investorRequestController");
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get("/", requireAuth, getAllInvestorRequests);
 router.get("/my-closed", requireAuth, getMyClosedRequests);
 router.get("/:id/pitches", requireAuth, getPitchesForRequest);
+router.patch("/:id/pitches/:pitchId/status", requireAuth, updateResponseStatus);
 router.put("/:id/reopen", requireAuth, reopenRequest);
 router.get("/:id", requireAuth, getSingleRequest);
 router.put("/edit-request/:id", requireAuth, editRequest);

@@ -6,6 +6,7 @@ const { randomUUID } = require("node:crypto");
 const { Server } = require("socket.io");
 const db = require("./config/database");
 const { verifyAccessToken, hashToken } = require("./utils/authTokens");
+const { notifyBestEffort } = require('./utils/notifications');
 
 if (!process.env.SECRET) throw new Error("SECRET must be configured");
 
@@ -15,6 +16,7 @@ const userInfoRoutes = require("./routes/userInfoRoutes");
 const investorInfoRoutes = require("./routes/investorInfoRoutes");
 const investorRequestRoutes = require("./routes/investorRequestRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 app.set("trust proxy", 1);
@@ -58,6 +60,8 @@ app.get("/ready", async (req, res) => {
     await db.query({ sql: "SELECT 1 FROM auth_account_state LIMIT 1", timeout: 3000 });
     await db.query({ sql: "SELECT 1 FROM auth_action_tokens LIMIT 1", timeout: 3000 });
     await db.query({ sql: "SELECT 1 FROM auth_revoked_tokens LIMIT 1", timeout: 3000 });
+    await db.query({ sql: "SELECT 1 FROM pitch_response_states LIMIT 1", timeout: 3000 });
+    await db.query({ sql: "SELECT 1 FROM user_notifications LIMIT 1", timeout: 3000 });
     res.json({ status: "ready" });
   } catch (error) {
     console.error("Readiness check failed:", error.message);
@@ -81,6 +85,7 @@ app.use("/profile", userInfoRoutes);
 app.use("/investor-info", investorInfoRoutes);
 app.use("/investor-request", investorRequestRoutes);
 app.use("/conversations", messageRoutes);
+app.use('/notifications', notificationRoutes);
 
 
 
@@ -196,6 +201,14 @@ io.on("connection", (socket) => {
         const receiverId = senderId === user_one_id ? user_two_id : user_one_id;
 
         io.to(`user:${senderId}`).to(`user:${receiverId}`).emit("receive_message", messageData);
+        await notifyBestEffort({
+          userId: receiverId,
+          actorId: senderId,
+          kind: 'message',
+          text: 'You have a new message.',
+          targetPath: `/messages?conversation=${encodeURIComponent(conversationId)}`,
+          io,
+        });
 
       } catch (err) {
         console.error("Error sending message:", err);
