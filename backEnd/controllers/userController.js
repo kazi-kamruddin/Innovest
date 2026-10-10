@@ -203,7 +203,11 @@ const resetPassword = async (req, res) => {
       [rows[0].user_id]
     );
     await connection.commit();
-    req.app?.get("io")?.in(`user:${rows[0].user_id}`).disconnectSockets(true);
+    try {
+      req.app?.get("io")?.in(`user:${rows[0].user_id}`).disconnectSockets(true);
+    } catch (error) {
+      console.error("Could not disconnect account sockets after password reset:", error);
+    }
     return res.json({ message: "Password updated. Sign in with your new password." });
   } catch (error) {
     if (connection) await connection.rollback();
@@ -223,7 +227,11 @@ const logoutUser = async (req, res) => {
       "INSERT IGNORE INTO auth_revoked_tokens (token_hash, expires_at) VALUES (?, FROM_UNIXTIME(?))",
       [tokenHash, expiresAt]
     );
-    req.app?.get("io")?.in(`token:${tokenHash}`).disconnectSockets(true);
+    try {
+      req.app?.get("io")?.in(`token:${tokenHash}`).disconnectSockets(true);
+    } catch (error) {
+      console.error("Could not disconnect token sockets after logout:", error);
+    }
     return res.json({ message: "Signed out" });
   } catch (error) {
     console.error("Logout failed:", error);
