@@ -10,6 +10,7 @@ const {
 } = require("../controllers/userController");
 const createRateLimit = require("../middleware/rateLimit");
 const requireAuth = require("../middleware/requireAuth");
+const { googleSignIn } = require('../controllers/googleAuthController');
 
 const router = express.Router();
 const byIp = (req) => req.ip;
@@ -27,6 +28,7 @@ router.post("/login",
 );
 
 router.post("/register", createRateLimit({ windowMs: 60 * 60 * 1000, max: 10, key: byIp }), signUpUser);
+router.post('/google', createRateLimit({ windowMs: 15 * 60 * 1000, max: 20, key: byIp }), googleSignIn);
 router.post("/forgot-password",
   createRateLimit({ windowMs: 60 * 60 * 1000, max: 20, key: byIp }),
   createRateLimit({ windowMs: 60 * 60 * 1000, max: 3, key: byEmail }),

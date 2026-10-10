@@ -202,6 +202,7 @@ const resetPassword = async (req, res) => {
       "UPDATE auth_action_tokens SET consumed_at = UTC_TIMESTAMP(6) WHERE user_id = ? AND purpose = 'reset_password' AND consumed_at IS NULL",
       [rows[0].user_id]
     );
+    await connection.execute('DELETE FROM auth_google_identities WHERE user_id = ?', [rows[0].user_id]);
     await connection.commit();
     try {
       req.app?.get("io")?.in(`user:${rows[0].user_id}`).disconnectSockets(true);

@@ -62,6 +62,7 @@ app.get("/ready", async (req, res) => {
     await db.query({ sql: "SELECT 1 FROM auth_revoked_tokens LIMIT 1", timeout: 3000 });
     await db.query({ sql: "SELECT 1 FROM pitch_response_states LIMIT 1", timeout: 3000 });
     await db.query({ sql: "SELECT 1 FROM user_notifications LIMIT 1", timeout: 3000 });
+    await db.query({ sql: "SELECT 1 FROM auth_google_identities LIMIT 1", timeout: 3000 });
     res.json({ status: "ready" });
   } catch (error) {
     console.error("Readiness check failed:", error.message);
