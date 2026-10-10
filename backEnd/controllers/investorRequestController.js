@@ -1,5 +1,18 @@
 const db = require("../config/database");
 const { parseAmountRange } = require("../utils/amounts");
+const { createNotification, notifyBestEffort } = require("../utils/notifications");
+
+async function notifyResponders(req, requestId, status) {
+  const [responders] = await db.execute('SELECT DISTINCT user_id FROM pitches WHERE forRequestId = ?', [requestId]);
+  await Promise.all(responders.map(({ user_id: userId }) => notifyBestEffort({
+    userId,
+    actorId: req.user.id,
+    kind: 'request_status',
+    text: `An investor request you answered is now ${status}.`,
+    targetPath: '/fundraise-dashboard',
+    io: req.app?.get('io'),
+  })));
+}
 
 // POST /investor-requests/create-new-request 
 const createInvestorRequest = async (req, res) => {
@@ -100,11 +113,16 @@ const markRequestAsClosed = async (req, res) => {
     if (!request || request.length === 0) {
       return res.status(404).json({ error: "Request not found or not authorized" });
     }
+    if (request[0].status === 'closed') {
+      return res.json({ message: 'Request is already closed' });
+    }
 
     await db.query(
       "UPDATE investor_requests SET status = 'closed', updatedAt = NOW() WHERE id = ?",
       [id]
     );
+
+    try { await notifyResponders(req, id, 'closed'); } catch (error) { console.error('Request status notification failed:', error); }
 
     res.json({ message: "Request marked as closed successfully" });
   } catch (error) {
@@ -148,11 +166,13 @@ const reopenRequest = async (req, res) => {
     }
 
     await db.execute(
-      `UPDATE investor_requests 
-       SET status = 'open', updatedAt = NOW() 
+      `UPDATE investor_requests
+       SET status = 'open', updatedAt = NOW()
        WHERE id = ?`,
       [id]
     );
+
+    try { await notifyResponders(req, id, 'open'); } catch (error) { console.error('Request status notification failed:', error); }
 
     res.json({ message: "Request reopened successfully" });
   } catch (err) {
@@ -183,10 +203,16 @@ const getSingleRequest = async (req, res) => {
 const getPitchesForRequest = async (req, res) => {
   try {
     const { id } = req.params;
+    const [requests] = await db.execute('SELECT investorId FROM investor_requests WHERE id = ?', [id]);
+    if (!requests.length) return res.status(404).json({ error: 'Request not found' });
+    if (Number(requests[0].investorId) !== Number(req.user.id)) {
+      return res.status(403).json({ error: 'Only the request owner can view responses' });
+    }
     const [rows] = await db.execute(
-      `SELECT p.*, u.name, u.email
+      `SELECT p.*, u.name, u.email, COALESCE(prs.status, 'submitted') AS response_status
        FROM pitches AS p
        LEFT JOIN users AS u ON p.user_id = u.id
+       LEFT JOIN pitch_response_states AS prs ON prs.pitch_id = p.id
        WHERE p.forRequestId = ?
        ORDER BY p.created_at DESC`,
       [id]
@@ -196,6 +222,72 @@ const getPitchesForRequest = async (req, res) => {
   } catch (err) {
     console.error("Error fetching pitches for request:", err);
     res.status(500).json({ error: "Failed to fetch pitches for this request" });
+  }
+};
+
+const updateResponseStatus = async (req, res) => {
+  const status = req.body?.status;
+  if (!['submitted', 'under_review', 'interested', 'declined'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid response status' });
+  }
+
+  const requestId = Number(req.params.id);
+  const pitchId = Number(req.params.pitchId);
+  if (![requestId, pitchId].every((id) => Number.isSafeInteger(id) && id > 0)) {
+    return res.status(400).json({ error: 'Invalid request or pitch' });
+  }
+
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+    const [rows] = await connection.execute(
+      `SELECT p.user_id, ir.investorId
+       FROM pitches p
+       JOIN investor_requests ir ON ir.id = p.forRequestId
+       WHERE p.id = ? AND ir.id = ? FOR UPDATE`,
+      [pitchId, requestId]
+    );
+    if (!rows.length) {
+      await connection.rollback();
+      return res.status(404).json({ error: 'Response not found for this request' });
+    }
+    if (Number(rows[0].investorId) !== Number(req.user.id)) {
+      await connection.rollback();
+      return res.status(403).json({ error: 'Only the request owner can update responses' });
+    }
+    const [stateRows] = await connection.execute(
+      'SELECT status FROM pitch_response_states WHERE pitch_id = ?',
+      [pitchId]
+    );
+    const currentStatus = stateRows[0]?.status || 'submitted';
+    if (currentStatus === status) {
+      await connection.commit();
+      return res.json({ status, changed: false });
+    }
+    await connection.execute(
+      `INSERT INTO pitch_response_states (pitch_id, status) VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE status = VALUES(status)`,
+      [pitchId, status]
+    );
+    const labels = { submitted: 'Submitted', under_review: 'Under review', interested: 'Interested', declined: 'Declined' };
+    const notification = await createNotification({
+      userId: rows[0].user_id,
+      actorId: req.user.id,
+      kind: 'response_status',
+      text: `Your pitch response is now ${labels[status].toLowerCase()}.`,
+      targetPath: `/fundraise-dashboard`,
+      executor: connection,
+    });
+    await connection.commit();
+    if (notification) req.app?.get('io')?.to(`user:${rows[0].user_id}`).emit('notification', notification);
+    res.json({ status, changed: true });
+  } catch (error) {
+    if (connection) await connection.rollback();
+    console.error('Failed to update response status:', error);
+    res.status(500).json({ error: 'Failed to update response status' });
+  } finally {
+    connection?.release();
   }
 };
 
@@ -230,5 +322,6 @@ module.exports = {
   reopenRequest,
   getSingleRequest,
   getPitchesForRequest,
+  updateResponseStatus,
   getAllInvestorRequests
 };

@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const { notifyBestEffort } = require('../utils/notifications');
 
 const getConversations = async (req, res) => {
   try {
@@ -126,10 +127,18 @@ const sendMessage = async (req, res) => {
     };
 
     const io = req.app?.get("io");
+    const partnerId = Number(check[0].user_one_id) === Number(userId) ? check[0].user_two_id : check[0].user_one_id;
     if (io) {
-      const partnerId = check[0].user_one_id === userId ? check[0].user_two_id : check[0].user_one_id;
       io.to(`user:${userId}`).to(`user:${partnerId}`).emit("receive_message", message);
     }
+    await notifyBestEffort({
+      userId: partnerId,
+      actorId: userId,
+      kind: 'message',
+      text: 'You have a new message.',
+      targetPath: `/messages?conversation=${encodeURIComponent(id)}`,
+      io,
+    });
 
     res.status(201).json(message);
   } catch (error) {

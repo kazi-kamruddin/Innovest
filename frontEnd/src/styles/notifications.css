@@ -1,0 +1,30 @@
+.iv-notifications-page { min-height: calc(100svh - 86px); background: #fcfdfb; color: #24352e; font-family: "Outfit", sans-serif; }
+.iv-notifications-page *, .iv-notifications-page *::before, .iv-notifications-page *::after { box-sizing: border-box; }
+.iv-notifications-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 34px 32px 80px; }
+.iv-notifications-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid #e2ebe3; }
+.iv-notifications-heading span { display: inline-flex; align-items: center; gap: 9px; color: #176d5d; font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+.iv-notifications-heading span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #1d8c66; }
+.iv-notifications-heading h1 { margin: 10px 0 0; font-size: clamp(25px, 2.9vw, 37px); font-weight: 650; line-height: 1.18; letter-spacing: -.045em; }
+.iv-notifications-heading p { margin: 9px 0 0; color: #7a8b7e; font-size: 13px; line-height: 1.65; }
+.iv-notifications-heading button, .iv-notification-actions button { min-height: 40px; padding: 9px 15px; border: 1px solid #b9d0be; border-radius: 10px; background: #fff; color: #345d41; font: 600 12px "Outfit", sans-serif; cursor: pointer; }
+.iv-notifications-heading button:hover, .iv-notification-actions button:hover { border-color: #8faf98; background: #edf5ee; color: #176d5d; }
+.iv-notifications-list { display: grid; gap: 14px; max-width: 900px; }
+.iv-notification-item { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 19px 22px; border: 1.5px solid #b9d0be; border-radius: 18px; background: #fff; box-shadow: 0 6px 26px rgba(33, 69, 43, .04); }
+.iv-notification-item.unread { border-color: #8faf98; background: #f1f8f3; }
+.iv-notification-item p { margin: 0 0 6px; font-size: 14px; font-weight: 600; line-height: 1.5; }
+.iv-notification-item time { color: #788a7b; font-size: 11px; }
+.iv-notification-actions { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.iv-notification-actions a { display: inline-flex; align-items: center; min-height: 40px; padding: 9px 15px; border-radius: 10px; background: #243e30; color: white; font-size: 12px; font-weight: 650; text-decoration: none; }
+.iv-notification-actions a:hover { background: #176d5d; color: white; text-decoration: none; }
+.iv-notifications-empty { max-width: 900px; padding: 48px 25px; border: 1.5px solid #b8d0bd; border-radius: 20px; background: #fff; text-align: center; }
+.iv-notifications-empty svg { color: #176d5d; }
+.iv-notifications-empty h2 { margin: 14px 0 0; font-size: 22px; font-weight: 650; letter-spacing: -.025em; }
+.iv-notifications-empty p { margin: 8px 0 0; color: #788a7b; font-size: 13px; }
+.iv-notifications-error { margin-bottom: 16px; color: #a43838; }
+.iv-notification-bell, .iv-notification-mobile-link { display: inline-flex; align-items: center; gap: 9px; color: #24352e; text-decoration: none; position: relative; font-family: "Outfit", sans-serif; }
+.iv-notification-bell { padding: 11px; border-radius: 10px; }
+.iv-notification-bell:hover, .iv-notification-mobile-link:hover { background: #e8f2ed; color: #176d5d; text-decoration: none; }
+.iv-notification-mobile-link { width: 100%; padding: 14px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; }
+.iv-notification-count { display: inline-flex; min-width: 19px; height: 19px; align-items: center; justify-content: center; padding: 0 4px; border-radius: 100px; background: #176d5d; color: white; font-size: 10px; font-weight: 700; }
+.iv-notification-bell:focus-visible, .iv-notification-mobile-link:focus-visible, .iv-notifications-page button:focus-visible, .iv-notifications-page a:focus-visible { outline: 2px solid #176d5d; outline-offset: 2px; }
+@media (max-width: 600px) { .iv-notifications-wrap { padding: 22px 16px 65px; } .iv-notifications-heading, .iv-notification-item { align-items: flex-start; flex-direction: column; } .iv-notification-item { width: 100%; padding: 18px; } .iv-notification-actions { flex-wrap: wrap; white-space: normal; } }

@@ -1,0 +1,20 @@
+# Local credentials and certificates
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Local logs and editor files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

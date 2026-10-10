@@ -1,5 +1,6 @@
 const db = require("../config/database");
 const { parseAmountRange } = require("../utils/amounts");
+const { notifyBestEffort } = require('../utils/notifications');
 
 const getAllPitches = async (req, res) => {
   try {
@@ -75,7 +76,9 @@ const getUserPitches = async (req, res) => {
     }
 
     const [pitches] = await db.execute(
-      "SELECT * FROM pitches WHERE user_id = ?",
+      `SELECT p.*, COALESCE(prs.status, 'submitted') AS response_status
+       FROM pitches p LEFT JOIN pitch_response_states prs ON prs.pitch_id = p.id
+       WHERE p.user_id = ?`,
       [req.params.id]
     );
 
@@ -202,7 +205,7 @@ const createPitchInResponse = async (req, res) => {
     if (requests[0].status !== "open") {
       return res.status(400).json({ error: "Investor request is closed" });
     }
-    if (requests[0].investorId === req.user.id) {
+    if (Number(requests[0].investorId) === Number(req.user.id)) {
       return res.status(403).json({ error: "Cannot respond to your own request" });
     }
 
@@ -235,6 +238,14 @@ const createPitchInResponse = async (req, res) => {
       [result.insertId]
     );
 
+    await notifyBestEffort({
+      userId: requests[0].investorId,
+      actorId: req.user.id,
+      kind: 'pitch_response',
+      text: 'A new pitch was submitted to your investor request.',
+      targetPath: `/investor-request/${requestId}/response-pitches`,
+      io: req.app?.get('io'),
+    });
     res.status(201).json(pitchRows[0]);
   } catch (err) {
     console.error("Pitch-in-response creation failed:", err);
