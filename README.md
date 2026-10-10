@@ -135,7 +135,7 @@ DB_NAME=your-database-name
 DB_SSL_CA_PATH=./certs/ca.pem
 ```
 
-**Database setup:** The application expects its MySQL tables to exist. Apply `backEnd/database/002_account_security.sql` for account security, then run `npm run migrate:responses` from `backEnd/` to create the response status and notification tables before deploying this backend version. See [operations](docs/operations.md) for the rollout and restore drill.
+**Database setup:** The application expects its MySQL tables to exist. Apply `backEnd/database/002_account_security.sql` for account security, then run `npm run migrate:responses` and `npm run migrate:google` from `backEnd/` before deploying this backend version. See [operations](docs/operations.md) for the rollout and restore drill.
 
 For hosted MySQL, configure the certificate using `DB_SSL_CA_PATH` or `DB_SSL_CA` as supported by `backEnd/config/database.js`. Never commit your `.env`, private certificates, or credentials.
 

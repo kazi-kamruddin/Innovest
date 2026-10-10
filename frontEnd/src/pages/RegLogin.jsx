@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useLogin";
+import GoogleSignIn from '../components/GoogleSignIn';
 
 const inputClass =
   "block! h-[46px]! w-full! rounded-lg! border! border-[#D4DFD5]! bg-white! px-4! text-[14px]! text-[#24352E]! outline-none! placeholder:text-[#A0ADA2]! transition-all! duration-200! focus:border-[#477957]! focus:ring-4! focus:ring-[#477957]/10!";
@@ -34,7 +35,7 @@ function LoginArtwork() {
   return (
     <aside
       aria-hidden="true"
-      className="relative! hidden! h-[550px]! overflow-hidden! bg-[#DDEBDD]! lg:block!"
+      className="relative! hidden! min-h-[550px]! overflow-hidden! bg-[#DDEBDD]! lg:block!"
     >
       <div className="absolute! inset-0!" style={{
         background: "radial-gradient(circle at 75% 30%, #F1F8ED, #DCEBDD 65%, #CDDFCD)"
@@ -121,7 +122,7 @@ export default function RegLogin() {
       <div className="mx-auto! flex! min-h-[calc(100svh-86px)]! w-full! max-w-[1440px]! items-center! justify-center! px-4! py-4! sm:px-6! lg:px-8!">
         <div className="grid! w-full! max-w-[980px]! grid-cols-1! overflow-hidden! rounded-[22px]! border! border-[#DAE4DA]! bg-white! shadow-[0_18px_55px_rgba(38,62,43,0.08)]! lg:grid-cols-2!">
 
-          <div className="flex! min-h-[530px]! flex-col! bg-[#FEFFFC]! px-6! py-6! sm:px-9! lg:h-[550px]! lg:px-10! lg:py-7!">
+          <div className="flex! min-h-[550px]! flex-col! bg-[#FEFFFC]! px-6! py-6! sm:px-9! lg:px-10! lg:py-7!">
             <Brand />
 
             <div className="mx-auto! flex! w-full! max-w-[355px]! flex-1! flex-col! justify-center! py-5!">
@@ -228,6 +229,8 @@ export default function RegLogin() {
                   {!isLoading && <span aria-hidden="true">→</span>}
                 </button>
               </form>
+
+              <GoogleSignIn />
 
               <p className="mb-0! mt-5! text-center! text-[12px]! text-[#77857B]!">
                 Don&apos;t have an account?{" "}

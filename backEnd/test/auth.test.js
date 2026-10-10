@@ -63,6 +63,7 @@ test("password reset revokes older JWTs", async () => {
   await resetPassword({ body: { token: "a".repeat(64), password: "a-new-long-password" } }, res);
   assert.equal(res.statusCode, 200);
   assert.ok(queries.some(({ sql }) => sql.includes("token_version = token_version + 1")));
+  assert.ok(queries.some(({ sql }) => sql.includes('DELETE FROM auth_google_identities')));
 
   db.execute = async () => [[{ token_version: 1 }]];
   await assert.rejects(verifyAccessToken(oldToken), /Revoked token/);

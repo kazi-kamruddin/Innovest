@@ -1,5 +1,14 @@
 # Operations
 
+## Google sign-in rollout
+
+1. Apply `backEnd/database/004_google_identity.sql` to Aiven before deploying this backend version. From `backEnd/`, run `npm run migrate:google` using the existing `.env` connection. The command can be rerun safely. The `/ready` endpoint checks the new table.
+2. In Google Cloud Console, create or select a project, complete **Google Auth Platform → Branding**, set **Audience** to External for public users, and create a **Web application** OAuth client in **Clients**. In **Authorized JavaScript origins**, add `http://localhost:5173` and the exact production Vercel origin, such as `https://innovest-site.vercel.app`. Use origins only: no trailing slash or path. This integration uses a browser callback, so it does not need an Authorized redirect URI.
+3. Copy the **client ID** to Render as `GOOGLE_CLIENT_ID` and to Vercel as `VITE_GOOGLE_CLIENT_ID` for Production. For local testing, set the same value in `backEnd/.env` and `frontEnd/.env.local`. Do not use the client secret. Redeploy both services after changing their environment variables; Vercel embeds `VITE_` variables at build time.
+4. Test three journeys: a new Google account, a returning Google account, and an existing email/password account. The existing account must enter its password once to link Google. After linking, test a password reset: it revokes sessions and removes the Google link, requiring a fresh password-confirmed link.
+
+Google's `sub` claim identifies linked users; email is used only to find an existing account during the first link. The backend verifies Google's signed ID token for the configured web client ID. The browser never sends a Google client secret to Innovest. If the Google button is absent, check `VITE_GOOGLE_CLIENT_ID`; if it appears but sign-in fails, check that Render uses the same client ID and that the frontend origin is authorized in Google Console.
+
 ## Response statuses and notifications rollout
 
 1. From `backEnd/`, run `npm run migrate:responses` with the existing Aiven connection configured in `backEnd/.env`. The command applies `database/003_responses_notifications.sql`, verifies both tables, and can be rerun safely. Do this before deploying this backend version.

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSignup } from "../hooks/useSignUp";
+import GoogleSignIn from '../components/GoogleSignIn';
 
 const inputClass =
   "block! h-[46px]! w-full! rounded-lg! border! border-[#D4DFD5]! bg-white! px-4! text-[14px]! text-[#24352E]! outline-none! placeholder:text-[#A0ADA2]! transition-all! duration-200! focus:border-[#477957]! focus:ring-4! focus:ring-[#477957]/10!";
@@ -10,7 +11,7 @@ function SignupArtwork() {
   return (
     <aside
       aria-hidden="true"
-      className="relative! hidden! h-[590px]! flex-col! items-center! justify-center! gap-8! overflow-hidden! bg-[#153F30]! px-9! py-8! lg:order-1! lg:flex!"
+      className="relative! hidden! min-h-[590px]! flex-col! items-center! justify-center! gap-8! overflow-hidden! bg-[#153F30]! px-9! py-8! lg:order-1! lg:flex!"
       style={{
         background:
           "radial-gradient(ellipse at 85% 12%, #28624D, #194635 40%, #10382B)",
@@ -69,7 +70,7 @@ export default function RegSignUp() {
         <div className="grid! w-full! max-w-[980px]! grid-cols-1! overflow-hidden! rounded-[22px]! border! border-[#DAE4DA]! bg-white! shadow-[0_18px_55px_rgba(38,62,43,0.08)]! lg:grid-cols-2!">
 
           {/* Form appears on the right on desktop */}
-          <div className="flex! min-h-[550px]! flex-col! bg-[#FEFFFC]! px-6! py-6! sm:px-9! lg:order-2! lg:h-[590px]! lg:px-10! lg:py-7!">
+          <div className="flex! min-h-[590px]! flex-col! bg-[#FEFFFC]! px-6! py-6! sm:px-9! lg:order-2! lg:px-10! lg:py-7!">
             <Link
               to="/"
               className="inline-flex! w-fit! items-center! gap-2.5! text-[#24352E]! no-underline!"
@@ -203,6 +204,8 @@ export default function RegSignUp() {
                   {!isLoading && <span aria-hidden="true">→</span>}
                 </button>
               </form>
+
+              <GoogleSignIn />
 
               <p className="mb-0! mt-5! text-center! text-[12px]! text-[#77857B]!">
                 Already have an account?{" "}
