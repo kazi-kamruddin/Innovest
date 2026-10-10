@@ -197,7 +197,7 @@ export default function InvestorRequestForm({ mode = "create", formData, onChang
                 <div>
                   <span className="iv-irf-step">SECTION 01</span>
                   <h2>Request details</h2>
-                  <p>Describe the type of business you're looking for.</p>
+                  <p>Describe the type of business you&apos;re looking for.</p>
                 </div>
               </div>
               <div className="iv-irf-fields">

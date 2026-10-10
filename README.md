@@ -22,7 +22,7 @@ Innovest focuses on **discovery, introductions, and communication**. Funding goa
 
 | Area | What you can do |
 | --- | --- |
-| **Authentication** | Create an account, sign in, and access authenticated features using JWT-based sessions. |
+| **Authentication** | Create an account, sign in, verify an email address, and recover a password when account email is enabled. |
 | **Investment marketplace** | Browse startup pitches, search opportunities, and filter by industry, stage, and country. |
 | **Fundraise dashboard** | Create, view, update, and delete your own business pitches; review funding goals. |
 | **Pitch details** | Read a business overview, target market, progress, objectives, and investment requirements. |
@@ -135,7 +135,7 @@ DB_NAME=your-database-name
 DB_SSL_CA_PATH=./certs/ca.pem
 ```
 
-**Database setup:** The application expects its MySQL tables to exist. Review `backEnd/database/001_upgrade_2025_dump.sql` and the existing database setup before applying any SQL changes. Do not run upgrade scripts against a populated database without a backup.
+**Database setup:** The application expects its MySQL tables to exist. Apply `backEnd/database/002_account_security.sql` before deploying this backend version; it adds the account tables used by login and protected routes. Export a backup first. See [operations](docs/operations.md) for the rollout and restore drill.
 
 For hosted MySQL, configure the certificate using `DB_SSL_CA_PATH` or `DB_SSL_CA` as supported by `backEnd/config/database.js`. Never commit your `.env`, private certificates, or credentials.
 
@@ -191,8 +191,9 @@ The public site is hosted at **[innovest-site.vercel.app](https://innovest-site.
 - **Backend (Render):** Deploy `backEnd` as a Docker web service, with the required environment variables configured on the host.
 - **Database (Aiven):** Provide the MySQL connection settings and CA certificate through the backend's secure runtime configuration.
 - **CORS:** Set the backend's `FRONTEND_URL` to the exact deployed frontend origin.
+- **Account email:** Configure verification and password recovery on Render after the new database tables exist.
 
-For Docker build instructions, SSL configuration, and Render settings, see **[backEnd/README.md](backEnd/README.md)**.
+For Docker build instructions, SSL configuration, and Render settings, see **[backEnd/README.md](backEnd/README.md)**. For production checks and backups, see **[operations](docs/operations.md)**.
 
 ## Development Team
 

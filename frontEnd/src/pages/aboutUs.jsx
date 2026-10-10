@@ -278,7 +278,7 @@ export default function AboutUs() {
 
             <p>
               The purpose and thinking behind
-              everything we're building.
+              everything we&apos;re building.
             </p>
           </div>
 
@@ -377,7 +377,7 @@ export default function AboutUs() {
             <span>THE NEXT STEP STARTS HERE</span>
 
             <h2>
-              Let's turn great ideas
+              Let&apos;s turn great ideas
               <br />
               into meaningful connections.
             </h2>

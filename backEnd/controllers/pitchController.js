@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const { parseAmountRange } = require("../utils/amounts");
 
 const getAllPitches = async (req, res) => {
   try {
@@ -103,9 +104,9 @@ const createPitch = async (req, res) => {
       the_market,
       progress,
       objective,
-    } = req.body;
+    } = req.body || {};
 
-    if (!title || !industry) {
+    if (typeof title !== "string" || !title.trim() || typeof industry !== "string" || !industry.trim()) {
       return res
         .status(400)
         .json({ error: "title and industry are required" });
@@ -115,9 +116,14 @@ const createPitch = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const amounts = parseAmountRange(minimum_investment, total_raising_amount);
+    if (!amounts) {
+      return res.status(400).json({ error: "Funding amounts must be non-negative numbers, with minimum no greater than total" });
+    }
+
     const [result] = await db.execute(
-      `INSERT INTO pitches 
-        (user_id, title, company_location, country, cell_number, industry, stage, ideal_investor_role, 
+      `INSERT INTO pitches
+        (user_id, title, company_location, country, cell_number, industry, stage, ideal_investor_role,
         total_raising_amount, minimum_investment, the_business, the_market, progress, objective) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -129,8 +135,8 @@ const createPitch = async (req, res) => {
         industry,
         stage || null,
         ideal_investor_role || null,
-        total_raising_amount || null,
-        minimum_investment || null,
+        amounts.max,
+        amounts.min,
         the_business || null,
         the_market || null,
         progress || null,
@@ -169,9 +175,9 @@ const createPitchInResponse = async (req, res) => {
       the_market,
       progress,
       objective,
-    } = req.body;
+    } = req.body || {};
 
-    if (!title || !industry) {
+    if (typeof title !== "string" || !title.trim() || typeof industry !== "string" || !industry.trim()) {
       return res
         .status(400)
         .json({ error: "title and industry are required" });
@@ -179,6 +185,11 @@ const createPitchInResponse = async (req, res) => {
 
     if (user_id != null && Number(user_id) !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const amounts = parseAmountRange(minimum_investment, total_raising_amount);
+    if (!amounts) {
+      return res.status(400).json({ error: "Funding amounts must be non-negative numbers, with minimum no greater than total" });
     }
 
     const [requests] = await db.execute(
@@ -209,8 +220,8 @@ const createPitchInResponse = async (req, res) => {
         industry,
         stage || null,
         ideal_investor_role || null,
-        total_raising_amount || null,
-        minimum_investment || null,
+        amounts.max,
+        amounts.min,
         the_business || null,
         the_market || null,
         progress || null,
@@ -268,7 +279,15 @@ const updatePitch = async (req, res) => {
       the_market,
       progress,
       objective,
-    } = req.body;
+    } = req.body || {};
+
+    if (typeof title !== "string" || !title.trim() || typeof industry !== "string" || !industry.trim()) {
+      return res.status(400).json({ error: "title and industry are required" });
+    }
+    const amounts = parseAmountRange(minimum_investment, total_raising_amount);
+    if (!amounts) {
+      return res.status(400).json({ error: "Funding amounts must be non-negative numbers, with minimum no greater than total" });
+    }
 
     await db.execute(
       `UPDATE pitches 
@@ -283,8 +302,8 @@ const updatePitch = async (req, res) => {
         industry,
         stage || null,
         ideal_investor_role || null,
-        total_raising_amount || null,
-        minimum_investment || null,
+        amounts.max,
+        amounts.min,
         the_business || null,
         the_market || null,
         progress || null,

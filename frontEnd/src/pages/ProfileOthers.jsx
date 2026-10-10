@@ -222,7 +222,7 @@ export default function ProfileOthers() {
               <span className="iv-profile-feature__icon"><FiMessageCircle size={21} /></span>
               <span className="iv-profile-kicker">CONNECT ON INNOVEST</span>
               <h3>Start a conversation.</h3>
-              <p>Use Knock to open a conversation with this member using Innovest's existing messaging system.</p>
+              <p>Use Knock to open a conversation with this member using Innovest&apos;s existing messaging system.</p>
               {isOwnProfile ? <Link className="iv-profile-button iv-profile-button--solid" to="/messages">Go to messages <FiArrowRight size={16} /></Link> :
                 <button className="iv-profile-button iv-profile-button--solid" type="button" onClick={handleKnock} disabled={knockPending}>
                   {knockPending ? "Opening…" : !user?.id ? "Sign in to connect" : "Knock / Message"} <FiArrowRight size={16} />

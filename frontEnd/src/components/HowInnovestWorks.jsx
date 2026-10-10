@@ -129,7 +129,7 @@ export default function HowInnovestWorks() {
                        text-[#6D7C71]!"
           >
             Bringing investors and entrepreneurs together
-            shouldn't be complicated. Innovest makes it
+            shouldn&apos;t be complicated. Innovest makes it
             easier to discover ideas, share opportunities,
             and start the right conversations.
           </p>

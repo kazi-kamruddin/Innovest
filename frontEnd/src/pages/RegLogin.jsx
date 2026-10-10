@@ -96,7 +96,7 @@ export default function RegLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
-  const { login, error, isLoading } = useLogin();
+  const { login, error, errorCode, isLoading } = useLogin();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -195,10 +195,20 @@ export default function RegLogin() {
                   </div>
                 </div>
 
+                <Link to="/forgot-password"
+                  className="self-end! text-[12px]! font-medium! text-[#345C3D]! no-underline! hover:underline!">
+                  Forgot password?
+                </Link>
+
                 {error && (
                   <div role="alert"
                     className="rounded-lg! border! border-[#EBC9C4]! bg-[#FFF4F2]! px-3! py-2.5! text-[12px]! text-[#B34942]!">
-                    Invalid credentials. Please try again.
+                    {errorCode === "EMAIL_UNVERIFIED" || errorCode === "HTTP_429" || errorCode === "HTTP_503"
+                      ? error
+                      : "Invalid credentials. Please try again."}
+                    {errorCode === "EMAIL_UNVERIFIED" && (
+                      <Link to="/check-email" state={{ email }} className="ml-1! font-semibold! text-[#345C3D]!">Resend link</Link>
+                    )}
                   </div>
                 )}
 
@@ -220,7 +230,7 @@ export default function RegLogin() {
               </form>
 
               <p className="mb-0! mt-5! text-center! text-[12px]! text-[#77857B]!">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link to="/signup"
                   className="font-semibold! text-[#345C3D]! no-underline! hover:underline!">
                   Sign up

@@ -442,7 +442,7 @@ export default function FundDash() {
               <div>
                 <h2>Your pitches</h2>
                 <p>
-                  Review the opportunities you've shared
+                  Review the opportunities you&apos;ve shared
                   with investors.
                 </p>
               </div>
@@ -474,7 +474,7 @@ export default function FundDash() {
                   <FiRefreshCw size={25} aria-hidden="true" />
                 </div>
 
-                <h2>Couldn't load your pitches</h2>
+                <h2>Couldn&apos;t load your pitches</h2>
                 <p>{error}</p>
 
                 <button
@@ -565,7 +565,7 @@ export default function FundDash() {
             </h2>
 
             <p id="iv-fd-modal-description">
-              You're about to delete{" "}
+              You&apos;re about to delete{" "}
               <strong>
                 {pitchToDelete.title || "this pitch"}
               </strong>

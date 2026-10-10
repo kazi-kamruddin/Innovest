@@ -643,7 +643,7 @@ export default function PitchAll() {
             >
               Explore investment opportunities, learn
               about ambitious businesses, and connect
-              with the people building what's next.
+              with the people building what&apos;s next.
             </p>
           </div>
 
@@ -906,7 +906,7 @@ export default function PitchAll() {
                          text-[20px]! font-semibold!
                          text-[#24352E]!"
             >
-              Opportunities aren't loading
+              Opportunities aren&apos;t loading
             </h3>
 
             <p

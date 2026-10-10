@@ -7,6 +7,7 @@ import Messages from "./pages/Messages.jsx";
 
 import RegSignUp from "./pages/RegSignUp.jsx";
 import RegLogin from "./pages/RegLogin.jsx";
+import { ForgotPassword, CheckEmail, VerifyEmail, ResetPassword } from "./pages/AccountActions.jsx";
 
 import Profile from "./pages/Profile.jsx";
 import ProfileEdit from "./pages/ProfileEdit.jsx";
@@ -62,6 +63,10 @@ function App() {
 
           <Route path="/login" element={!user ? <RegLogin /> : <Navigate to={"/"} />} />
           <Route path="/signup" element={!user ? <RegSignUp /> : <Navigate to={"/"} />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/check-email" element={<CheckEmail />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           <Route path="/profile" element={user ? <Profile /> : <Navigate to={"/login"} />} />
           <Route path="/profile/edit-profile" element={user?<ProfileEdit /> : <Navigate to={"/login"}/>} />

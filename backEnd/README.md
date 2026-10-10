@@ -26,4 +26,8 @@ Create a Web Service linked to the GitHub repository with these settings:
 
 Render builds the image from the Dockerfile and starts it with its `CMD`. The server reads Render's `PORT` automatically. Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `SECRET`, and `FRONTEND_URL` as Render environment variables. Set `DB_SSL_CA` to the full PEM contents of the Aiven CA certificate, including the BEGIN and END lines; do not set `DB_SSL_CA_PATH` to a path on your computer. Set `FRONTEND_URL` to the final Vercel production origin (for example, `https://innovest.vercel.app`) without a trailing slash. Never commit the `.env` file, certificate, or credentials.
 
+The root endpoint (`/`) returns a small API status response. Set Render's health check path to `/health`. The `/ready` endpoint checks MySQL and the account tables, returning HTTP 503 when either is unavailable.
+
+Apply `database/002_account_security.sql` to Aiven before deploying this backend version. To activate email verification and password recovery, configure `BREVO_API_KEY`, `AUTH_EMAIL_FROM`, and `ACCOUNT_EMAIL_ENABLED=true` on Render. A verified personal address can be used as a Brevo sender without a custom domain, although Brevo replaces the From address for delivery. New users receive a verification link before they can sign in. Accounts created before this change keep access without a verification step. See [operations](../docs/operations.md) for the rollout, smoke check, and backup procedure.
+
 The Dockerfile does not include or start MySQL. Aiven remains the database service, and Vercel builds the frontend separately.

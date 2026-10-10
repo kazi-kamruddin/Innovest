@@ -1,0 +1,43 @@
+name: Quality checks
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backEnd/package-lock.json
+      - run: npm ci
+        working-directory: backEnd
+      - run: npm test
+        working-directory: backEnd
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: backEnd
+      - run: docker build -f backEnd/Dockerfile backEnd
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontEnd/package-lock.json
+      - run: npm ci
+        working-directory: frontEnd
+      - run: npm run lint
+        working-directory: frontEnd
+      - run: npm run build
+        working-directory: frontEnd
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: frontEnd

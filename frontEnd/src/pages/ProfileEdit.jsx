@@ -107,7 +107,7 @@ export default function ProfileEdit() {
           <div>
             <span className="iv-profile-eyebrow"><span /> YOUR WORKSPACE</span>
             <h1>Edit your <em>profile.</em></h1>
-            <p>Share your background and choose what you'd like to discover on Innovest.</p>
+            <p>Share your background and choose what you&apos;d like to discover on Innovest.</p>
           </div>
         </div>
 

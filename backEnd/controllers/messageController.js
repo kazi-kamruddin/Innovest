@@ -25,10 +25,15 @@ const getConversations = async (req, res) => {
 const startConversation = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { targetUserId } = req.body;
+    const targetUserId = Number(req.body?.targetUserId);
 
-    if (!targetUserId) {
-      return res.status(400).json({ error: "targetUserId is required" });
+    if (!Number.isSafeInteger(targetUserId) || targetUserId <= 0 || targetUserId === userId) {
+      return res.status(400).json({ error: "A valid recipient other than yourself is required" });
+    }
+
+    const [recipients] = await db.execute("SELECT id FROM users WHERE id = ?", [targetUserId]);
+    if (recipients.length === 0) {
+      return res.status(404).json({ error: "Recipient not found" });
     }
 
     const [existing] = await db.execute(
@@ -91,9 +96,9 @@ const sendMessage = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { content } = req.body;
+    const { content } = req.body || {};
 
-    if (!content) {
+    if (typeof content !== "string" || !content.trim()) {
       return res.status(400).json({ error: "Message content is required" });
     }
 
@@ -112,13 +117,21 @@ const sendMessage = async (req, res) => {
       [id, userId, content]
     );
 
-    res.status(201).json({
+    const message = {
       id: result.insertId,
       conversation_id: id,
       sender_id: userId,
       content,
       created_at: new Date(),
-    });
+    };
+
+    const io = req.app?.get("io");
+    if (io) {
+      const partnerId = check[0].user_one_id === userId ? check[0].user_two_id : check[0].user_one_id;
+      io.to(`user:${userId}`).to(`user:${partnerId}`).emit("receive_message", message);
+    }
+
+    res.status(201).json(message);
   } catch (error) {
     console.error("sendMessage error:", error);
     res.status(500).json({ error: "Failed to send message" });
