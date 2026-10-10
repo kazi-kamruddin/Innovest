@@ -63,6 +63,7 @@ function PitchCard({ pitch, onDelete }) {
 
       <div className="iv-fd-card-content">
         <h3>{pitch.title || "Untitled pitch"}</h3>
+        {pitch.forRequestId && <p className="iv-fd-response-status">Investor response: {({ submitted: 'Submitted', under_review: 'Under review', interested: 'Interested', declined: 'Declined' })[pitch.response_status] || 'Submitted'}</p>}
 
         <p className="iv-fd-location">
           <FiMapPin size={14} aria-hidden="true" />

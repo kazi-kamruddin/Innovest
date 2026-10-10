@@ -4,6 +4,7 @@ import { useAuthContext } from "./hooks/useAuthContext";
 import LandingPage from "./pages/LandingPage";
 import AboutUs from "./pages/aboutUs.jsx";
 import Messages from "./pages/Messages.jsx";
+import Notifications from './pages/Notifications.jsx';
 
 import RegSignUp from "./pages/RegSignUp.jsx";
 import RegLogin from "./pages/RegLogin.jsx";
@@ -60,6 +61,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/messages" element={user ? <Messages /> : <Navigate to="/login" />} />
+          <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/login" />} />
 
           <Route path="/login" element={!user ? <RegLogin /> : <Navigate to={"/"} />} />
           <Route path="/signup" element={!user ? <RegSignUp /> : <Navigate to={"/"} />} />

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuthContext } from "../hooks/useAuthContext";
+import NotificationBell from './NotificationBell';
+import '../styles/notifications.css';
 
 const links = [
   { label: "Invest", to: "/pitches" },
@@ -169,13 +171,13 @@ function Navbar() {
               </NavLink>
             </>
           ) : (
-            <NavLink
+            <><NotificationBell /><NavLink
               to="/profile"
               className={actionButton}
             >
               Dashboard
               <span aria-hidden="true">↗</span>
-            </NavLink>
+            </NavLink></>
           )}
         </div>
 
@@ -319,14 +321,14 @@ function Navbar() {
                   </NavLink>
                 </>
               ) : (
-                <NavLink
+                <><NotificationBell mobile onClick={() => setMenuOpen(false)} /><NavLink
                   to="/profile"
                   onClick={() => setMenuOpen(false)}
                   className={actionButton}
                 >
                   Dashboard
                   <span aria-hidden="true">↗</span>
-                </NavLink>
+                </NavLink></>
               )}
             </div>
           </div>

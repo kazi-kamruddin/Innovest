@@ -22,7 +22,9 @@ import "../styles/investor-request-flow.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
-function PitchResponseCard({ pitch }) {
+const STATUS_LABELS = { submitted: 'Submitted', under_review: 'Under review', interested: 'Interested', declined: 'Declined' };
+
+function PitchResponseCard({ pitch, onStatusChange, updating }) {
   const location = [pitch.company_location, pitch.country].filter(Boolean).join(", ");
   return (
     <article className="iv-irf-response-card">
@@ -49,6 +51,13 @@ function PitchResponseCard({ pitch }) {
         <Link to={`/pitches/${pitch.id}`} className="iv-irf-request-main-button">
           View pitch details <FiArrowUpRight size={17} aria-hidden="true" />
         </Link>
+        <label className="iv-irf-response-status">
+          Response status
+          <select value={pitch.response_status || 'submitted'} disabled={updating}
+            onChange={(event) => onStatusChange(pitch.id, event.target.value)}>
+            {Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
       </div>
     </article>
   );
@@ -63,6 +72,28 @@ export default function InvestorRequestAllResponses() {
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
   const [query, setQuery] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
+  const [updateError, setUpdateError] = useState('');
+
+  async function changeStatus(pitchId, status) {
+    setUpdatingId(pitchId);
+    setUpdateError('');
+    try {
+      const token = localStorage.getItem('token')?.trim();
+      const response = await fetch(`${API_BASE}/investor-request/${encodeURIComponent(id)}/pitches/${encodeURIComponent(pitchId)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not update response status.');
+      setPitches((current) => current.map((pitch) => pitch.id === pitchId ? { ...pitch, response_status: data.status } : pitch));
+    } catch (updateError) {
+      setUpdateError(updateError.message || 'Could not update response status.');
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   useEffect(() => {
     if (!user?.id) {
@@ -149,9 +180,10 @@ export default function InvestorRequestAllResponses() {
                 <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search responses..." />
               </label>
             </div>
+            {updateError && <p role="alert" className="iv-irf-update-error">{updateError}</p>}
             {visible.length > 0 ? (
               <div className="iv-irf-cards">
-                {visible.map((pitch) => <PitchResponseCard key={pitch.id} pitch={pitch} />)}
+                {visible.map((pitch) => <PitchResponseCard key={pitch.id} pitch={pitch} onStatusChange={changeStatus} updating={updatingId === pitch.id} />)}
               </div>
             ) : (
               <InvestorRequestState icon={FiSearch} title="No matching pitches" description="Try a different name, industry or keyword."

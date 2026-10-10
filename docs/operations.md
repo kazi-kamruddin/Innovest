@@ -1,5 +1,13 @@
 # Operations
 
+## Response statuses and notifications rollout
+
+1. From `backEnd/`, run `npm run migrate:responses` with the existing Aiven connection configured in `backEnd/.env`. The command applies `database/003_responses_notifications.sql`, verifies both tables, and can be rerun safely. Do this before deploying this backend version.
+2. Merge the reviewed code to `main` and allow Render and Vercel to deploy. Render's `/ready` endpoint checks both new tables, so it returns 503 until the migration is applied.
+3. Test with two accounts: an entrepreneur submits a pitch to an investor request; the investor sees it in Responses, changes its status, and the entrepreneur sees that status on the Fundraise dashboard. Send a message in each direction and confirm the recipient sees it in Notifications.
+
+Notifications are stored in Aiven and delivered live through Socket.IO when the recipient is connected. The browser also refreshes the unread count every 30 seconds. They are in-app only; Brevo remains dedicated to account verification and password recovery.
+
 ## Account security rollout
 
 1. Confirm Aiven shows a recent backup. This migration only creates three new tables; an independent SQL export is optional for this change.

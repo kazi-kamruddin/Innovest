@@ -226,3 +226,7 @@
 @media (prefers-reduced-motion: reduce) {
   .iv-irf-page *, .iv-irf-modal-backdrop * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+.iv-irf-page .iv-irf-response-status { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; color: #395846; font-size: 12px; font-weight: 650; }
+.iv-irf-page .iv-irf-response-status select { min-height: 43px; padding: 10px 12px; border: 1.5px solid #b9d0be; border-radius: 10px; background: #fbfdfb; color: #2f4436; font: 400 13px "Outfit", sans-serif; cursor: pointer; }
+.iv-irf-page .iv-irf-response-status select:focus { outline: none; border-color: #176d5d; box-shadow: 0 0 0 3px rgba(23, 109, 93, .105); }
+.iv-irf-page .iv-irf-update-error { color: #a43838; margin: 1rem 0; }
