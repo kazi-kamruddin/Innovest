@@ -47,7 +47,7 @@ After testing, remove the variables from that PowerShell session if desired:
 Remove-Item Env:INNOVEST_TEST_ACCOUNTS_FILE, Env:INNOVEST_TEST_SITE_URL, Env:INNOVEST_TEST_API_URL, Env:INNOVEST_EXPECT_GOOGLE -ErrorAction SilentlyContinue
 ```
 
-The default live suite does not create or edit records. The local mocked authentication-error and loading tests are skipped against the deployed site until the corresponding frontend fixes are deployed. Investor requests cannot currently be deleted through the app.
+The default live suite does not create or edit records. The mocked authentication-error and loading tests now also run against the deployed frontend: Playwright intercepts their API calls to reproduce delayed or failed responses without changing live records. Investor requests cannot currently be deleted through the app.
 
 ## Opt-in two-person journeys
 
@@ -67,7 +67,7 @@ The investor test:
 
 The request lifecycle test edits, closes, reopens, and finally closes another disposable request. It verifies non-owner writes and responses to a closed request are denied. The standalone pitch test creates, views, edits, and deletes a pitch, including non-owner write checks. The profile test edits accountA's details, checks public visibility, and restores the original values. The logout test revokes one Playwright session and signs in again.
 
-The messaging test opens the two accounts' conversation through the API, sends two labeled messages while both browsers are open, checks live delivery and persistence, verifies a notification can be marked read only by its owner, and denies guest message access. Those private messages and the conversation remain as test data because there is no deletion endpoint. The deployed Knock button was intermittent on a rerun; the local frontend now starts conversations through the same API, and its mocked regression passed. Verify the new button against production after deployment.
+The messaging test opens the two accounts' conversation through the API, sends two labeled messages while both browsers are open, checks live delivery and persistence, verifies a notification can be marked read only by its owner, and denies guest message access. Those private messages and the conversation remain as test data because there is no deletion endpoint. The Knock button now starts conversations through the same API; both its mocked regression and a real deployed button click passed after redeployment.
 
 After an interrupted run, close or delete only unfinished records with the exact E2E disposable prefixes owned by these test accounts:
 
@@ -76,6 +76,6 @@ $env:INNOVEST_TEST_CLEANUP = '1'
 npm run test:e2e -- e2e/cleanup-test-data.spec.js
 ```
 
-The local frontend has separate mocked regressions for delayed request status, delayed message history, and Knock. Run `npm run dev` with `VITE_API_URL` set to the API, omit `INNOVEST_TEST_SITE_URL`, and run `npm run test:e2e -- e2e/request-loading.spec.js e2e/message-loading.spec.js e2e/knock-flow.spec.js`.
+The frontend has mocked regressions for delayed request status, delayed message history, Knock, and authentication server errors. They passed against the redeployed site on 11 October 2026. Run them with the live site and API variables above using `npm run test:e2e -- e2e/request-loading.spec.js e2e/message-loading.spec.js e2e/knock-flow.spec.js e2e/auth-errors.spec.js`. `e2e/production-regressions.spec.js` clicks the real deployed Knock button and checks that the public member profile omits the login email; both checks passed. The full set of six record-changing journeys also passed after redeployment, and cleanup found no unfinished disposable pitches or open requests.
 
 Manual checks still needed: a fresh email verification link, a full password-reset email and old-session invalidation, and the Google account chooser/linking flow. These require access to the mailbox or Google account. A database backup restore drill requires a separate database and operator access.

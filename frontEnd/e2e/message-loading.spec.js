@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('direct message link waits for inbox and history before showing an empty chat', async ({ browser }) => {
-  test.skip(!process.env.INNOVEST_TEST_API_URL || /^https?:\/\//.test(process.env.INNOVEST_TEST_SITE_URL || ''),
-    'Run this mocked UX regression against the local frontend.');
+  test.skip(!process.env.INNOVEST_TEST_API_URL, 'Set the API URL for this mocked UX regression.');
   const api = process.env.INNOVEST_TEST_API_URL.replace(/\/+$/, '');
   const context = await browser.newContext();
   const token = `${Buffer.from('{}').toString('base64url')}.${Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 })).toString('base64url')}.test`;
