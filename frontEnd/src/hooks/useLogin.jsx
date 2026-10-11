@@ -34,9 +34,16 @@ export const useLogin = () => {
       setIsLoading(false);
       return false; 
     } catch (err) {
-      const message = err.response?.data?.error || 'Invalid credentials';
+      const status = err.response?.status;
+      const message = !status
+        ? 'Could not reach the server. Please try again shortly.'
+        : status >= 500
+          ? 'Sign in is temporarily unavailable. Please try again shortly.'
+          : status === 401
+            ? 'Invalid credentials. Please try again.'
+            : err.response?.data?.error || 'Sign in failed. Please try again.';
       setError(message);
-      setErrorCode(err.response?.data?.code || `HTTP_${err.response?.status || 0}`);
+      setErrorCode(err.response?.data?.code || `HTTP_${status || 0}`);
       setIsLoading(false);
       return false; 
     }

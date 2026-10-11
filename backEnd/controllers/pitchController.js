@@ -5,7 +5,7 @@ const { notifyBestEffort } = require('../utils/notifications');
 const getAllPitches = async (req, res) => {
   try {
     let sql = `
-      SELECT pitches.*, users.id AS user_id, users.name AS user_name, users.email AS user_email
+      SELECT pitches.*, users.id AS user_id, users.name AS user_name
       FROM pitches
       JOIN users ON pitches.user_id = users.id
       WHERE 1=1
@@ -38,7 +38,7 @@ const getPitchById = async (req, res) => {
   try {
     const [rows] = await db.execute(
       `
-      SELECT pitches.*, users.id AS user_id, users.name AS user_name, users.email AS user_email
+      SELECT pitches.*, users.id AS user_id, users.name AS user_name
       FROM pitches
       JOIN users ON pitches.user_id = users.id
       WHERE pitches.id = ?

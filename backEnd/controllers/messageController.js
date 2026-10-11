@@ -53,6 +53,13 @@ const startConversation = async (req, res) => {
       [userId, targetUserId]
     );
 
+    for (const [id, partnerId] of [[userId, targetUserId], [targetUserId, userId]]) {
+      req.app?.get('io')?.to(`user:${id}`).emit('new_conversation', {
+        conversationId: result.insertId,
+        partnerId,
+      });
+    }
+
     res.status(201).json({
       id: result.insertId,
       user_one_id: userId,

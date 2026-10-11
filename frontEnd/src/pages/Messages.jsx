@@ -144,7 +144,7 @@ export default function Messages() {
 
   const [threads, setThreads] = useState({});
   const [threadLoading, setThreadLoading] = useState(false);
-  const [threadError, setThreadError] = useState("");
+  const [threadError, setThreadError] = useState(null);
   const [refreshThread, setRefreshThread] = useState(0);
   const [latestById, setLatestById] = useState({});
   const [unreadIds, setUnreadIds] = useState(() => new Set());
@@ -167,6 +167,9 @@ export default function Messages() {
   const partner = partnerFor(selectedConversation, userId);
   const partnerId = partner?.id;
   const currentMessages = selectedId == null ? [] : threads[String(selectedId)] || [];
+  const currentThreadError = threadError?.id === String(selectedId) ? threadError.message : "";
+  const waitingForHistory = selectedId != null &&
+    (threadLoading || (!Object.prototype.hasOwnProperty.call(threads, String(selectedId)) && !currentThreadError));
 
   useEffect(() => {
     selectedIdRef.current = selectedId;
@@ -312,7 +315,7 @@ export default function Messages() {
     const controller = new AbortController();
     const key = String(selectedId);
     setThreadLoading(true);
-    setThreadError("");
+    setThreadError(null);
 
     (async () => {
       try {
@@ -346,7 +349,7 @@ export default function Messages() {
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error("Failed to load messages:", error);
-          setThreadError(error.message || "Couldn't load messages.");
+          setThreadError({ id: key, message: error.message || "Couldn't load messages." });
         }
       } finally {
         if (!controller.signal.aborted) setThreadLoading(false);
@@ -614,7 +617,9 @@ export default function Messages() {
 
           {/* CENTER - CHAT */}
           <section className="iv-msg-chat" aria-label="Chat">
-            {!selectedConversation ? (
+            {!selectedConversation && loadingConversations ? (
+              <div className="iv-msg-select-prompt" role="status">Loading conversations...</div>
+            ) : !selectedConversation ? (
               <div className="iv-msg-select-prompt">
                 <div className="iv-msg-empty-graphic" aria-hidden="true"><FiMessageCircle size={34} /></div>
                 <h2>Your next conversation starts here.</h2>
@@ -647,12 +652,12 @@ export default function Messages() {
                 </div>
 
                 <div className="iv-msg-message-history" ref={historyRef} aria-label="Message history" role="log" aria-live="polite" aria-relevant="additions text">
-                  {threadLoading && currentMessages.length === 0 ? (
+                  {waitingForHistory && currentMessages.length === 0 ? (
                     <div className="iv-msg-thread-note" role="status">Loading messages...</div>
-                  ) : threadError && currentMessages.length === 0 ? (
+                  ) : currentThreadError && currentMessages.length === 0 ? (
                     <div className="iv-msg-thread-note iv-msg-thread-error" role="alert">
                       <FiAlertCircle size={19} aria-hidden="true" />
-                      <span>{threadError}</span>
+                      <span>{currentThreadError}</span>
                       <button type="button" onClick={() => setRefreshThread((value) => value + 1)}>Retry</button>
                     </div>
                   ) : currentMessages.length === 0 ? (

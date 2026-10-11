@@ -10,6 +10,7 @@ const { listNotifications, markRead } = require('../controllers/notificationCont
 const { storeInvestorInfo } = require("../controllers/investorInfoController");
 const { createPitch, createPitchInResponse } = require("../controllers/pitchController");
 const { startConversation, sendMessage } = require("../controllers/messageController");
+const { getUserInfo } = require("../controllers/userInfoController");
 
 const response = () => ({
   statusCode: 200,
@@ -113,6 +114,36 @@ test("conversation creation rejects the current user as recipient", async () => 
   await startConversation({ user: { id: 7 }, body: { targetUserId: 7 } }, res);
 
   assert.equal(res.statusCode, 400);
+});
+
+test("public profile never returns the account email", async () => {
+  db.execute = async () => [[{
+    user_id: 7, name: "Founder", email: "private@example.com",
+    location: "Dhaka", areas_of_interest: "Technology", about: "Building a product",
+  }]];
+  const res = response();
+  await getUserInfo({ params: { userId: "7" } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.user.email, undefined);
+  assert.equal(res.body.user.name, "Founder");
+});
+
+test("starting a new conversation tells both participants", async () => {
+  db.execute = async (sql) => {
+    if (sql.includes("SELECT id FROM users")) return [[{ id: 9 }]];
+    if (sql.includes("SELECT * FROM conversations")) return [[]];
+    if (sql.includes("INSERT INTO conversations")) return [{ insertId: 42 }];
+    throw new Error("Unexpected query");
+  };
+  const events = [];
+  const io = { to(room) { this.room = room; return this; }, emit(name, payload) { events.push({ room: this.room, name, payload }); } };
+  const res = response();
+  await startConversation({ user: { id: 7 }, body: { targetUserId: 9 }, app: { get: () => io } }, res);
+  assert.equal(res.statusCode, 201);
+  assert.deepEqual(events.map(({ room, name }) => [room, name]), [
+    ["user:7", "new_conversation"], ["user:9", "new_conversation"],
+  ]);
+  assert.equal(events[0].payload.conversationId, 42);
 });
 
 test("REST messages reach both participants through Socket.IO", async () => {
