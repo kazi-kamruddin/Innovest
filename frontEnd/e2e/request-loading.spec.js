@@ -2,9 +2,8 @@ import { expect, test } from '@playwright/test';
 import { loadTestAccounts } from './accounts.js';
 
 test('investor requests do not flash the wrong tab while profile status is delayed', async ({ browser, request }) => {
-  test.skip(!process.env.INNOVEST_TEST_ACCOUNTS_FILE || !process.env.INNOVEST_TEST_API_URL ||
-    /^https?:\/\//.test(process.env.INNOVEST_TEST_SITE_URL || ''),
-  'Run this regression against the local frontend with the two-account file and API URL.');
+  test.skip(!process.env.INNOVEST_TEST_ACCOUNTS_FILE || !process.env.INNOVEST_TEST_API_URL,
+    'Set the two-account file and API URL for this regression.');
   const apiBase = process.env.INNOVEST_TEST_API_URL.replace(/\/+$/, '');
   const account = loadTestAccounts().accountB;
   const login = await request.post(`${apiBase}/user/login`, { data: account });

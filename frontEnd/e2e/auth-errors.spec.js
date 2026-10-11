@@ -1,8 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-test.skip(/^https?:\/\//.test(process.env.INNOVEST_TEST_SITE_URL || ''),
-  'These assertions cover local frontend error-copy changes and will apply to production after deployment.');
-
 test('login distinguishes a server failure from invalid credentials', async ({ page }) => {
   await page.route('**/user/login', (route) => route.fulfill({
     status: 500,
