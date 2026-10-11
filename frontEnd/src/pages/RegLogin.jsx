@@ -204,9 +204,7 @@ export default function RegLogin() {
                 {error && (
                   <div role="alert"
                     className="rounded-lg! border! border-[#EBC9C4]! bg-[#FFF4F2]! px-3! py-2.5! text-[12px]! text-[#B34942]!">
-                    {errorCode === "EMAIL_UNVERIFIED" || errorCode === "HTTP_429" || errorCode === "HTTP_503"
-                      ? error
-                      : "Invalid credentials. Please try again."}
+                    {error}
                     {errorCode === "EMAIL_UNVERIFIED" && (
                       <Link to="/check-email" state={{ email }} className="ml-1! font-semibold! text-[#345C3D]!">Resend link</Link>
                     )}

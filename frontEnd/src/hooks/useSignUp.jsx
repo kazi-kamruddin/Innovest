@@ -34,8 +34,12 @@ export const useSignup = () => {
       }
       return false; 
     } catch (err) {
-      const message = err.response?.data?.error || 'Signup failed';
-      console.warn('[Signup] Signup failed:', message);
+      const status = err.response?.status;
+      const message = !status
+        ? 'Could not reach the server. Please try again shortly.'
+        : status >= 500
+          ? 'Account creation is temporarily unavailable. Please try again shortly.'
+          : err.response?.data?.error || 'Could not create your account. Please try again.';
       setError(message);
       return false;
     } finally {

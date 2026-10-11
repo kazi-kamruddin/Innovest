@@ -126,20 +126,17 @@ function RequestCard({ request, mine, onClose }) {
                 <FiX size={18} aria-hidden="true" />
               </button>
             </>
-          ) : (
-            <>
-              <Link
-                to={`/investor-request/create-response-pitch/${request.id}`}
-                className="iv-ir-card-main-action"
-              >
-                Respond with a pitch
-                <FiArrowRight size={16} aria-hidden="true" />
-              </Link>
-              <Link to={responsesLink} className="iv-ir-card-secondary-action">
-                Responses <FiArrowUpRight size={16} aria-hidden="true" />
-              </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link
+                  to={`/investor-request/create-response-pitch/${request.id}`}
+                  className="iv-ir-card-main-action"
+                >
+                  Respond with a pitch
+                  <FiArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </>
+            )}
         </div>
       </div>
     </article>
@@ -209,8 +206,6 @@ export default function InvestorRequest() {
     async function fetchData() {
       setLoading(true);
       setFetchError("");
-      setIsInvestor(false);
-      setActiveTab("others");
 
       if (!API_BASE || !token) {
         setFetchError("Your session or API configuration is unavailable. Please sign in again if needed.");
@@ -218,47 +213,36 @@ export default function InvestorRequest() {
         return;
       }
 
-      // The investor-info endpoint determines whether the user can post requests.
-      // A missing investor profile is normal for an entrepreneur.
-      async function fetchInvestorStatus() {
-        try {
-          const response = await fetch(`${API_BASE}/investor-info/${user.id}`, {
-            headers,
-            signal: controller.signal,
-          });
-          if (!response.ok) return;
-          const data = await response.json();
-          if (!controller.signal.aborted && data && Object.keys(data).length > 0) {
-            setIsInvestor(true);
-            setActiveTab("mine");
-          }
-        } catch (error) {
-          if (!controller.signal.aborted) console.warn("Investor status unavailable:", error);
+      try {
+        // Keep the loading cards visible until both the request list and the
+        // viewer's investor status are known. Otherwise the default "others"
+        // tab briefly displays cards before switching to "mine".
+        const [statusResponse, requestsResponse] = await Promise.all([
+          fetch(`${API_BASE}/investor-info/${user.id}`, { headers, signal: controller.signal }),
+          fetch(`${API_BASE}/investor-request`, { headers, signal: controller.signal }),
+        ]);
+        if (statusResponse.status !== 404 && !statusResponse.ok) {
+          throw new Error(`Investor status failed (${statusResponse.status})`);
         }
-      }
-
-      async function fetchOpenRequests() {
-        try {
-          const response = await fetch(`${API_BASE}/investor-request`, {
-            headers,
-            signal: controller.signal,
-          });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const data = await response.json();
-          if (!Array.isArray(data)) throw new Error("Unexpected requests response");
-          if (!controller.signal.aborted) setRequests(data);
-        } catch (error) {
-          if (!controller.signal.aborted) {
-            console.error("Unable to load investor requests:", error);
-            setFetchError("We couldn't load the requests right now. Please try again.");
-          }
-        } finally {
-          if (!controller.signal.aborted) setLoading(false);
+        if (!requestsResponse.ok) throw new Error(`Requests failed (${requestsResponse.status})`);
+        const [statusData, requestData] = await Promise.all([
+          statusResponse.ok ? statusResponse.json() : null,
+          requestsResponse.json(),
+        ]);
+        if (!Array.isArray(requestData)) throw new Error("Unexpected requests response");
+        if (controller.signal.aborted) return;
+        const investor = Boolean(statusData && Object.keys(statusData).length > 0);
+        setRequests(requestData);
+        setIsInvestor(investor);
+        setActiveTab(investor ? "mine" : "others");
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Unable to load investor requests:", error);
+          setFetchError("We couldn't load the requests right now. Please try again.");
         }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-
-      fetchInvestorStatus();
-      fetchOpenRequests();
     }
 
     fetchData();
@@ -378,7 +362,7 @@ export default function InvestorRequest() {
                 <span>{loading ? "Loading..." : `${myRequests.length + otherRequests.length} open requests`}</span>
               </div>
 
-              <div className="iv-ir-tabs" aria-label="Choose which requests to see">
+              {!loading && <div className="iv-ir-tabs" aria-label="Choose which requests to see">
                 {isInvestor && (
                   <button
                     type="button"
@@ -397,7 +381,7 @@ export default function InvestorRequest() {
                 >
                   Other investors <span>{otherRequests.length}</span>
                 </button>
-              </div>
+              </div>}
 
               <div className="iv-ir-filters">
                 <label className="iv-ir-search">

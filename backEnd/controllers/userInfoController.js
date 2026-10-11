@@ -6,7 +6,7 @@ const getUserInfo = async (req, res) => {
     const { userId } = req.params;
 
     const [rows] = await db.execute(
-      `SELECT u.id AS user_id, u.name, u.email, ui.location, 
+      `SELECT u.id AS user_id, u.name, ui.location,
               ui.areas_of_interest, ui.about
        FROM users u
        LEFT JOIN user_info ui ON u.id = ui.user_id
@@ -22,7 +22,6 @@ const getUserInfo = async (req, res) => {
       user: {
         id: rows[0].user_id,
         name: rows[0].name,
-        email: rows[0].email,
       },
       location: rows[0].location || null,
       areas_of_interest: rows[0].areas_of_interest || null,

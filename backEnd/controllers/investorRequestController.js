@@ -298,7 +298,7 @@ const getAllInvestorRequests = async (req, res) => {
     const [rows] = await db.execute(
       `SELECT ir.id, ir.investorId, ir.title, ir.description, ir.category, 
               ir.minInvestment, ir.maxInvestment, ir.status, ir.createdAt, ir.updatedAt, 
-              u.name, u.email
+              u.name
        FROM investor_requests AS ir
        LEFT JOIN users AS u ON ir.investorId = u.id
        WHERE ir.status = 'open'

@@ -126,7 +126,7 @@ const getInvestorInfoPublic = async (req, res) => {
 const getInvestorList = async (req, res) => {
   try {
     const [rows] = await db.execute(`
-      SELECT investor_info.*, users.name, users.email
+      SELECT investor_info.*, users.name
       FROM investor_info
       JOIN users ON investor_info.user_id = users.id
     `);
