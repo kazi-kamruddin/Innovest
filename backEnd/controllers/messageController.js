@@ -1,5 +1,6 @@
 const db = require("../config/database");
 const { notifyBestEffort } = require('../utils/notifications');
+const { messageContentError } = require('../utils/messageValidation');
 
 const getConversations = async (req, res) => {
   try {
@@ -106,8 +107,9 @@ const sendMessage = async (req, res) => {
     const { id } = req.params;
     const { content } = req.body || {};
 
-    if (typeof content !== "string" || !content.trim()) {
-      return res.status(400).json({ error: "Message content is required" });
+    const contentError = messageContentError(content);
+    if (contentError) {
+      return res.status(400).json({ error: contentError });
     }
 
     const [check] = await db.execute(

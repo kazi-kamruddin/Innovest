@@ -8,8 +8,8 @@ require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: d
 const { createInvestorRequest, getPitchesForRequest, updateResponseStatus } = require("../controllers/investorRequestController");
 const { listNotifications, markRead } = require('../controllers/notificationController');
 const { storeInvestorInfo } = require("../controllers/investorInfoController");
-const { createPitch, createPitchInResponse } = require("../controllers/pitchController");
-const { startConversation, sendMessage } = require("../controllers/messageController");
+const { createPitch, createPitchInResponse, getAllPitches, getPitchById } = require("../controllers/pitchController");
+const { startConversation, getMessages, sendMessage } = require("../controllers/messageController");
 const { getUserInfo } = require("../controllers/userInfoController");
 
 const response = () => ({
@@ -107,6 +107,46 @@ test("pitch creation preserves zero funding amounts", async () => {
   assert.deepEqual(inserted.slice(8, 10), [0, 0]);
 });
 
+test('public discovery excludes pitches submitted to investor requests', async () => {
+  db.execute = async (sql) => {
+    assert.match(sql, /pitches\.forRequestId IS NULL/);
+    return [[{ id: 14, title: 'Public pitch' }]];
+  };
+  const res = response();
+  await getAllPitches({ query: {} }, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.map((pitch) => pitch.id), [14]);
+});
+
+test('response pitch detail is visible only to its founder and request investor', async () => {
+  let investorLookups = 0;
+  db.execute = async (sql) => {
+    if (sql.includes('FROM pitches')) return [[{ id: 15, user_id: 7, forRequestId: 22 }]];
+    if (sql.includes('FROM investor_requests')) {
+      investorLookups += 1;
+      return [[{ investorId: 9 }]];
+    }
+    throw new Error('Unexpected query');
+  };
+  for (const [userId, expected] of [[undefined, 404], [7, 200], [9, 200], [10, 404]]) {
+    const res = response();
+    await getPitchById({ params: { id: '15' }, user: userId ? { id: userId } : undefined }, res);
+    assert.equal(res.statusCode, expected);
+  }
+  assert.equal(investorLookups, 2);
+});
+
+test('standalone pitch detail remains public', async () => {
+  db.execute = async (sql) => {
+    assert.match(sql, /FROM pitches/);
+    return [[{ id: 16, title: 'Public pitch', user_id: 7, forRequestId: null }]];
+  };
+  const res = response();
+  await getPitchById({ params: { id: '16' } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.title, 'Public pitch');
+});
+
 test("conversation creation rejects the current user as recipient", async () => {
   db.execute = async () => { throw new Error("Database should not be called"); };
   const res = response();
@@ -114,6 +154,23 @@ test("conversation creation rejects the current user as recipient", async () => 
   await startConversation({ user: { id: 7 }, body: { targetUserId: 7 } }, res);
 
   assert.equal(res.statusCode, 400);
+});
+
+test("non-participants cannot read or send conversation messages", async () => {
+  const queries = [];
+  db.execute = async (sql) => {
+    queries.push(sql);
+    return [[]];
+  };
+  const read = response();
+  await getMessages({ user: { id: 99 }, params: { id: '42' } }, read);
+  assert.equal(read.statusCode, 403);
+
+  const write = response();
+  await sendMessage({ user: { id: 99 }, params: { id: '42' }, body: { content: 'Not a member' } }, write);
+  assert.equal(write.statusCode, 403);
+  assert.equal(queries.length, 2);
+  assert.ok(queries.every((sql) => sql.includes('user_one_id = ? OR user_two_id = ?')));
 });
 
 test("public profile never returns the account email", async () => {
@@ -168,6 +225,16 @@ test("REST messages reach both participants through Socket.IO", async () => {
   assert.equal(emitted[0].event, "receive_message");
   assert.equal(emitted[0].payload.id, res.body.id);
   assert.equal(emitted[1].event, "notification");
+});
+
+test('oversized messages are rejected before reaching the database', async () => {
+  db.execute = async () => { throw new Error('Database should not be called'); };
+  const res = response();
+  await sendMessage({
+    user: { id: 7 }, params: { id: '3' }, body: { content: 'x'.repeat(4001) },
+  }, res);
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.error, /4000/);
 });
 
 test('only the investor request owner can view response pitches', async () => {

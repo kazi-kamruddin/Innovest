@@ -120,9 +120,9 @@ const sendActionLink = async (email, purpose, subject, path, minutes) => {
 };
 
 const requestPasswordReset = async (req, res) => {
-  if (!emailReady()) return res.status(503).json({ error: "Account email is temporarily unavailable." });
   const email = normalizeEmail(req.body?.email);
   if (!validator.isEmail(email)) return res.status(400).json({ error: "Enter a valid email address." });
+  if (!emailReady()) return res.status(503).json({ error: "Account email is temporarily unavailable." });
   try {
     await sendActionLink(email, "reset_password", "Reset your Innovest password", "/reset-password", 30);
   } catch (error) {
@@ -132,9 +132,9 @@ const requestPasswordReset = async (req, res) => {
 };
 
 const resendVerification = async (req, res) => {
-  if (!emailReady()) return res.status(503).json({ error: "Account email is temporarily unavailable." });
   const email = normalizeEmail(req.body?.email);
   if (!validator.isEmail(email)) return res.status(400).json({ error: "Enter a valid email address." });
+  if (!emailReady()) return res.status(503).json({ error: "Account email is temporarily unavailable." });
   try {
     await sendActionLink(email, "verify_email", "Verify your Innovest email", "/verify-email", 60 * 24);
   } catch (error) {

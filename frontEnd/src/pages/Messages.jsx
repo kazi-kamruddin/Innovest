@@ -719,6 +719,7 @@ export default function Messages() {
                         }
                       }}
                       rows={2}
+                      maxLength={4000}
                       aria-label="Write a message"
                       placeholder={`Message ${partner.name}...`}
                     />

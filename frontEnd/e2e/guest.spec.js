@@ -7,7 +7,7 @@ test('guest can reach public account pages and is redirected from private pages'
   await page.goto('/signup');
   await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
 
-  for (const path of ['/profile', '/messages', '/notifications']) {
+  for (const path of ['/profile', '/profile/edit-profile', '/profile/investor-info', '/messages', '/notifications']) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login(?:[?#]|$)/);
   }
