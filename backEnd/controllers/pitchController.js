@@ -8,7 +8,7 @@ const getAllPitches = async (req, res) => {
       SELECT pitches.*, users.id AS user_id, users.name AS user_name
       FROM pitches
       JOIN users ON pitches.user_id = users.id
-      WHERE 1=1
+      WHERE pitches.forRequestId IS NULL
     `;
     const params = [];
 
@@ -50,7 +50,19 @@ const getPitchById = async (req, res) => {
       return res.status(404).json({ error: "Pitch not found" });
     }
 
-    res.status(200).json(rows[0]);
+    const pitch = rows[0];
+    if (pitch.forRequestId != null && Number(pitch.user_id) !== Number(req.user?.id)) {
+      if (!req.user) return res.status(404).json({ error: "Pitch not found" });
+      const [requests] = await db.execute(
+        "SELECT investorId FROM investor_requests WHERE id = ?",
+        [pitch.forRequestId]
+      );
+      if (!requests.length || Number(requests[0].investorId) !== Number(req.user.id)) {
+        return res.status(404).json({ error: "Pitch not found" });
+      }
+    }
+
+    res.status(200).json(pitch);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch pitch" });

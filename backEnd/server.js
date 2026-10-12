@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const db = require("./config/database");
 const { verifyAccessToken, hashToken } = require("./utils/authTokens");
 const { notifyBestEffort } = require('./utils/notifications');
+const { messageContentError } = require('./utils/messageValidation');
 
 if (!process.env.SECRET) throw new Error("SECRET must be configured");
 
@@ -122,8 +123,9 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} disconnected.`);
   });
 
-  socket.on("knock_user", async ({ receiverId }) => {
+  socket.on("knock_user", async (payload) => {
     try {
+      const receiverId = payload?.receiverId;
       const senderId = userId;
       const targetId = Number(receiverId);
       if (!Number.isSafeInteger(targetId) || targetId <= 0 || targetId === senderId) {
@@ -168,11 +170,13 @@ io.on("connection", (socket) => {
 
   socket.on(
     "send_message",
-    async ({ conversationId, content }) => {
+    async (payload) => {
       try {
+        const { conversationId, content } = payload || {};
         const senderId = userId;
-        if (typeof content !== "string" || !content.trim()) {
-          return socket.emit("send_message_error", { message: "Message content is required" });
+        const contentError = messageContentError(content);
+        if (contentError) {
+          return socket.emit("send_message_error", { message: contentError });
         }
 
         const [rows] = await db.execute(

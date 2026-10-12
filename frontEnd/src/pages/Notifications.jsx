@@ -6,6 +6,13 @@ import '../styles/notifications.css';
 
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
+function notificationTarget(path) {
+  if (path === '/fundraise-dashboard' ||
+      /^\/investor-request\/[1-9]\d*\/response-pitches$/.test(path) ||
+      /^\/messages\?conversation=[1-9]\d*$/.test(path)) return path;
+  return '/notifications';
+}
+
 export default function Notifications() {
   const { user } = useAuthContext();
   const [items, setItems] = useState([]);
@@ -62,7 +69,7 @@ export default function Notifications() {
       {loading ? <p>Loading notifications...</p> : !items.length ? <div className="iv-notifications-empty"><FiBell size={30} /><h2>All caught up</h2><p>Your updates will appear here.</p></div> :
         <div className="iv-notifications-list">{items.map((item) => <article key={item.id} className={`iv-notification-item ${item.read_at ? '' : 'unread'}`}>
           <div><p>{item.text}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString()}</time></div>
-          <div className="iv-notification-actions"><Link to={item.target_path} onClick={() => { if (!item.read_at) markRead(item.id); }}>View</Link>
+          <div className="iv-notification-actions"><Link to={notificationTarget(item.target_path)} onClick={() => { if (!item.read_at) markRead(item.id); }}>View</Link>
             {!item.read_at && <button type="button" onClick={() => markRead(item.id)}>Mark read</button>}</div>
         </article>)}</div>}
     </div>

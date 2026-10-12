@@ -179,10 +179,12 @@ export default function PitchSingle() {
           );
         }
 
+        const token = localStorage.getItem('token')?.trim();
         const response = await fetch(
           `${API_BASE}/pitches/${encodeURIComponent(id)}`,
           {
             signal: controller.signal,
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           }
         );
 

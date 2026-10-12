@@ -1,5 +1,6 @@
 const express = require("express");
 const requireAuth = require("../middleware/requireAuth");
+const optionalAuth = require("../middleware/optionalAuth");
 const {
   getAllPitches,
   getPitchById,
@@ -15,7 +16,7 @@ const router = express.Router();
 
 
 router.get("/", getAllPitches);
-router.get("/:id", getPitchById);
+router.get("/:id", optionalAuth, getPitchById);
 
 router.get("/users/:id/pitches", requireAuth, getUserPitches);
 router.post("/", requireAuth, createPitch);
