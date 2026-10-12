@@ -21,12 +21,12 @@ async function loadUser(connection, userId) {
 }
 
 const googleSignIn = async (req, res) => {
-  if (!process.env.GOOGLE_CLIENT_ID?.trim()) {
-    return res.status(503).json({ error: 'Google sign-in is not configured.' });
-  }
   const credential = req.body?.credential;
   if (typeof credential !== 'string' || credential.length < 100 || credential.length > 10000) {
     return res.status(400).json({ error: 'A valid Google credential is required.' });
+  }
+  if (!process.env.GOOGLE_CLIENT_ID?.trim()) {
+    return res.status(503).json({ error: 'Google sign-in is not configured.' });
   }
 
   let payload;

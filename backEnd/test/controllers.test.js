@@ -9,7 +9,7 @@ const { createInvestorRequest, getPitchesForRequest, updateResponseStatus } = re
 const { listNotifications, markRead } = require('../controllers/notificationController');
 const { storeInvestorInfo } = require("../controllers/investorInfoController");
 const { createPitch, createPitchInResponse, getAllPitches, getPitchById } = require("../controllers/pitchController");
-const { startConversation, sendMessage } = require("../controllers/messageController");
+const { startConversation, getMessages, sendMessage } = require("../controllers/messageController");
 const { getUserInfo } = require("../controllers/userInfoController");
 
 const response = () => ({
@@ -154,6 +154,23 @@ test("conversation creation rejects the current user as recipient", async () => 
   await startConversation({ user: { id: 7 }, body: { targetUserId: 7 } }, res);
 
   assert.equal(res.statusCode, 400);
+});
+
+test("non-participants cannot read or send conversation messages", async () => {
+  const queries = [];
+  db.execute = async (sql) => {
+    queries.push(sql);
+    return [[]];
+  };
+  const read = response();
+  await getMessages({ user: { id: 99 }, params: { id: '42' } }, read);
+  assert.equal(read.statusCode, 403);
+
+  const write = response();
+  await sendMessage({ user: { id: 99 }, params: { id: '42' }, body: { content: 'Not a member' } }, write);
+  assert.equal(write.statusCode, 403);
+  assert.equal(queries.length, 2);
+  assert.ok(queries.every((sql) => sql.includes('user_one_id = ? OR user_two_id = ?')));
 });
 
 test("public profile never returns the account email", async () => {

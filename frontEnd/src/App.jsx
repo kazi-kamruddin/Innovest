@@ -73,7 +73,7 @@ function App() {
           <Route path="/profile" element={user ? <Profile /> : <Navigate to={"/login"} />} />
           <Route path="/profile/edit-profile" element={user?<ProfileEdit /> : <Navigate to={"/login"}/>} />
           <Route path="/profile/:userId" element={<ProfileOthers />} />
-          <Route path="/profile/investor-info" element={<ProfileInvestorInfo />} />
+          <Route path="/profile/investor-info" element={user ? <ProfileInvestorInfo /> : <Navigate to="/login" />} />
           
           <Route path="/fundraise-dashboard" element={<FundDash />} />
           <Route path="/fundraise-dashboard/create-pitch" element={<FundDashCreatePitch />} />

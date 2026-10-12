@@ -48,10 +48,11 @@ test('request responses stay out of public pitch discovery and detail routes', a
 
     const publicList = await request.get(`${api}/pitches`);
     expect(publicList.status()).toBe(200);
-    expect((await publicList.json()).some((pitch) => pitch.id === pitchId)).toBe(false);
+    expect.soft((await publicList.json()).some((pitch) => pitch.id === pitchId),
+      'A private response must not appear in public pitch discovery').toBe(false);
 
     const guestDetail = await request.get(`${api}/pitches/${pitchId}`);
-    expect(guestDetail.status()).toBe(404);
+    expect.soft(guestDetail.status(), 'Guests must not open a private response pitch').toBe(404);
     for (const headers of [founderHeaders, investorHeaders]) {
       const detail = await request.get(`${api}/pitches/${pitchId}`, { headers });
       expect(detail.status()).toBe(200);

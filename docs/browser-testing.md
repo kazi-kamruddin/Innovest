@@ -1,5 +1,7 @@
 # Browser testing with two disposable Innovest accounts
 
+The route-by-route coverage record and current production blocker are in [functional-audit.md](functional-audit.md).
+
 The default Playwright checks use two verified accounts without changing live records. They cover API readiness, invalid account input, guest redirects, both account logins, private pages, investor and pitch discovery, mobile navigation and width, API ownership for pitch lists, and whether the Google button renders. Record-changing tests require an explicit write flag. Google account authorization is not automated.
 
 ## Prepare the accounts
@@ -78,7 +80,7 @@ npm run test:e2e -- e2e/cleanup-test-data.spec.js
 
 The frontend has mocked regressions for delayed request status, delayed message history, Knock, and authentication server errors. They passed against the redeployed site on 11 October 2026. Run them with the live site and API variables above using `npm run test:e2e -- e2e/request-loading.spec.js e2e/message-loading.spec.js e2e/knock-flow.spec.js e2e/auth-errors.spec.js`. `e2e/production-regressions.spec.js` clicks the real deployed Knock button and checks that the public member profile omits the login email; both checks passed. The full set of six record-changing journeys also passed after redeployment, and cleanup found no unfinished disposable pitches or open requests.
 
-Manual checks still needed: a fresh email verification link, a full password-reset email and old-session invalidation, and the Google account chooser/linking flow. These require access to the mailbox or Google account. A database backup restore drill requires a separate database and operator access.
+Manual checks still needed: a fresh email verification link, a full password-reset email and old-session invalidation, the Google account chooser/linking flow, one actual EmailJS Help message, and a backup restore into a separate database. A live non-participant conversation check needs a third verified disposable account; the backend rule has a controller test.
 
 ## Additional access-control regressions
 
