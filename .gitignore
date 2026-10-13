@@ -22,3 +22,7 @@ test-results/
 Thumbs.db
 .vscode/
 .idea/
+
+# Portable local project context
+/.project-context/
+/reference/
