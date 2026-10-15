@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const { textFieldsError } = require('../utils/inputValidation');
 
 
 const getUserInfo = async (req, res) => {
@@ -35,6 +36,8 @@ const getUserInfo = async (req, res) => {
 
 
 const storeUserInfo = async (req, res) => {
+  const inputError = textFieldsError(req.body, { location: 255, areas_of_interest: 'text', about: 'text' });
+  if (inputError) return res.status(400).json({ error: inputError });
   try {
     const { userId } = req.params;
     const loggedInUserId = req.user.id;
@@ -43,7 +46,7 @@ const storeUserInfo = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const { location, areas_of_interest, about } = req.body;
+    const { location, areas_of_interest, about } = req.body || {};
 
     const [userCheck] = await db.execute(
       "SELECT id FROM users WHERE id = ?",

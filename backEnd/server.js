@@ -5,7 +5,7 @@ const http = require("http");
 const { randomUUID } = require("node:crypto");
 const { Server } = require("socket.io");
 const db = require("./config/database");
-const { verifyAccessToken, hashToken } = require("./utils/authTokens");
+const { authenticateSocket, protectSocketSession } = require('./middleware/socketAuth');
 const { notifyBestEffort } = require('./utils/notifications');
 const { messageContentError } = require('./utils/messageValidation');
 
@@ -101,19 +101,10 @@ const io = new Server(server, {
 });
 app.set("io", io);
 
-io.use(async (socket, next) => {
-  try {
-    const token = socket.handshake.auth?.token;
-    if (!token) return next(new Error("Authentication required"));
-    socket.data.userId = await verifyAccessToken(token);
-    socket.data.tokenHash = hashToken(token);
-    next();
-  } catch {
-    next(new Error("Invalid or expired token"));
-  }
-});
+io.use(authenticateSocket);
 
 io.on("connection", (socket) => {
+  protectSocketSession(socket);
   const userId = socket.data.userId;
   socket.join(`user:${userId}`);
   socket.join(`token:${socket.data.tokenHash}`);

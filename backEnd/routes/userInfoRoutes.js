@@ -6,6 +6,7 @@ const {
 } = require("../controllers/userInfoController");
 
 const router = express.Router();
+router.param('userId', require('../middleware/validateId'));
 
 
 

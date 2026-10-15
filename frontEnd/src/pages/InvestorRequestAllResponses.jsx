@@ -45,7 +45,6 @@ function PitchResponseCard({ pitch, onStatusChange, updating }) {
           <div>
             <span>Entrepreneur</span>
             <strong>{pitch.name || "Pitch creator"}</strong>
-            {pitch.email && <span className="iv-irf-founder-email">{pitch.email}</span>}
           </div>
         </div>
         <Link to={`/pitches/${pitch.id}`} className="iv-irf-request-main-button">

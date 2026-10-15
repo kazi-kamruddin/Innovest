@@ -12,6 +12,7 @@ const {
 } = require("../controllers/pitchController");
 
 const router = express.Router();
+for (const name of ['id', 'userId', 'pitchId', 'requestId']) router.param(name, require('../middleware/validateId'));
 
 
 

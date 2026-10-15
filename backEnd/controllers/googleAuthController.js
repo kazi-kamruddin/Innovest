@@ -4,6 +4,7 @@ const validator = require('validator');
 const pool = require('../config/database');
 const googleIdentity = require('../utils/googleIdentity');
 const { createAccessToken } = require('../utils/authTokens');
+const { rollbackQuietly } = require('../utils/transactions');
 
 const normalizeEmail = (email) => typeof email === 'string' ? email.trim().toLowerCase() : '';
 
@@ -110,7 +111,7 @@ const googleSignIn = async (req, res) => {
     await connection.commit();
     return res.json({ user: publicUser(user), token: createAccessToken(user.id, Number(user.token_version)) });
   } catch (error) {
-    if (connection) await connection.rollback();
+    await rollbackQuietly(connection);
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ error: 'This account changed during sign-in. Please try again.' });
     }

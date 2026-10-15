@@ -78,7 +78,7 @@ export default function ProfileInvestorInfo() {
     setSaveError("");
     const min = Number(minimum);
     const max = Number(maximum);
-    // Existing backend parses both fields with parseFloat; blank strings lead to invalid SQL values.
+    // The form requires an explicit range even though the API permits omitted amounts.
     if (minimum.trim() === "" || maximum.trim() === "" || !Number.isFinite(min) || !Number.isFinite(max) || min < 0 || max < 0 || min > max) {
       setSaveError("Enter both investment amounts. They must be non-negative, and the maximum must be at least the minimum.");
       return;

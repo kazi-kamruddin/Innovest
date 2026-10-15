@@ -1,8 +1,11 @@
 const db = require("../config/database");
 const { parseAmountRange } = require("../utils/amounts");
+const { textFieldsError } = require('../utils/inputValidation');
 
 
 const storeInvestorInfo = async (req, res) => {
+  const inputError = textFieldsError(req.body, { fields_of_interest: 'text', preferred_industries: 'text' });
+  if (inputError) return res.status(400).json({ error: inputError });
   try {
     const {
       user_id,
@@ -130,10 +133,6 @@ const getInvestorList = async (req, res) => {
       FROM investor_info
       JOIN users ON investor_info.user_id = users.id
     `);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "No investor information found" });
-    }
 
     res.json(rows);
   } catch (err) {

@@ -7,7 +7,7 @@ const hashToken = (token) => crypto.createHash("sha256").update(token).digest("h
 const createAccessToken = (id, version = 0) => jwt.sign(
   { id, version },
   process.env.SECRET,
-  { expiresIn: "2d" }
+  { expiresIn: "2d", jwtid: crypto.randomUUID() }
 );
 
 const issueActionToken = async (connection, userId, purpose, minutes) => {

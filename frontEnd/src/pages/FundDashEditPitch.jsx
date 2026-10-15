@@ -26,6 +26,9 @@ export default function FundDashEditPitch() {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const cancelRef = useRef(null);
+  const redirectRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(redirectRef.current), []);
 
   useEffect(() => {
     if (!user?.id) {
@@ -41,10 +44,12 @@ export default function FundDashEditPitch() {
 
       try {
         if (!API_BASE) throw new Error("The API URL is not configured.");
+        const token = localStorage.getItem('token')?.trim();
+        if (!token) throw new Error('Your session has expired. Please sign in again.');
 
         const response = await fetch(
           `${API_BASE}/pitches/${encodeURIComponent(id)}`,
-          { signal: controller.signal }
+          { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 404) throw new Error("This pitch could not be found.");
@@ -127,7 +132,7 @@ export default function FundDashEditPitch() {
 
       setShowModal(false);
       toast.success("Pitch updated successfully!");
-      setTimeout(() => navigate("/fundraise-dashboard"), 1300);
+      redirectRef.current = setTimeout(() => navigate("/fundraise-dashboard"), 1300);
     } catch (error) {
       console.error("Pitch update failed:", error);
       toast.error(error.message || "Failed to update pitch.");

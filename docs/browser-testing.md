@@ -1,6 +1,6 @@
 # Browser testing with two disposable Innovest accounts
 
-The route-by-route coverage record and current production blocker are in [functional-audit.md](functional-audit.md).
+The dated coverage record, fixes, and deployment verification limits are in [functional-audit.md](functional-audit.md).
 
 The default Playwright checks use two verified accounts without changing live records. They cover API readiness, invalid account input, guest redirects, both account logins, private pages, investor and pitch discovery, mobile navigation and width, API ownership for pitch lists, and whether the Google button renders. Record-changing tests require an explicit write flag. Google account authorization is not automated.
 
@@ -95,3 +95,11 @@ The live two-account checks on 13 October also passed messaging and notification
 The production backend accepts only the configured Vercel origin, so a locally served frontend cannot sign in against the live API. Run live account tests against the deployed frontend. Local browser checks use mocked API responses where needed. After deploying the privacy fix, rerun `e2e/response-pitch-privacy.spec.js` with `INNOVEST_TEST_WRITE=1` to verify the formerly exposed route returns no private response to a guest.
 
 The privacy regression passed against the locally updated backend and frontend connected to Aiven on 13 October: public discovery excluded the new response, a guest received 404 for its detail, and the founder and request investor received 200. The browser rendered the founder's detail. The test deleted the response pitch and closed the disposable request.
+
+## 15 October 2026 audit update
+
+The original response privacy regression passed against the public frontend/API on 15 October, closing the older deployed response-exposure finding. The test was then expanded to check that response review omits the founder's login email and that its founder can open the private editor, save changes, and retain guest denial. These additions passed against the updated local frontend/backend connected to Aiven; deploy today's changes before expecting the expanded test to pass publicly.
+
+New mocked checks are in `e2e/session-regressions.spec.js` (private editor authorization and cross-tab account/logout changes) and `e2e/notification-races.spec.js` (failed loads and a late poll after marking items read). They require `INNOVEST_TEST_API_URL` but use fake sessions and do not write real records. The default local suite passed 27 checks with 11 gated skips. All nine selected stateful journeys passed across the grouped run and corrected privacy-fixture rerun; the audit record describes the limits.
+
+Each account is limited to 10 logins per IP in 15 minutes, and the IP has a 30-login limit. Split production runs across that window. Restarting a local backend resets its own in-memory limiter; do not restart production merely to bypass a test limit. The cleanup flag targets only labeled disposable records owned by the test accounts.

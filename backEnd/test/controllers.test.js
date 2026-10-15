@@ -7,10 +7,10 @@ require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: d
 
 const { createInvestorRequest, getPitchesForRequest, updateResponseStatus } = require("../controllers/investorRequestController");
 const { listNotifications, markRead } = require('../controllers/notificationController');
-const { storeInvestorInfo } = require("../controllers/investorInfoController");
+const { storeInvestorInfo, getInvestorList } = require("../controllers/investorInfoController");
 const { createPitch, createPitchInResponse, getAllPitches, getPitchById } = require("../controllers/pitchController");
 const { startConversation, getMessages, sendMessage } = require("../controllers/messageController");
-const { getUserInfo } = require("../controllers/userInfoController");
+const { getUserInfo, storeUserInfo } = require("../controllers/userInfoController");
 
 const response = () => ({
   statusCode: 200,
@@ -252,10 +252,22 @@ test('only the investor request owner can view response pitches', async () => {
 
 test('submitting a response notifies the investor', async () => {
   const events = [];
+  const transaction = [];
+  let released = false;
+  db.getConnection = async () => ({
+    execute: (...args) => db.execute(...args),
+    beginTransaction: async () => transaction.push('begin'),
+    commit: async () => transaction.push('commit'),
+    rollback: async () => transaction.push('rollback'),
+    release: () => { released = true; transaction.push('release'); },
+  });
   db.execute = async (sql) => {
     if (sql.includes('SELECT investorId, status')) return [[{ investorId: 9, status: 'open' }]];
     if (sql.includes('INSERT INTO pitches')) return [{ insertId: 21 }];
-    if (sql.includes('INSERT INTO user_notifications')) return [{ insertId: 44 }];
+    if (sql.includes('INSERT INTO user_notifications')) {
+      assert.equal(released, true, 'The notification must not compete with a held transaction connection');
+      return [{ insertId: 44 }];
+    }
     return [[{ id: 21 }]];
   };
   const io = { to: (room) => ({ emit: (event) => events.push({ room, event }) }) };
@@ -264,7 +276,82 @@ test('submitting a response notifies the investor', async () => {
     title: 'Pitch', industry: 'Technology', minimum_investment: 0, total_raising_amount: 10,
   }, app: { get: () => io } }, res);
   assert.equal(res.statusCode, 201);
+  assert.deepEqual(transaction, ['begin', 'commit', 'release']);
   assert.deepEqual(events, [{ room: 'user:9', event: 'notification' }]);
+});
+
+test('a closed request rolls back without writing a response or notification', async () => {
+  const calls = [];
+  db.getConnection = async () => ({
+    beginTransaction: async () => calls.push('begin'),
+    execute: async (sql) => {
+      assert.match(sql, /FOR UPDATE/);
+      calls.push('check');
+      return [[{ investorId: 9, status: 'closed' }]];
+    },
+    rollback: async () => calls.push('rollback'),
+    release: () => calls.push('release'),
+  });
+  const res = response();
+  await createPitchInResponse({ user: { id: 7 }, params: { requestId: '3' }, body: { title: 'Pitch', industry: 'Technology' } }, res);
+  assert.equal(res.statusCode, 400);
+  assert.deepEqual(calls, ['begin', 'check', 'rollback', 'release']);
+});
+
+test('a lost response transaction still returns an error and releases its connection', async (t) => {
+  t.mock.method(console, 'error', () => {});
+  let released = false;
+  db.getConnection = async () => ({
+    beginTransaction: async () => {},
+    execute: async (sql) => {
+      if (sql.startsWith('SELECT investorId')) return [[{ investorId: 9, status: 'open' }]];
+      throw new Error('Connection lost during insert');
+    },
+    rollback: async () => { throw new Error('Connection is unavailable for rollback'); },
+    release: () => { released = true; },
+  });
+  const res = response();
+  await createPitchInResponse({ user: { id: 7 }, params: { requestId: '3' }, body: { title: 'Pitch', industry: 'Technology' } }, res);
+  assert.equal(res.statusCode, 500);
+  assert.equal(released, true);
+});
+
+test('invalid types and values exceeding column limits are rejected before SQL writes', async () => {
+  db.execute = async () => { throw new Error('Database should not be called'); };
+  for (const [handler, body] of [
+    [createPitch, { title: 'Pitch', industry: 'Technology', country: {} }],
+    [createPitch, { title: 'x'.repeat(256), industry: 'Technology' }],
+    [createPitch, { title: 'Pitch', industry: 'Technology', total_raising_amount: 1e100 }],
+    [createInvestorRequest, { investorId: 7, title: 'x'.repeat(256), description: 'Request', category: 'Technology' }],
+    [storeUserInfo, { about: [] }],
+    [storeUserInfo, []],
+    [storeUserInfo, { about: '界'.repeat(22000) }],
+    [storeInvestorInfo, { user_id: 7, preferred_industries: {} }],
+  ]) {
+    const res = response();
+    await handler({ user: { id: 7 }, params: { userId: '7' }, body }, res);
+    assert.equal(res.statusCode, 400);
+  }
+});
+
+test('an empty investor directory returns an empty collection', async () => {
+  db.execute = async () => [[]];
+  const res = response();
+  await getInvestorList({}, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, []);
+});
+
+test('response review queries do not disclose the founder login email', async () => {
+  db.execute = async (sql) => {
+    if (sql.includes('SELECT investorId')) return [[{ investorId: 9 }]];
+    assert.doesNotMatch(sql, /u\.email/);
+    return [[{ id: 21, name: 'Founder' }]];
+  };
+  const res = response();
+  await getPitchesForRequest({ user: { id: 9 }, params: { id: '3' } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body[0].name, 'Founder');
 });
 
 test('only the request owner can change response status', async () => {
