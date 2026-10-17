@@ -1119,3 +1119,105 @@
     transition: none !important;
   }
 }
+
+/* SCROLL TO BOTTOM BUTTON */
+.iv-messages .iv-msg-chat {
+  position: relative;
+}
+
+.iv-messages .iv-msg-scroll-bottom {
+  position: absolute;
+  bottom: 88px;
+  right: 24px;
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border: 1px solid #a8cdb2;
+  border-radius: 50px;
+  background: #ffffff;
+  color: #176d5d;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(23, 109, 93, 0.18);
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease;
+  animation: ivMsgFadeIn 0.2s ease-out;
+}
+
+.iv-messages .iv-msg-scroll-bottom:hover {
+  background: #eaf5ec;
+  transform: translateY(-2px);
+}
+
+@keyframes ivMsgFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* RECONNECTED BANNER */
+.iv-messages .iv-msg-reconnected-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: #e8f4ea;
+  border-bottom: 1px solid #bad8c1;
+  color: #216a44;
+  font-size: 11.5px;
+  font-weight: 650;
+  animation: ivMsgFadeIn 0.2s ease-out;
+}
+
+/* DELIVERY STATUS */
+.iv-messages .iv-msg-delivery-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #587f64;
+}
+
+.iv-messages .iv-msg-delivery-sending {
+  color: #8da091;
+  font-style: italic;
+}
+
+.iv-messages .iv-msg-delivery-failed button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #b34a44;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* RECONNECT TRIGGER ON HEADER */
+.iv-messages .iv-msg-connection--clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.iv-messages .iv-msg-connection--clickable:hover {
+  transform: translateY(-1px);
+  background-color: #e6eee7;
+}
+
+/* CHARACTER COUNTER */
+.iv-messages .iv-msg-composer-hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.iv-messages .iv-msg-char-counter {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8fa293;
+}
+

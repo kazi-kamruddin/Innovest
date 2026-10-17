@@ -77,7 +77,19 @@ export default function Notifications() {
         {items.some((item) => !item.read_at) && <button type="button" onClick={markAllRead}>Mark all as read</button>}
       </div>
       {error && <div className="iv-notifications-error" role="alert">{error} <button type="button" onClick={load}><FiRefreshCw /> Retry</button></div>}
-      {loading ? <p>Loading notifications...</p> : !items.length && !error ? <div className="iv-notifications-empty"><FiBell size={30} /><h2>All caught up</h2><p>Your updates will appear here.</p></div> :
+      {loading ? (
+        <div className="iv-notifications-skeleton-list" aria-busy="true" aria-label="Loading notifications">
+          {[1, 2, 3].map((key) => (
+            <div key={key} className="iv-notification-skeleton">
+              <div className="iv-notification-skeleton__main">
+                <div className="iv-notification-skeleton__line iv-notification-skeleton__line--text" />
+                <div className="iv-notification-skeleton__line iv-notification-skeleton__line--time" />
+              </div>
+              <div className="iv-notification-skeleton__btn" />
+            </div>
+          ))}
+        </div>
+      ) : !items.length && !error ? <div className="iv-notifications-empty"><FiBell size={30} /><h2>All caught up</h2><p>Your updates will appear here.</p></div> :
         <div className="iv-notifications-list">{items.map((item) => <article key={item.id} className={`iv-notification-item ${item.read_at ? '' : 'unread'}`}>
           <div><p>{item.text}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString()}</time></div>
           <div className="iv-notification-actions"><Link to={notificationTarget(item.target_path)} onClick={() => { if (!item.read_at) markRead(item.id); }}>View</Link>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   FiArrowRight,
   FiArrowUpRight,
@@ -183,10 +183,52 @@ export default function InvestorRequest() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
-  const [activeTab, setActiveTab] = useState("others");
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const query = searchParams.get("search") || "";
+  const category = searchParams.get("category") || "all";
+  const sortBy = searchParams.get("sortBy") || "newest";
+
+  const [activeTab, setActiveTab] = useState(tabParam || "others");
+
+  useEffect(() => {
+    if (tabParam && (tabParam === "mine" || tabParam === "others")) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const updateFilters = (updates) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        Object.entries(updates).forEach(([key, value]) => {
+          if (
+            value &&
+            value !== "all" &&
+            !(key === "sortBy" && value === "newest") &&
+            !(key === "tab" && value === "others")
+          ) {
+            next.set(key, value);
+          } else {
+            next.delete(key);
+          }
+        });
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    updateFilters({ tab: newTab });
+  };
+
+  const setQuery = (value) => updateFilters({ search: value });
+  const setCategory = (value) => updateFilters({ category: value });
+  const setSortBy = (value) => updateFilters({ sortBy: value });
+
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [closing, setClosing] = useState(false);
   const cancelRef = useRef(null);
@@ -214,9 +256,6 @@ export default function InvestorRequest() {
       }
 
       try {
-        // Keep the loading cards visible until both the request list and the
-        // viewer's investor status are known. Otherwise the default "others"
-        // tab briefly displays cards before switching to "mine".
         const [statusResponse, requestsResponse] = await Promise.all([
           fetch(`${API_BASE}/investor-info/${user.id}`, { headers, signal: controller.signal }),
           fetch(`${API_BASE}/investor-request`, { headers, signal: controller.signal }),
@@ -232,9 +271,12 @@ export default function InvestorRequest() {
         if (!Array.isArray(requestData)) throw new Error("Unexpected requests response");
         if (controller.signal.aborted) return;
         const investor = Boolean(statusData && Object.keys(statusData).length > 0);
+        const myCount = requestData.filter((r) => String(r.investorId) === String(user.id)).length;
         setRequests(requestData);
         setIsInvestor(investor);
-        setActiveTab(investor ? "mine" : "others");
+        if (!tabParam) {
+          setActiveTab(investor && myCount > 0 ? "mine" : "others");
+        }
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error("Unable to load investor requests:", error);
@@ -247,7 +289,7 @@ export default function InvestorRequest() {
 
     fetchData();
     return () => controller.abort();
-  }, [user?.id, retryKey]);
+  }, [user?.id, retryKey, tabParam]);
 
   const myRequests = useMemo(
     () => requests.filter((request) => String(request.investorId) === String(user?.id)),
@@ -266,9 +308,14 @@ export default function InvestorRequest() {
 
   const hasFilters = Boolean(query.trim() || category !== "all" || sortBy !== "newest");
   const clearFilters = () => {
-    setQuery("");
-    setCategory("all");
-    setSortBy("newest");
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams();
+        if (prev.get("tab")) next.set("tab", prev.get("tab"));
+        return next;
+      },
+      { replace: true }
+    );
   };
 
   const visibleRequests = useMemo(() => {
@@ -368,7 +415,7 @@ export default function InvestorRequest() {
                     type="button"
                     className={`iv-ir-tab ${activeTab === "mine" ? "is-active" : ""}`}
                     aria-pressed={activeTab === "mine"}
-                    onClick={() => setActiveTab("mine")}
+                    onClick={() => handleTabChange("mine")}
                   >
                     My requests <span>{myRequests.length}</span>
                   </button>
@@ -377,7 +424,7 @@ export default function InvestorRequest() {
                   type="button"
                   className={`iv-ir-tab ${activeTab === "others" ? "is-active" : ""}`}
                   aria-pressed={activeTab === "others"}
-                  onClick={() => setActiveTab("others")}
+                  onClick={() => handleTabChange("others")}
                 >
                   Other investors <span>{otherRequests.length}</span>
                 </button>

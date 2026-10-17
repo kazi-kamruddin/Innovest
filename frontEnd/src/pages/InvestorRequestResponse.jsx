@@ -76,16 +76,25 @@ const SECTIONS = [
   },
 ];
 
-function PitchField({ field, value, onChange, disabled }) {
+function PitchField({ field, value, onChange, disabled, error, helper }) {
   const id = `iv-irf-pitch-${field.name}`;
   const common = {
-    id, name: field.name, value: value ?? "", onChange, disabled,
+    id,
+    name: field.name,
+    value: value ?? "",
+    onChange,
+    disabled,
     required: Boolean(field.required),
     maxLength: field.maxLength,
-    "aria-describedby": field.maxLength ? `${id}-count` : undefined,
+    "aria-invalid": Boolean(error),
+    "aria-describedby": error
+      ? `${id}-error`
+      : field.maxLength
+      ? `${id}-count`
+      : undefined,
   };
   return (
-    <div className={`iv-irf-field ${field.full ? "iv-irf-full" : ""}`}>
+    <div className={`iv-irf-field ${field.full ? "iv-irf-full" : ""} ${error ? "has-error" : ""}`}>
       <label htmlFor={id}>{field.label}{field.required && <span className="iv-irf-required"> *</span>}</label>
       {field.options ? (
         <select {...common}>
@@ -95,32 +104,50 @@ function PitchField({ field, value, onChange, disabled }) {
       ) : field.textarea ? (
         <textarea {...common} rows={4} placeholder={field.placeholder} />
       ) : (
-        <input {...common} type={field.type || "text"} placeholder={field.placeholder}
+        <input
+          {...common}
+          type={field.type || "text"}
+          placeholder={field.placeholder}
           min={field.type === "number" ? 0 : undefined}
-          step={field.type === "number" ? "any" : undefined} />
+          step={field.type === "number" ? "any" : undefined}
+          onWheel={field.type === "number" ? (e) => e.target.blur() : undefined}
+        />
       )}
-      {field.maxLength && (
+      {helper && !error && <span className="iv-irf-amount-helper">{helper}</span>}
+      {error && <span id={`${id}-error`} className="iv-irf-field-error" role="alert">{error}</span>}
+      {field.maxLength && !error && (
         <span id={`${id}-count`} className="iv-irf-hint iv-irf-char-count">{String(value ?? "").length} / {field.maxLength}</span>
       )}
     </div>
   );
 }
 
-function validateResponsePitch(formData) {
-  if (!formData.title.trim()) return "Please enter a pitch title.";
-  if (!formData.country) return "Please select a country.";
-  if (!formData.industry) return "Please select an industry.";
+function validateResponsePitchFields(formData) {
+  const errors = {};
+  if (!formData.title?.trim()) errors.title = "Please enter a pitch title.";
+  if (!formData.country) errors.country = "Please select a country.";
+  if (!formData.industry) errors.industry = "Please select an industry.";
+
   for (const name of ["total_raising_amount", "minimum_investment"]) {
     const value = formData[name];
-    if (value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0)) {
-      return "Funding amounts must be valid non-negative numbers.";
+    if (value !== "" && value !== null && value !== undefined && (!Number.isFinite(Number(value)) || Number(value) < 0)) {
+      errors[name] = "Funding amounts must be valid non-negative numbers.";
     }
   }
-  if (formData.minimum_investment !== "" && formData.total_raising_amount !== "" &&
-      Number(formData.minimum_investment) > Number(formData.total_raising_amount)) {
-    return "Minimum investment cannot exceed the raising goal.";
+
+  if (
+    formData.minimum_investment !== "" &&
+    formData.total_raising_amount !== "" &&
+    formData.minimum_investment !== null &&
+    formData.total_raising_amount !== null &&
+    !errors.minimum_investment &&
+    !errors.total_raising_amount &&
+    Number(formData.minimum_investment) > Number(formData.total_raising_amount)
+  ) {
+    errors.minimum_investment = "Minimum investment cannot exceed the raising goal.";
   }
-  return null;
+
+  return errors;
 }
 
 export default function InvestorRequestResponse() {
@@ -133,10 +160,61 @@ export default function InvestorRequestResponse() {
   const [loadError, setLoadError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
   const [formData, setFormData] = useState({ ...EMPTY_PITCH });
+  const [errors, setErrors] = useState({});
+  const [userPitches, setUserPitches] = useState([]);
+  const [selectedPitchId, setSelectedPitchId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const isDirty = Boolean(
+    formData.title ||
+    formData.company_location ||
+    formData.country ||
+    formData.cell_number ||
+    formData.industry ||
+    formData.stage ||
+    formData.ideal_investor_role ||
+    formData.total_raising_amount ||
+    formData.minimum_investment ||
+    formData.the_business ||
+    formData.the_market ||
+    formData.progress ||
+    formData.objective
+  );
+
   useEffect(() => () => { if (redirectRef.current) clearTimeout(redirectRef.current); }, []);
+
+  useEffect(() => {
+    if (!isDirty || submitted) return;
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty, submitted]);
+
+  const handleLeave = (e) => {
+    if (isDirty && !submitted && !window.confirm("You have unsaved changes in your pitch response. Are you sure you want to leave?")) {
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    if (!user?.id || !API_BASE) return;
+    const token = localStorage.getItem("token")?.trim();
+    if (!token) return;
+    fetch(`${API_BASE}/pitches/users/${encodeURIComponent(user.id)}/pitches`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setUserPitches(data);
+        }
+      })
+      .catch((err) => console.error("Unable to load user pitches for response prefill:", err));
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -174,13 +252,52 @@ export default function InvestorRequestResponse() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((current) => ({ ...current, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handlePrefillSelect = (e) => {
+    const pitchId = e.target.value;
+    setSelectedPitchId(pitchId);
+    if (!pitchId) return;
+    const chosen = userPitches.find((p) => String(p.id) === String(pitchId));
+    if (!chosen) return;
+    setFormData({
+      title: chosen.title || "",
+      company_location: chosen.company_location || "",
+      country: chosen.country || "",
+      cell_number: chosen.cell_number || "",
+      industry: chosen.industry || "",
+      stage: chosen.stage || "",
+      ideal_investor_role: chosen.ideal_investor_role || "",
+      total_raising_amount: chosen.total_raising_amount ?? "",
+      minimum_investment: chosen.minimum_investment ?? "",
+      the_business: chosen.the_business || "",
+      the_market: chosen.the_market || "",
+      progress: chosen.progress || "",
+      objective: chosen.objective || "",
+    });
+    setErrors({});
+    toast.info(`Prefilled form from "${chosen.title}"`);
   };
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (submitting || submitted) return;
-    const error = validateResponsePitch(formData);
-    if (error) return toast.error(error);
+    const fieldErrors = validateResponsePitchFields(formData);
+    setErrors(fieldErrors);
+    const errorKeys = Object.keys(fieldErrors);
+    if (errorKeys.length > 0) {
+      toast.error(fieldErrors[errorKeys[0]]);
+      const firstEl = document.getElementById(`iv-irf-pitch-${errorKeys[0]}`);
+      if (firstEl) {
+        firstEl.focus();
+        firstEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+
     const token = localStorage.getItem("token")?.trim();
     if (!token || !user?.id || !API_BASE) {
       toast.error("Please sign in again to submit a response pitch.");
@@ -236,6 +353,7 @@ export default function InvestorRequestResponse() {
           title="Respond with a" accent="pitch."
           description="Present your venture to the investor who posted this opportunity."
           actions={<span className="iv-irf-required-note">* Required fields</span>}
+          onBackClick={handleLeave}
         />
         <section className="iv-irf-target" aria-label="Investor request being answered">
           <div className="iv-irf-target-symbol"><FiCheckCircle size={21} aria-hidden="true" /></div>
@@ -247,8 +365,27 @@ export default function InvestorRequestResponse() {
           <span className="iv-irf-target-status">Open</span>
         </section>
 
+        {userPitches.length > 0 && (
+          <div className="iv-irf-prefill-banner">
+            <span>💡 Have an existing pitch? Prefill this response:</span>
+            <select
+              value={selectedPitchId}
+              onChange={handlePrefillSelect}
+              disabled={submitting || submitted}
+              aria-label="Prefill form from an existing pitch"
+            >
+              <option value="">-- Choose one of your existing pitches --</option>
+              {userPitches.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title} ({p.industry || "General"})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="iv-irf-layout">
-          <form className="iv-irf-form" onSubmit={handleSubmit}>
+          <form className="iv-irf-form" onSubmit={handleSubmit} noValidate>
             {SECTIONS.map((section) => {
               const Icon = section.icon;
               return (
@@ -263,15 +400,26 @@ export default function InvestorRequestResponse() {
                   </div>
                   <div className="iv-irf-fields">
                     {section.fields.map((field) => (
-                      <PitchField key={field.name} field={field} value={formData[field.name]}
-                        onChange={handleChange} disabled={submitting || submitted} />
+                      <PitchField
+                        key={field.name}
+                        field={field}
+                        value={formData[field.name]}
+                        error={errors[field.name]}
+                        helper={
+                          (field.name === "total_raising_amount" || field.name === "minimum_investment")
+                            ? moneyText(formData[field.name])
+                            : undefined
+                        }
+                        onChange={handleChange}
+                        disabled={submitting || submitted}
+                      />
                     ))}
                   </div>
                 </section>
               );
             })}
             <div className="iv-irf-form-actions">
-              <Link className="iv-irf-secondary" to="/investor-request">Cancel</Link>
+              <Link className="iv-irf-secondary" to="/investor-request" onClick={handleLeave}>Cancel</Link>
               <button type="submit" className="iv-irf-primary" disabled={submitting || submitted}>
                 <FiSend size={16} aria-hidden="true" />
                 {submitted ? "Submitted" : submitting ? "Submitting..." : "Submit response pitch"}

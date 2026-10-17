@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "./hooks/useAuthContext";
 
 import LandingPage from "./pages/LandingPage";
@@ -43,8 +43,8 @@ import "./App.css";
 
 
 function App() {
-    
   const { user } = useAuthContext();
+  const location = useLocation();
 
   return (
     <>
@@ -60,8 +60,8 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/messages" element={user ? <Messages /> : <Navigate to="/login" />} />
-          <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/login" />} />
+          <Route path="/messages" element={user ? <Messages /> : <Navigate to="/login" state={{ from: location }} replace />} />
+          <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/login" state={{ from: location }} replace />} />
 
           <Route path="/login" element={!user ? <RegLogin /> : <Navigate to={"/"} />} />
           <Route path="/signup" element={!user ? <RegSignUp /> : <Navigate to={"/"} />} />
@@ -70,10 +70,10 @@ function App() {
           <Route path="/check-email" element={<CheckEmail />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
 
-          <Route path="/profile" element={user ? <Profile /> : <Navigate to={"/login"} />} />
-          <Route path="/profile/edit-profile" element={user?<ProfileEdit /> : <Navigate to={"/login"}/>} />
+          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" state={{ from: location }} replace />} />
+          <Route path="/profile/edit-profile" element={user ? <ProfileEdit /> : <Navigate to="/login" state={{ from: location }} replace />} />
           <Route path="/profile/:userId" element={<ProfileOthers />} />
-          <Route path="/profile/investor-info" element={user ? <ProfileInvestorInfo /> : <Navigate to="/login" />} />
+          <Route path="/profile/investor-info" element={user ? <ProfileInvestorInfo /> : <Navigate to="/login" state={{ from: location }} replace />} />
           
           <Route path="/fundraise-dashboard" element={<FundDash />} />
           <Route path="/fundraise-dashboard/create-pitch" element={<FundDashCreatePitch />} />

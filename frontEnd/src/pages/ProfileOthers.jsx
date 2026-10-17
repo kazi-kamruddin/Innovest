@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft, FiArrowRight, FiBriefcase, FiMapPin,
   FiMessageCircle, FiTarget, FiUser, FiUsers,
@@ -15,6 +15,7 @@ export default function ProfileOthers() {
   const { userId } = useParams();
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [investor, setInvestor] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,7 @@ export default function ProfileOthers() {
 
   async function handleKnock() {
     if (!user?.id) {
-      navigate("/login");
+      navigate("/login", { state: { from: location } });
       return;
     }
     if (String(user.id) === String(userId)) {

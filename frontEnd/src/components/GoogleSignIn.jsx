@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../hooks/useAuthContext';
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
@@ -26,15 +26,23 @@ function loadGoogleScript() {
   return scriptPromise;
 }
 
-export default function GoogleSignIn() {
+export default function GoogleSignIn({ redirectPath }) {
   const buttonRef = useRef(null);
   const inFlightRef = useRef(false);
   const { dispatch } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const [linkCredential, setLinkCredential] = useState('');
   const [linkPassword, setLinkPassword] = useState('');
   const [error, setError] = useState('');
   const [working, setWorking] = useState(false);
+
+  const queryParams = new URLSearchParams(location.search);
+  const targetDestination =
+    redirectPath ||
+    (location.state?.from?.pathname
+      ? `${location.state.from.pathname}${location.state.from.search || ''}${location.state.from.hash || ''}`
+      : location.state?.from || queryParams.get('returnTo') || '/');
 
   const exchange = useCallback(async (credential, password) => {
     if (inFlightRef.current) return;
@@ -58,14 +66,14 @@ export default function GoogleSignIn() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       dispatch({ type: 'LOGIN', payload: data.user });
-      navigate('/', { replace: true });
+      navigate(targetDestination, { replace: true });
     } catch (exchangeError) {
       setError(exchangeError.message || 'Google sign-in failed.');
     } finally {
       inFlightRef.current = false;
       setWorking(false);
     }
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, targetDestination]);
 
   useEffect(() => {
     if (!clientId || !apiBase) return undefined;

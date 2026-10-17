@@ -155,6 +155,8 @@ export default function Messages() {
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState("");
   const [sendingWithRest, setSendingWithRest] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [reconnectedNotice, setReconnectedNotice] = useState(false);
 
   const socketRef = useRef(null);
   const selectedIdRef = useRef(null);
@@ -162,6 +164,9 @@ export default function Messages() {
   const nextTempIdRef = useRef(0);
   const historyRef = useRef(null);
   const composerRef = useRef(null);
+  const wasDisconnectedRef = useRef(false);
+  const isNearBottomRef = useRef(true);
+  const prevCountRef = useRef(0);
 
   const selectedConversation = conversations.find((c) => sameId(c.id, selectedId));
   const partner = partnerFor(selectedConversation, userId);
@@ -235,16 +240,23 @@ export default function Messages() {
 
     function onConnect() {
       setConnectionStatus("connected");
+      if (wasDisconnectedRef.current) {
+        setReconnectedNotice(true);
+        setTimeout(() => setReconnectedNotice(false), 3000);
+      }
+      wasDisconnectedRef.current = false;
       setRefreshConversations((value) => value + 1);
       setRefreshThread((value) => value + 1);
     }
 
     function onDisconnect() {
       setConnectionStatus("reconnecting");
+      wasDisconnectedRef.current = true;
     }
 
     function onConnectError() {
       setConnectionStatus("unavailable");
+      wasDisconnectedRef.current = true;
     }
 
     function onReceive(raw) {
@@ -393,11 +405,50 @@ export default function Messages() {
     return () => controller.abort();
   }, [partnerId, token]);
 
-  useEffect(() => {
-    if (historyRef.current) {
-      historyRef.current.scrollTop = historyRef.current.scrollHeight;
+  const handleHistoryScroll = () => {
+    if (!historyRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = historyRef.current;
+    const nearBottom = scrollHeight - scrollTop - clientHeight < 120;
+    isNearBottomRef.current = nearBottom;
+    if (nearBottom) {
+      setShowScrollBottom(false);
     }
-  }, [selectedId, currentMessages.length, threadLoading]);
+  };
+
+  const scrollToBottom = (behavior = "smooth") => {
+    if (historyRef.current) {
+      historyRef.current.scrollTo({
+        top: historyRef.current.scrollHeight,
+        behavior,
+      });
+      setShowScrollBottom(false);
+      isNearBottomRef.current = true;
+    }
+  };
+
+  useEffect(() => {
+    if (selectedId != null) {
+      setTimeout(() => scrollToBottom("auto"), 50);
+    }
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (selectedId != null && historyRef.current) {
+      if (isNearBottomRef.current) {
+        scrollToBottom("smooth");
+      } else if (currentMessages.length > prevCountRef.current) {
+        setShowScrollBottom(true);
+      }
+    }
+    prevCountRef.current = currentMessages.length;
+  }, [currentMessages.length, selectedId]);
+
+  function handleManualReconnect() {
+    if (socketRef.current && connectionStatus !== "connected") {
+      setConnectionStatus("connecting");
+      socketRef.current.connect();
+    }
+  }
 
   const visibleConversations = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -421,6 +472,11 @@ export default function Messages() {
     setDraft("");
     setSendError("");
     setThreadError("");
+    setShowScrollBottom(false);
+    isNearBottomRef.current = true;
+    setTimeout(() => {
+      composerRef.current?.focus();
+    }, 60);
   }
 
   function restoreFailedMessage(message) {
@@ -643,15 +699,33 @@ export default function Messages() {
                     <p>Private conversation</p>
                   </div>
                   <div
-                    className={`iv-msg-connection iv-msg-connection-${connectionStatus}`}
-                    title={connectionStatus === "connected" ? "Realtime connection is active" : "Realtime connection is unavailable"}
+                    className={`iv-msg-connection iv-msg-connection-${connectionStatus} ${connectionStatus !== "connected" ? "iv-msg-connection--clickable" : ""}`}
+                    title={connectionStatus === "connected" ? "Realtime connection is active" : "Realtime connection is unavailable. Click to reconnect."}
+                    onClick={connectionStatus !== "connected" ? handleManualReconnect : undefined}
+                    role={connectionStatus !== "connected" ? "button" : undefined}
+                    tabIndex={connectionStatus !== "connected" ? 0 : undefined}
                   >
                     {connectionStatus === "connected" ? <FiWifi size={14} aria-hidden="true" /> : <FiWifiOff size={14} aria-hidden="true" />}
-                    <span>{connectionStatus === "connected" ? "Live" : "Reconnecting"}</span>
+                    <span>{connectionStatus === "connected" ? "Live" : connectionStatus === "connecting" ? "Connecting..." : "Reconnect"}</span>
                   </div>
                 </div>
 
-                <div className="iv-msg-message-history" ref={historyRef} aria-label="Message history" role="log" aria-live="polite" aria-relevant="additions text">
+                {reconnectedNotice && (
+                  <div className="iv-msg-reconnected-banner" role="status">
+                    <FiCheck size={14} aria-hidden="true" />
+                    <span>Real-time connection restored</span>
+                  </div>
+                )}
+
+                <div
+                  className="iv-msg-message-history"
+                  ref={historyRef}
+                  onScroll={handleHistoryScroll}
+                  aria-label="Message history"
+                  role="log"
+                  aria-live="polite"
+                  aria-relevant="additions text"
+                >
                   {waitingForHistory && currentMessages.length === 0 ? (
                     <div className="iv-msg-thread-note" role="status">Loading messages...</div>
                   ) : currentThreadError && currentMessages.length === 0 ? (
@@ -679,11 +753,15 @@ export default function Messages() {
                               <div className="iv-msg-bubble-meta">
                                 <span>{timeLabel(message.created_at)}</span>
                                 {message.pending ? (
-                                  <span>Sending...</span>
+                                  <span className="iv-msg-delivery-status iv-msg-delivery-sending">Sending...</span>
                                 ) : message.failed ? (
-                                  <button type="button" onClick={() => restoreFailedMessage(message)}>Not sent · Retry</button>
+                                  <span className="iv-msg-delivery-status iv-msg-delivery-failed">
+                                    Not sent · <button type="button" onClick={() => restoreFailedMessage(message)}>Retry</button>
+                                  </span>
                                 ) : own ? (
-                                  <FiCheck size={13} aria-label="Saved" />
+                                  <span className="iv-msg-delivery-status" title="Delivered">
+                                    <FiCheck size={12} aria-hidden="true" /> Delivered
+                                  </span>
                                 ) : null}
                               </div>
                             </div>
@@ -693,6 +771,17 @@ export default function Messages() {
                     })
                   )}
                 </div>
+
+                {showScrollBottom && (
+                  <button
+                    type="button"
+                    className="iv-msg-scroll-bottom"
+                    onClick={() => scrollToBottom("smooth")}
+                    aria-label="Scroll to newest messages"
+                  >
+                    ↓ New messages
+                  </button>
+                )}
 
                 <div className="iv-msg-composer-area">
                   {sendError && (
@@ -727,7 +816,12 @@ export default function Messages() {
                       <FiSend size={17} aria-hidden="true" /> <span>Send</span>
                     </button>
                   </form>
-                  <p className="iv-msg-composer-hint">Enter to send · Shift + Enter for a new line</p>
+                  <div className="iv-msg-composer-hint-row">
+                    <p className="iv-msg-composer-hint">Enter to send · Shift + Enter for a new line</p>
+                    {draft.length > 3000 && (
+                      <span className="iv-msg-char-counter">{draft.length} / 4000</span>
+                    )}
+                  </div>
                 </div>
               </>
             )}

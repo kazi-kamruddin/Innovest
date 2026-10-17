@@ -9,7 +9,7 @@ import InvestorRequestForm, {
   getInvestorRequestPayload,
   InvestorRequestConfirmDialog,
   InvestorRequestState,
-  validateInvestorRequest,
+  validateInvestorRequestFields,
 } from "../components/InvestorRequestForm";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
@@ -18,13 +18,39 @@ export default function InvestorRequestCreate() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ ...EMPTY_INVESTOR_REQUEST });
+  const [errors, setErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const isDirty = Boolean(
+    formData.title ||
+    formData.description ||
+    formData.category ||
+    formData.minInvestment ||
+    formData.maxInvestment
+  );
+
   const handleReview = (event) => {
     event.preventDefault();
-    const error = validateInvestorRequest(formData);
-    if (error) return toast.error(error);
+    const fieldErrors = validateInvestorRequestFields(formData);
+    setErrors(fieldErrors);
+    const errorKeys = Object.keys(fieldErrors);
+    if (errorKeys.length > 0) {
+      toast.error(fieldErrors[errorKeys[0]]);
+      const fieldIdMap = {
+        title: "iv-irf-title",
+        category: "iv-irf-category",
+        description: "iv-irf-description",
+        minInvestment: "iv-irf-min",
+        maxInvestment: "iv-irf-max",
+      };
+      const firstEl = document.getElementById(fieldIdMap[errorKeys[0]]);
+      if (firstEl) {
+        firstEl.focus();
+        firstEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
     setConfirmOpen(true);
   };
 
@@ -69,7 +95,15 @@ export default function InvestorRequestCreate() {
 
   return (
     <>
-      <InvestorRequestForm mode="create" formData={formData} onChange={setFormData} onSubmit={handleReview} busy={saving} />
+      <InvestorRequestForm
+        mode="create"
+        formData={formData}
+        onChange={setFormData}
+        onSubmit={handleReview}
+        busy={saving}
+        errors={errors}
+        isDirty={isDirty}
+      />
       {confirmOpen && (
           <InvestorRequestConfirmDialog
             title="Publish this request?"

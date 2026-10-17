@@ -212,6 +212,38 @@
   font-variant-numeric: tabular-nums;
 }
 
+.iv-pe-page .iv-pe-field-error {
+  display: block;
+  margin: 5px 0 0;
+  color: #b25241;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.4;
+}
+
+.iv-pe-page .iv-pe-field input[aria-invalid="true"],
+.iv-pe-page .iv-pe-field select[aria-invalid="true"],
+.iv-pe-page .iv-pe-field textarea[aria-invalid="true"] {
+  border-color: #dca69d;
+  background-color: #fffbfa;
+}
+
+.iv-pe-page .iv-pe-field input[aria-invalid="true"]:focus,
+.iv-pe-page .iv-pe-field select[aria-invalid="true"]:focus,
+.iv-pe-page .iv-pe-field textarea[aria-invalid="true"]:focus {
+  border-color: #b25241;
+  box-shadow: 0 0 0 3px rgba(178, 82, 65, 0.12);
+}
+
+.iv-pe-page .iv-pe-amount-helper {
+  display: block;
+  margin-top: 5px;
+  color: #278466;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+
 /* Submit row */
 .iv-pe-page .iv-pe-action-row {
   display: flex;
