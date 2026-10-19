@@ -52,9 +52,9 @@ const signUpUser = async (req, res) => {
 
   let connection;
   try {
+    const hash = await bcrypt.hash(password, 12);
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    const hash = await bcrypt.hash(password, 12);
     const [result] = await connection.execute(
       "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
       [name, email, hash]

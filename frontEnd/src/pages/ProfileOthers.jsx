@@ -5,8 +5,9 @@ import {
   FiMessageCircle, FiTarget, FiUser, FiUsers,
 } from "react-icons/fi";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { PROFILE_API, moneyText } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, InterestPills, moneyText, ProfileAvatar,
+  InterestPills, ProfileAvatar,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";

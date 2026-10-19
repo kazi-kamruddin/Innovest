@@ -24,7 +24,7 @@ const issueActionToken = async (connection, userId, purpose, minutes) => {
 };
 
 const verifyAccessToken = async (token) => {
-  const decoded = jwt.verify(token, process.env.SECRET);
+  const decoded = jwt.verify(token, process.env.SECRET, { algorithms: ["HS256"] });
   const id = Number(decoded.id);
   if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid token");
 

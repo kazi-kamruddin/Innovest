@@ -299,6 +299,10 @@ const updateResponseStatus = async (req, res) => {
 // GET /investor-requests (list all requests)
 const getAllInvestorRequests = async (req, res) => {
   try {
+    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 50), 100);
+    const page = Math.max(1, parseInt(req.query?.page, 10) || 1);
+    const offset = Math.max(0, parseInt(req.query?.offset, 10) || (page - 1) * limit);
+
     const [rows] = await db.execute(
       `SELECT ir.id, ir.investorId, ir.title, ir.description, ir.category, 
               ir.minInvestment, ir.maxInvestment, ir.status, ir.createdAt, ir.updatedAt, 
@@ -306,9 +310,15 @@ const getAllInvestorRequests = async (req, res) => {
        FROM investor_requests AS ir
        LEFT JOIN users AS u ON ir.investorId = u.id
        WHERE ir.status = 'open'
-       ORDER BY ir.createdAt DESC`
+       ORDER BY ir.createdAt DESC
+       LIMIT ? OFFSET ?`,
+      [limit, offset]
     );
 
+    if (typeof res.set === "function") {
+      res.set("X-Page", String(page));
+      res.set("X-Limit", String(limit));
+    }
     res.json(rows);
   } catch (err) {
     console.error("Error retrieving investor requests:", err);

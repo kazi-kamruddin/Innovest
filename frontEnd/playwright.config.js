@@ -12,9 +12,8 @@ export default defineConfig({
   use: {
     baseURL: process.env.INNOVEST_TEST_SITE_URL || 'http://localhost:5173',
     navigationTimeout: 90_000,
-    actionTimeout: 20_000,
-    trace: 'off',
-    screenshot: 'off',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
     video: 'off',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

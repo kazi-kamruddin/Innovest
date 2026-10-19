@@ -76,7 +76,11 @@ const storeUserInfo = async (req, res) => {
     } else {
       await db.execute(
         `INSERT INTO user_info (user_id, location, areas_of_interest, about)
-         VALUES (?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           location = VALUES(location),
+           areas_of_interest = VALUES(areas_of_interest),
+           about = VALUES(about)`,
         [
           userId,
           location || null,

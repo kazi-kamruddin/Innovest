@@ -8,6 +8,7 @@ const pitchFields = {
   stage: 255, ideal_investor_role: 255, the_business: 'text', the_market: 'text',
   progress: 'text', objective: 'text',
 };
+const escapeLike = (val) => String(val || "").replace(/([%_\\])/g, "\\$1");
 
 const getAllPitches = async (req, res) => {
   try {
@@ -21,18 +22,31 @@ const getAllPitches = async (req, res) => {
 
     if (req.query.industry) {
       sql += " AND pitches.industry LIKE ?";
-      params.push(`%${req.query.industry}%`);
+      params.push(`%${escapeLike(req.query.industry)}%`);
     }
     if (req.query.stage) {
       sql += " AND pitches.stage LIKE ?";
-      params.push(`%${req.query.stage}%`);
+      params.push(`%${escapeLike(req.query.stage)}%`);
     }
     if (req.query.country) {
       sql += " AND pitches.country LIKE ?";
-      params.push(`%${req.query.country}%`);
+      params.push(`%${escapeLike(req.query.country)}%`);
     }
 
+    sql += " ORDER BY pitches.created_at DESC, pitches.id DESC";
+
+    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 50), 100);
+    const page = Math.max(1, parseInt(req.query?.page, 10) || 1);
+    const offset = Math.max(0, parseInt(req.query?.offset, 10) || (page - 1) * limit);
+
+    sql += " LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
     const [rows] = await db.execute(sql, params);
+    if (typeof res.set === "function") {
+      res.set("X-Page", String(page));
+      res.set("X-Limit", String(limit));
+    }
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);

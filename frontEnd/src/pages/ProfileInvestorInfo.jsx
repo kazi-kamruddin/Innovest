@@ -4,8 +4,9 @@ import { FiArrowLeft, FiBriefcase, FiCheck, FiDollarSign, FiSave, FiTarget } fro
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { PROFILE_API, moneyText } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, InterestPicker, InterestPills, moneyText,
+  InterestPicker, InterestPills,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";

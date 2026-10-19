@@ -16,12 +16,26 @@ for (const name of ['id', 'userId', 'pitchId', 'requestId']) router.param(name, 
 
 
 
+const createRateLimit = require("../middleware/rateLimit");
+
+const byUserOrIp = (req) => `${req.ip}:${req.user?.id || ""}`;
+
 router.get("/", getAllPitches);
 router.get("/:id", optionalAuth, getPitchById);
 
 router.get("/users/:id/pitches", requireAuth, getUserPitches);
-router.post("/", requireAuth, createPitch);
-router.post("/in-response/:requestId", requireAuth, createPitchInResponse);
+router.post(
+  "/",
+  requireAuth,
+  createRateLimit({ windowMs: 60 * 60 * 1000, max: 20, key: byUserOrIp }),
+  createPitch
+);
+router.post(
+  "/in-response/:requestId",
+  requireAuth,
+  createRateLimit({ windowMs: 60 * 60 * 1000, max: 30, key: byUserOrIp }),
+  createPitchInResponse
+);
 router.put("/users/:userId/pitches/:pitchId", requireAuth, updatePitch);
 router.delete("/users/:userId/pitches/:pitchId", requireAuth, deletePitch);
 

@@ -55,7 +55,12 @@ const storeInvestorInfo = async (req, res) => {
       await db.execute(
         `INSERT INTO investor_info
         (user_id, fields_of_interest, investment_range_min, investment_range_max, preferred_industries) 
-        VALUES (?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          fields_of_interest = VALUES(fields_of_interest),
+          investment_range_min = VALUES(investment_range_min),
+          investment_range_max = VALUES(investment_range_max),
+          preferred_industries = VALUES(preferred_industries)`,
         [
           user_id,
           fields_of_interest || null,

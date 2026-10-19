@@ -6,10 +6,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import PitchEditorForm, {
-  EMPTY_PITCH,
   PitchEditorStatus,
-  validatePitchFields,
 } from "../components/PitchEditorForm";
+import {
+  EMPTY_PITCH,
+  validatePitchFields,
+} from "../utils/pitchEditorUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 

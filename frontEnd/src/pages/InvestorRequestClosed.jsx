@@ -20,9 +20,11 @@ import {
   InvestorRequestConfirmDialog,
   InvestorRequestHeader,
   InvestorRequestState,
+} from "../components/InvestorRequestForm";
+import {
   investmentRange,
   readableDate,
-} from "../components/InvestorRequestForm";
+} from "../utils/investorRequestUtils";
 import "../styles/investor-request-flow.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");

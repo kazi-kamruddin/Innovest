@@ -6,11 +6,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext";
 
 import PitchEditorForm, {
+  PitchEditorStatus,
+} from "../components/PitchEditorForm";
+import {
   EMPTY_PITCH,
   normalizePitch,
-  PitchEditorStatus,
   validatePitchFields,
-} from "../components/PitchEditorForm";
+} from "../utils/pitchEditorUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 

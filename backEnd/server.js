@@ -32,6 +32,9 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.set("Referrer-Policy", "no-referrer");
   res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   const requestId = randomUUID();
   const started = Date.now();
   res.set("X-Request-Id", requestId);
@@ -89,8 +92,15 @@ app.use("/investor-request", investorRequestRoutes);
 app.use("/conversations", messageRoutes);
 app.use('/notifications', notificationRoutes);
 
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
 
-
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  if (res.headersSent) return next(err);
+  res.status(err.status || 500).json({ error: err.message || "Internal server error" });
+});
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -110,12 +120,24 @@ io.on("connection", (socket) => {
   socket.join(`token:${socket.data.tokenHash}`);
   console.log("A user connected, socket id:", socket.id);
 
+  let knockCount = 0;
+  let knockReset = Date.now() + 60000;
+  let msgCount = 0;
+  let msgReset = Date.now() + 60000;
+
   socket.on("disconnect", () => {
     console.log(`User ${userId} disconnected.`);
   });
 
   socket.on("knock_user", async (payload) => {
     try {
+      const now = Date.now();
+      if (now > knockReset) { knockCount = 0; knockReset = now + 60000; }
+      knockCount += 1;
+      if (knockCount > 15) {
+        return socket.emit("knock_error", { message: "Too many knock requests. Please wait a moment." });
+      }
+
       const receiverId = payload?.receiverId;
       const senderId = userId;
       const targetId = Number(receiverId);
@@ -127,6 +149,9 @@ io.on("connection", (socket) => {
       if (recipients.length === 0) {
         return socket.emit("knock_error", { message: "Recipient not found" });
       }
+
+      const userOne = Math.min(senderId, targetId);
+      const userTwo = Math.max(senderId, targetId);
 
       const [existing] = await db.execute(
         `SELECT * FROM conversations 
@@ -141,7 +166,7 @@ io.on("connection", (socket) => {
       } else {
         const [result] = await db.execute(
           "INSERT INTO conversations (user_one_id, user_two_id, created_at) VALUES (?, ?, NOW())",
-          [senderId, targetId]
+          [userOne, userTwo]
         );
         conversationId = result.insertId;
       }
@@ -163,6 +188,13 @@ io.on("connection", (socket) => {
     "send_message",
     async (payload) => {
       try {
+        const now = Date.now();
+        if (now > msgReset) { msgCount = 0; msgReset = now + 60000; }
+        msgCount += 1;
+        if (msgCount > 60) {
+          return socket.emit("send_message_error", { message: "Too many messages sent. Please slow down." });
+        }
+
         const { conversationId, content } = payload || {};
         const senderId = userId;
         const contentError = messageContentError(content);
@@ -219,3 +251,26 @@ const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+const gracefulShutdown = (signal) => {
+  console.log(`Received ${signal}. Shutting down gracefully...`);
+  server.close(async () => {
+    try {
+      if (io) io.close();
+      await db.end();
+      console.log("Closed HTTP server, Socket.IO, and MySQL pool.");
+      process.exit(0);
+    } catch (err) {
+      console.error("Error during graceful shutdown:", err);
+      process.exit(1);
+    }
+  });
+  setTimeout(() => {
+    console.error("Forcefully terminating after timeout.");
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+

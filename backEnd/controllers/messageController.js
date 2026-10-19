@@ -38,6 +38,9 @@ const startConversation = async (req, res) => {
       return res.status(404).json({ error: "Recipient not found" });
     }
 
+    const userOne = Math.min(userId, targetUserId);
+    const userTwo = Math.max(userId, targetUserId);
+
     const [existing] = await db.execute(
       `SELECT * FROM conversations
        WHERE (user_one_id = ? AND user_two_id = ?)
@@ -51,7 +54,7 @@ const startConversation = async (req, res) => {
 
     const [result] = await db.execute(
       "INSERT INTO conversations (user_one_id, user_two_id, created_at) VALUES (?, ?, NOW())",
-      [userId, targetUserId]
+      [userOne, userTwo]
     );
 
     for (const [id, partnerId] of [[userId, targetUserId], [targetUserId, userId]]) {
@@ -63,8 +66,8 @@ const startConversation = async (req, res) => {
 
     res.status(201).json({
       id: result.insertId,
-      user_one_id: userId,
-      user_two_id: targetUserId,
+      user_one_id: userOne,
+      user_two_id: userTwo,
     });
   } catch (error) {
     console.error("startConversation error:", error);
@@ -87,12 +90,18 @@ const getMessages = async (req, res) => {
       return res.status(403).json({ error: "Not authorized for this conversation" });
     }
 
+    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 100), 200);
+    const offset = Math.max(0, parseInt(req.query?.offset, 10) || 0);
+
     const [msgs] = await db.execute(
       `SELECT id, conversation_id, sender_id, body as content, created_at
-      FROM messages WHERE conversation_id = ? ORDER BY created_at ASC`,
-      [id]
+      FROM messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+      [id, limit, offset]
     );
 
+    if (typeof res.set === "function") {
+      res.set("X-Limit", String(limit));
+    }
 
     res.status(200).json(msgs);
   } catch (error) {

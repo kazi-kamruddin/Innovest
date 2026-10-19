@@ -5,12 +5,14 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext";
 import InvestorRequestForm, {
-  EMPTY_INVESTOR_REQUEST,
-  getInvestorRequestPayload,
   InvestorRequestConfirmDialog,
   InvestorRequestState,
-  validateInvestorRequestFields,
 } from "../components/InvestorRequestForm";
+import {
+  EMPTY_INVESTOR_REQUEST,
+  getInvestorRequestPayload,
+  validateInvestorRequestFields,
+} from "../utils/investorRequestUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 

@@ -4,8 +4,9 @@ import { FiArrowLeft, FiCheck, FiEdit2, FiMapPin, FiSave, FiTarget, FiUser } fro
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { PROFILE_API, csvItems } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, csvItems, InterestPicker, InterestPills, ProfileAvatar,
+  InterestPicker, InterestPills, ProfileAvatar,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";

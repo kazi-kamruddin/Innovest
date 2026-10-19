@@ -18,10 +18,12 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import {
   InvestorRequestHeader,
   InvestorRequestState,
+} from "../components/InvestorRequestForm";
+import {
   investmentRange,
   moneyText,
   REQUEST_CATEGORIES,
-} from "../components/InvestorRequestForm";
+} from "../utils/investorRequestUtils";
 import "../styles/investor-request-flow.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");

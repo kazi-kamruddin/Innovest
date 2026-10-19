@@ -17,8 +17,8 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import {
   InvestorRequestHeader,
   InvestorRequestState,
-  moneyText,
 } from "../components/InvestorRequestForm";
+import { moneyText } from "../utils/investorRequestUtils";
 import "../styles/investor-request-flow.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
