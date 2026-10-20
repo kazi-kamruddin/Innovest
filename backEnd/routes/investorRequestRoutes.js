@@ -13,6 +13,7 @@ const {
 } = require("../controllers/investorRequestController");
 
 const router = express.Router();
+for (const name of ['id', 'pitchId']) router.param(name, require('../middleware/validateId'));
 
 router.get("/", requireAuth, getAllInvestorRequests);
 router.get("/my-closed", requireAuth, getMyClosedRequests);

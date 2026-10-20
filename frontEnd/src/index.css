@@ -4,6 +4,15 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Keep layout sizing stable even when the external Bootstrap stylesheet fails. */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
 
 /* Smooth authentication page transition */
 

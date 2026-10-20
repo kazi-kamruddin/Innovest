@@ -4,8 +4,9 @@ import { FiArrowLeft, FiCheck, FiEdit2, FiMapPin, FiSave, FiTarget, FiUser } fro
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { PROFILE_API, csvItems } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, csvItems, InterestPicker, InterestPills, ProfileAvatar,
+  InterestPicker, InterestPills, ProfileAvatar,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";
@@ -20,6 +21,7 @@ export default function ProfileEdit() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const redirectTimer = useRef(null);
+  const initialFormRef = useRef(emptyForm);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -41,11 +43,13 @@ export default function ProfileEdit() {
         if (!response.ok) throw new Error("Could not load your profile information.");
         const data = await response.json();
         if (!controller.signal.aborted) {
-          setForm({
+          const loaded = {
             location: data.location || "",
             areas_of_interest: data.areas_of_interest || "",
             about: data.about || "",
-          });
+          };
+          setForm(loaded);
+          initialFormRef.current = loaded;
         }
       } catch (err) {
         if (!controller.signal.aborted) setError(err.message || "Could not load your details.");
@@ -56,6 +60,28 @@ export default function ProfileEdit() {
     load();
     return () => controller.abort();
   }, [user?.id, retryKey]);
+
+  const isDirty =
+    form.location !== initialFormRef.current.location ||
+    form.areas_of_interest !== initialFormRef.current.areas_of_interest ||
+    form.about !== initialFormRef.current.about;
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  const handleNavBack = (e) => {
+    if (isDirty && !window.confirm("You have unsaved changes. Are you sure you want to leave without saving?")) {
+      e.preventDefault();
+    }
+  };
 
   const selected = csvItems(form.areas_of_interest);
 
@@ -85,6 +111,11 @@ export default function ProfileEdit() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || data.error || "Unable to save your profile.");
+      initialFormRef.current = {
+        location: form.location.trim(),
+        areas_of_interest: selected.join(", "),
+        about: form.about.trim(),
+      };
       toast.success("Profile updated successfully.");
       redirectTimer.current = setTimeout(() => navigate("/profile"), 850);
     } catch (err) {
@@ -102,7 +133,7 @@ export default function ProfileEdit() {
   return (
     <main className="iv-profile">
       <div className="iv-profile-container">
-        <Link to="/profile" className="iv-profile-back"><FiArrowLeft size={16} /> Back to profile</Link>
+        <Link to="/profile" className="iv-profile-back" onClick={handleNavBack}><FiArrowLeft size={16} /> Back to profile</Link>
         <div className="iv-profile-page-heading">
           <div>
             <span className="iv-profile-eyebrow"><span /> YOUR WORKSPACE</span>
@@ -131,8 +162,13 @@ export default function ProfileEdit() {
 
                   <label className="iv-profile-field">
                     <span><FiUser size={15} /> About</span>
-                    <textarea rows={6} name="about" placeholder="Share what you do, what you're building, or what interests you…" value={form.about} onChange={(e) => setForm((prev) => ({ ...prev, about: e.target.value }))} />
-                    <span className="iv-profile-field-help">This introduction will be visible on your public profile.</span>
+                    <textarea rows={6} name="about" maxLength={1000} placeholder="Share what you do, what you're building, or what interests you…" value={form.about} onChange={(e) => setForm((prev) => ({ ...prev, about: e.target.value }))} />
+                    <div className="iv-profile-bio-footer">
+                      <span className="iv-profile-field-help">This introduction will be visible on your public profile.</span>
+                      <span className="iv-profile-char-count" aria-live="polite">
+                        {form.about.length} / 1000
+                      </span>
+                    </div>
                   </label>
                 </div>
               </ProfileCard>
@@ -140,7 +176,7 @@ export default function ProfileEdit() {
               {submitError && <p className="iv-profile-form-error" role="alert">{submitError}</p>}
 
               <div className="iv-profile-form-actions">
-                <Link to="/profile" className="iv-profile-button iv-profile-button--outline">Cancel</Link>
+                <Link to="/profile" className="iv-profile-button iv-profile-button--outline" onClick={handleNavBack}>Cancel</Link>
                 <button type="submit" className="iv-profile-button iv-profile-button--solid" disabled={saving}>
                   {saving ? "Saving…" : <><FiSave size={16} /> Save changes</>}
                 </button>

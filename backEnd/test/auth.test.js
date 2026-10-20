@@ -110,6 +110,24 @@ test("logout revokes the presented access token", async () => {
   await assert.rejects(verifyAccessToken(token), /Revoked token/);
 });
 
+test('same-second logins have independent tokens and logout revokes only one', async (t) => {
+  t.mock.method(Date, 'now', () => 1790000000000);
+  const first = createAccessToken(7);
+  const second = createAccessToken(7);
+  assert.notEqual(first, second);
+  let revokedHash;
+  db.execute = async (sql, params) => {
+    if (sql.includes('INSERT IGNORE INTO auth_revoked_tokens')) {
+      revokedHash = params[0];
+      return [{}];
+    }
+    return [[{ token_version: 0, revoked: Number(revokedHash === params[0]) }]];
+  };
+  await logoutUser({ authToken: first }, response());
+  await assert.rejects(verifyAccessToken(first), /Revoked token/);
+  assert.equal(await verifyAccessToken(second), 7);
+});
+
 test("rate limiting returns HTTP 429 and retry timing", () => {
   const limit = createRateLimit({ windowMs: 60000, max: 1, key: (req) => req.ip });
   const req = { ip: "127.0.0.1" };
@@ -120,6 +138,39 @@ test("rate limiting returns HTTP 429 and retry timing", () => {
   assert.equal(passed, 1);
   assert.equal(res.statusCode, 429);
   assert.ok(Number(res.headers["Retry-After"]) > 0);
+});
+
+test('signup releases its database connection before waiting for email delivery', async (t) => {
+  const keys = ['ACCOUNT_EMAIL_ENABLED', 'BREVO_API_KEY', 'AUTH_EMAIL_FROM', 'FRONTEND_URL'];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  let released = false;
+  db.getConnection = async () => ({
+    beginTransaction: async () => {},
+    commit: async () => {},
+    rollback: async () => {},
+    release: () => { released = true; },
+    execute: async (sql) => sql.includes('INSERT INTO users') ? [{ insertId: 7 }] : [{}],
+  });
+  try {
+    process.env.ACCOUNT_EMAIL_ENABLED = 'true';
+    process.env.BREVO_API_KEY = 'test-key';
+    process.env.AUTH_EMAIL_FROM = 'sender@example.com';
+    process.env.FRONTEND_URL = 'https://example.invalid';
+    t.mock.method(global, 'fetch', async () => {
+      assert.equal(released, true);
+      return { ok: true };
+    });
+    const res = response();
+    await signUpUser({ body: { name: 'Founder', email: 'founder@example.com', password: 'a-long-account-password' } }, res);
+    assert.equal(res.statusCode, 201);
+    assert.equal(res.body.verificationRequired, true);
+    assert.notEqual(res.body.emailSent, false);
+  } finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
 });
 
 test("account email uses the HTTPS provider with a link to the public site", async () => {

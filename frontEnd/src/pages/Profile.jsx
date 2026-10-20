@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FiArrowRight, FiBriefcase, FiEdit2, FiExternalLink,
+  FiArrowRight, FiBriefcase, FiCheck, FiEdit2, FiExternalLink,
   FiLogOut, FiMail, FiMapPin, FiMessageCircle, FiTarget, FiUser, FiUsers,
 } from "react-icons/fi";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
 import { useLogout } from "../hooks/useLogout.jsx";
+import { PROFILE_API, csvItems, moneyText } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, csvItems, InterestPills, moneyText, ProfileAvatar,
+  InterestPills, ProfileAvatar,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";
@@ -71,8 +72,46 @@ export default function Profile() {
   const fullName = profile.user.name || user?.name || "Innovest member";
   const email = profile.user.email || user?.email;
   const interests = csvItems(profile.areas_of_interest);
-  const completed = [fullName !== "Innovest member", !!profile.location, interests.length > 0, !!profile.about];
-  const completedCount = completed.filter(Boolean).length;
+
+  const profileSteps = [
+    {
+      id: "name",
+      label: "Full Name",
+      done: Boolean(fullName && fullName !== "Innovest member"),
+      link: "/profile/edit-profile",
+      actionLabel: "Add name",
+    },
+    {
+      id: "location",
+      label: "Location",
+      done: Boolean(profile?.location),
+      link: "/profile/edit-profile",
+      actionLabel: "Add location",
+    },
+    {
+      id: "about",
+      label: "Bio / Introduction",
+      done: Boolean(profile?.about?.trim()),
+      link: "/profile/edit-profile",
+      actionLabel: "Write bio",
+    },
+    {
+      id: "interests",
+      label: "Areas of interest",
+      done: interests.length > 0,
+      link: "/profile/edit-profile",
+      actionLabel: "Choose interests",
+    },
+    {
+      id: "investor",
+      label: "Investor preferences",
+      done: Boolean(investor && (investor.investment_range_min || investor.preferred_industries)),
+      link: "/profile/investor-info",
+      actionLabel: "Set preferences",
+    },
+  ];
+  const completedSteps = profileSteps.filter((s) => s.done).length;
+  const completionPercentage = Math.round((completedSteps / profileSteps.length) * 100);
 
   function handleLogout() {
     logout();
@@ -137,11 +176,48 @@ export default function Profile() {
           </div>
 
           <aside className="iv-profile-side">
+            <ProfileCard icon={FiTarget} title="Profile Strength" subtitle={`${completionPercentage}% completed`}>
+              <div className="iv-profile-meter">
+                <div className="iv-profile-meter__track">
+                  <div
+                    className="iv-profile-meter__fill"
+                    style={{ width: `${completionPercentage}%` }}
+                    role="progressbar"
+                    aria-valuenow={completionPercentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  />
+                </div>
+                <span className="iv-profile-meter__label">{completedSteps} of {profileSteps.length} milestones complete</span>
+              </div>
+
+              <ul className="iv-profile-checklist">
+                {profileSteps.map((step) => (
+                  <li key={step.id} className={`iv-profile-checklist__item ${step.done ? "is-done" : "is-todo"}`}>
+                    <span className="iv-profile-checklist__check" aria-hidden="true">
+                      {step.done ? <FiCheck size={12} /> : <span className="iv-profile-checklist__dot" />}
+                    </span>
+                    <span className="iv-profile-checklist__text">{step.label}</span>
+                    {!step.done && (
+                      <Link to={step.link} className="iv-profile-checklist__action">
+                        {step.actionLabel}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {completionPercentage === 100 && (
+                <p className="iv-profile-complete-badge">
+                  All set! Your profile is complete and stands out to partners.
+                </p>
+              )}
+            </ProfileCard>
+
             <ProfileCard icon={FiUser} title="Profile details" subtitle="Information tied to your account">
               <dl className="iv-profile-detail-list">
                 <div><dt><FiMail size={15} /> Email</dt><dd>{email || "Not available"}</dd></div>
                 <div><dt><FiMapPin size={15} /> Location</dt><dd>{profile.location || "Not added"}</dd></div>
-                <div><dt><FiTarget size={15} /> Profile basics added</dt><dd>{completedCount} of 4</dd></div>
+                <div><dt><FiTarget size={15} /> Status</dt><dd>{completionPercentage === 100 ? "Complete" : "In progress"}</dd></div>
               </dl>
             </ProfileCard>
 

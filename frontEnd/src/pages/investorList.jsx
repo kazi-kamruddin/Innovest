@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   FiArrowRight,
   FiArrowUpRight,
@@ -101,9 +101,32 @@ export default function InvestorList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
-  const [search, setSearch] = useState("");
-  const [industry, setIndustry] = useState("all");
-  const [sortBy, setSortBy] = useState("name");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const search = searchParams.get("search") || "";
+  const industry = searchParams.get("industry") || "all";
+  const sortBy = searchParams.get("sortBy") || "name";
+
+  const updateFilters = (updates) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        Object.entries(updates).forEach(([key, value]) => {
+          if (value && value !== "all" && !(key === "sortBy" && value === "name")) {
+            next.set(key, value);
+          } else {
+            next.delete(key);
+          }
+        });
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const setSearch = (value) => updateFilters({ search: value });
+  const setIndustry = (value) => updateFilters({ industry: value });
+  const setSortBy = (value) => updateFilters({ sortBy: value });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -173,7 +196,9 @@ export default function InvestorList() {
       });
   }, [availableInvestors, search, industry, sortBy]);
 
-  function clearFilters() { setSearch(""); setIndustry("all"); setSortBy("name"); }
+  function clearFilters() {
+    setSearchParams({}, { replace: true });
+  }
   const hasActiveFilters = search.trim() !== "" || industry !== "all" || sortBy !== "name";
 
   return (

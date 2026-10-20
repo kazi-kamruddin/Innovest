@@ -22,3 +22,23 @@ test-results/
 Thumbs.db
 .vscode/
 .idea/
+
+# Portable local project context
+/.project-context/
+/reference/
+
+# ==========================================
+# AI Agent files and local skill packages
+# ==========================================
+.agents/
+.agent/
+_agents/
+_agent/
+skills/
+AGENTS.md
+AGENT.md
+agent.md
+GEMINI.md
+skills-lock.json
+.skills-lock.json
+

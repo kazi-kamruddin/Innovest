@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const validator = require("validator");
 const { hashToken, createAccessToken, issueActionToken } = require("../utils/authTokens");
 const { emailEnabled, emailReady, sendAccountEmail } = require("../utils/accountEmail");
+const { rollbackQuietly } = require('../utils/transactions');
 
 const normalizeEmail = (email) => typeof email === "string" ? email.trim().toLowerCase() : "";
 const validPassword = (password) => typeof password === "string" && password.length >= 12 && password.length <= 128 && password.trim().length > 0;
@@ -42,7 +43,7 @@ const signUpUser = async (req, res) => {
   const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
   const email = normalizeEmail(req.body?.email);
   const password = req.body?.password;
-  if (!name || name.length > 255 || !validator.isEmail(email) || !validPassword(password)) {
+  if (!name || name.length > 255 || email.length > 255 || !validator.isEmail(email) || !validPassword(password)) {
     return res.status(400).json({ error: "Enter a name, valid email, and password of 12 to 128 characters." });
   }
   if (emailEnabled() && !emailReady()) {
@@ -51,9 +52,9 @@ const signUpUser = async (req, res) => {
 
   let connection;
   try {
+    const hash = await bcrypt.hash(password, 12);
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    const hash = await bcrypt.hash(password, 12);
     const [result] = await connection.execute(
       "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
       [name, email, hash]
@@ -66,6 +67,9 @@ const signUpUser = async (req, res) => {
     }
     await connection.commit();
 
+    // Email delivery must not reserve a database connection while it waits.
+    connection.release();
+    connection = undefined;
     if (verificationToken) {
       try {
         await sendAccountEmail({
@@ -86,7 +90,7 @@ const signUpUser = async (req, res) => {
       token: createAccessToken(result.insertId),
     });
   } catch (error) {
-    if (connection) await connection.rollback();
+    await rollbackQuietly(connection);
     if (error.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Email already in use" });
     console.error("Signup failed:", error);
     return res.status(500).json({ error: "Signup failed" });
@@ -111,7 +115,7 @@ const sendActionLink = async (email, purpose, subject, path, minutes) => {
     token = await issueActionToken(connection, user.id, purpose, minutes);
     await connection.commit();
   } catch (error) {
-    if (connection) await connection.rollback();
+    await rollbackQuietly(connection);
     throw error;
   } finally {
     connection?.release();
@@ -166,7 +170,7 @@ const verifyEmail = async (req, res) => {
     await connection.commit();
     return res.json({ message: "Email verified. You can now sign in." });
   } catch (error) {
-    if (connection) await connection.rollback();
+    await rollbackQuietly(connection);
     console.error("Email verification failed:", error);
     return res.status(500).json({ error: "Could not verify email." });
   } finally {
@@ -211,7 +215,7 @@ const resetPassword = async (req, res) => {
     }
     return res.json({ message: "Password updated. Sign in with your new password." });
   } catch (error) {
-    if (connection) await connection.rollback();
+    await rollbackQuietly(connection);
     console.error("Password reset failed:", error);
     return res.status(500).json({ error: "Could not reset password." });
   } finally {

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useLogin";
 import GoogleSignIn from '../components/GoogleSignIn';
 
@@ -99,6 +99,12 @@ export default function RegLogin() {
 
   const { login, error, errorCode, isLoading } = useLogin();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const returnTo =
+    location.state?.from?.pathname
+      ? `${location.state.from.pathname}${location.state.from.search || ""}${location.state.from.hash || ""}`
+      : location.state?.from || queryParams.get("returnTo") || "/";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,7 +116,7 @@ export default function RegLogin() {
     if (success) {
       setSuccessMsg("Login successful!");
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      navigate("/");
+      navigate(returnTo, { replace: true });
     }
   };
 
@@ -228,7 +234,7 @@ export default function RegLogin() {
                 </button>
               </form>
 
-              <GoogleSignIn />
+              <GoogleSignIn redirectPath={returnTo} />
 
               <p className="mb-0! mt-5! text-center! text-[12px]! text-[#77857B]!">
                 Don&apos;t have an account?{" "}

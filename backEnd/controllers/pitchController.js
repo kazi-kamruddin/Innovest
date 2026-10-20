@@ -1,6 +1,14 @@
 const db = require("../config/database");
 const { parseAmountRange } = require("../utils/amounts");
 const { notifyBestEffort } = require('../utils/notifications');
+const { textFieldsError } = require('../utils/inputValidation');
+const { rollbackQuietly } = require('../utils/transactions');
+const pitchFields = {
+  title: 255, industry: 255, company_location: 255, country: 255, cell_number: 255,
+  stage: 255, ideal_investor_role: 255, the_business: 'text', the_market: 'text',
+  progress: 'text', objective: 'text',
+};
+const escapeLike = (val) => String(val || "").replace(/([%_\\])/g, "\\$1");
 
 const getAllPitches = async (req, res) => {
   try {
@@ -14,18 +22,31 @@ const getAllPitches = async (req, res) => {
 
     if (req.query.industry) {
       sql += " AND pitches.industry LIKE ?";
-      params.push(`%${req.query.industry}%`);
+      params.push(`%${escapeLike(req.query.industry)}%`);
     }
     if (req.query.stage) {
       sql += " AND pitches.stage LIKE ?";
-      params.push(`%${req.query.stage}%`);
+      params.push(`%${escapeLike(req.query.stage)}%`);
     }
     if (req.query.country) {
       sql += " AND pitches.country LIKE ?";
-      params.push(`%${req.query.country}%`);
+      params.push(`%${escapeLike(req.query.country)}%`);
     }
 
+    sql += " ORDER BY pitches.created_at DESC, pitches.id DESC";
+
+    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 50), 100);
+    const page = Math.max(1, parseInt(req.query?.page, 10) || 1);
+    const offset = Math.max(0, parseInt(req.query?.offset, 10) || (page - 1) * limit);
+
+    sql += " LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
     const [rows] = await db.execute(sql, params);
+    if (typeof res.set === "function") {
+      res.set("X-Page", String(page));
+      res.set("X-Limit", String(limit));
+    }
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
@@ -103,6 +124,8 @@ const getUserPitches = async (req, res) => {
 
 
 const createPitch = async (req, res) => {
+  const inputError = textFieldsError(req.body, pitchFields, ['title', 'industry']);
+  if (inputError) return res.status(400).json({ error: inputError });
   try {
     const {
       user_id,
@@ -120,12 +143,6 @@ const createPitch = async (req, res) => {
       progress,
       objective,
     } = req.body || {};
-
-    if (typeof title !== "string" || !title.trim() || typeof industry !== "string" || !industry.trim()) {
-      return res
-        .status(400)
-        .json({ error: "title and industry are required" });
-    }
 
     if (user_id != null && Number(user_id) !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
@@ -173,6 +190,10 @@ const createPitch = async (req, res) => {
 
 
 const createPitchInResponse = async (req, res) => {
+  const inputError = textFieldsError(req.body, pitchFields, ['title', 'industry']);
+  if (inputError) return res.status(400).json({ error: inputError });
+  let connection;
+  let transactionOpen = false;
   try {
     const { requestId } = req.params;
     const {
@@ -192,12 +213,6 @@ const createPitchInResponse = async (req, res) => {
       objective,
     } = req.body || {};
 
-    if (typeof title !== "string" || !title.trim() || typeof industry !== "string" || !industry.trim()) {
-      return res
-        .status(400)
-        .json({ error: "title and industry are required" });
-    }
-
     if (user_id != null && Number(user_id) !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
@@ -207,21 +222,31 @@ const createPitchInResponse = async (req, res) => {
       return res.status(400).json({ error: "Funding amounts must be non-negative numbers, with minimum no greater than total" });
     }
 
-    const [requests] = await db.execute(
-      "SELECT investorId, status FROM investor_requests WHERE id = ?",
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+    transactionOpen = true;
+    // Closing a request and accepting a response must serialize on the same row.
+    const [requests] = await connection.execute(
+      "SELECT investorId, status FROM investor_requests WHERE id = ? FOR UPDATE",
       [requestId]
     );
     if (requests.length === 0) {
+      await connection.rollback();
+      transactionOpen = false;
       return res.status(404).json({ error: "Investor request not found" });
     }
     if (requests[0].status !== "open") {
+      await connection.rollback();
+      transactionOpen = false;
       return res.status(400).json({ error: "Investor request is closed" });
     }
     if (Number(requests[0].investorId) === Number(req.user.id)) {
+      await connection.rollback();
+      transactionOpen = false;
       return res.status(403).json({ error: "Cannot respond to your own request" });
     }
 
-    const [result] = await db.execute(
+    const [result] = await connection.execute(
       `INSERT INTO pitches 
         (user_id, title, company_location, country, cell_number, industry, stage, ideal_investor_role,
          total_raising_amount, minimum_investment, the_business, the_market, progress, objective, forRequestId) 
@@ -245,11 +270,16 @@ const createPitchInResponse = async (req, res) => {
       ]
     );
 
-    const [pitchRows] = await db.execute(
+    const [pitchRows] = await connection.execute(
       "SELECT * FROM pitches WHERE id = ?",
       [result.insertId]
     );
 
+    await connection.commit();
+    transactionOpen = false;
+    // Notification persistence uses the pool; do not hold its connection here.
+    connection.release();
+    connection = undefined;
     await notifyBestEffort({
       userId: requests[0].investorId,
       actorId: req.user.id,
@@ -260,8 +290,11 @@ const createPitchInResponse = async (req, res) => {
     });
     res.status(201).json(pitchRows[0]);
   } catch (err) {
+    if (transactionOpen) await rollbackQuietly(connection);
     console.error("Pitch-in-response creation failed:", err);
     res.status(500).json({ error: "Pitch creation failed" });
+  } finally {
+    connection?.release();
   }
 };
 
@@ -288,6 +321,9 @@ const updatePitch = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const inputError = textFieldsError(req.body, pitchFields, ['title', 'industry']);
+    if (inputError) return res.status(400).json({ error: inputError });
+
     const {
       title,
       company_location,
@@ -304,9 +340,6 @@ const updatePitch = async (req, res) => {
       objective,
     } = req.body || {};
 
-    if (typeof title !== "string" || !title.trim() || typeof industry !== "string" || !industry.trim()) {
-      return res.status(400).json({ error: "title and industry are required" });
-    }
     const amounts = parseAmountRange(minimum_investment, total_raising_amount);
     if (!amounts) {
       return res.status(400).json({ error: "Funding amounts must be non-negative numbers, with minimum no greater than total" });

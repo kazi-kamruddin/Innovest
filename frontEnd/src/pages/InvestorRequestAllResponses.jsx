@@ -4,6 +4,7 @@ import {
   FiArrowRight,
   FiArrowUpRight,
   FiBriefcase,
+  FiCheck,
   FiDollarSign,
   FiInbox,
   FiMapPin,
@@ -16,15 +17,15 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import {
   InvestorRequestHeader,
   InvestorRequestState,
-  moneyText,
 } from "../components/InvestorRequestForm";
+import { moneyText } from "../utils/investorRequestUtils";
 import "../styles/investor-request-flow.css";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 const STATUS_LABELS = { submitted: 'Submitted', under_review: 'Under review', interested: 'Interested', declined: 'Declined' };
 
-function PitchResponseCard({ pitch, onStatusChange, updating }) {
+function PitchResponseCard({ pitch, onStatusChange, updating, isSaved }) {
   const location = [pitch.company_location, pitch.country].filter(Boolean).join(", ");
   return (
     <article className="iv-irf-response-card">
@@ -45,18 +46,27 @@ function PitchResponseCard({ pitch, onStatusChange, updating }) {
           <div>
             <span>Entrepreneur</span>
             <strong>{pitch.name || "Pitch creator"}</strong>
-            {pitch.email && <span className="iv-irf-founder-email">{pitch.email}</span>}
           </div>
         </div>
         <Link to={`/pitches/${pitch.id}`} className="iv-irf-request-main-button">
           View pitch details <FiArrowUpRight size={17} aria-hidden="true" />
         </Link>
         <label className="iv-irf-response-status">
-          Response status
+          <span>Response status</span>
           <select value={pitch.response_status || 'submitted'} disabled={updating}
             onChange={(event) => onStatusChange(pitch.id, event.target.value)}>
             {Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
+          {updating && (
+            <span className="iv-irf-status-feedback iv-irf-status-feedback--updating">
+              <FiRefreshCw className="animate-spin" size={12} /> Saving status...
+            </span>
+          )}
+          {isSaved && !updating && (
+            <span className="iv-irf-status-feedback iv-irf-status-feedback--saved" role="status">
+              <FiCheck size={13} /> Status saved
+            </span>
+          )}
         </label>
       </div>
     </article>
@@ -73,6 +83,7 @@ export default function InvestorRequestAllResponses() {
   const [retryKey, setRetryKey] = useState(0);
   const [query, setQuery] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [savedId, setSavedId] = useState(null);
   const [updateError, setUpdateError] = useState('');
 
   async function changeStatus(pitchId, status) {
@@ -88,6 +99,8 @@ export default function InvestorRequestAllResponses() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Could not update response status.');
       setPitches((current) => current.map((pitch) => pitch.id === pitchId ? { ...pitch, response_status: data.status } : pitch));
+      setSavedId(pitchId);
+      setTimeout(() => setSavedId((curr) => (curr === pitchId ? null : curr)), 2500);
     } catch (updateError) {
       setUpdateError(updateError.message || 'Could not update response status.');
     } finally {
@@ -183,7 +196,15 @@ export default function InvestorRequestAllResponses() {
             {updateError && <p role="alert" className="iv-irf-update-error">{updateError}</p>}
             {visible.length > 0 ? (
               <div className="iv-irf-cards">
-                {visible.map((pitch) => <PitchResponseCard key={pitch.id} pitch={pitch} onStatusChange={changeStatus} updating={updatingId === pitch.id} />)}
+                {visible.map((pitch) => (
+                  <PitchResponseCard
+                    key={pitch.id}
+                    pitch={pitch}
+                    onStatusChange={changeStatus}
+                    updating={updatingId === pitch.id}
+                    isSaved={savedId === pitch.id}
+                  />
+                ))}
               </div>
             ) : (
               <InvestorRequestState icon={FiSearch} title="No matching pitches" description="Try a different name, industry or keyword."

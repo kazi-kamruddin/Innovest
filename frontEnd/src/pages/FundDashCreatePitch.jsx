@@ -6,10 +6,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import PitchEditorForm, {
-  EMPTY_PITCH,
   PitchEditorStatus,
-  validatePitch,
 } from "../components/PitchEditorForm";
+import {
+  EMPTY_PITCH,
+  validatePitchFields,
+} from "../utils/pitchEditorUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
@@ -17,11 +19,17 @@ export default function FundDashCreatePitch() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ ...EMPTY_PITCH });
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const isDirty = Object.keys(formData).some((key) => formData[key] !== EMPTY_PITCH[key]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((current) => ({ ...current, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -33,11 +41,17 @@ export default function FundDashCreatePitch() {
       return;
     }
 
-    const validationError = validatePitch(formData);
-    if (validationError) {
-      toast.error(validationError);
+    const fieldErrors = validatePitchFields(formData);
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      const firstKey = Object.keys(fieldErrors)[0];
+      const el = document.getElementById(`pitch-editor-${firstKey}`);
+      el?.focus();
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error(fieldErrors[firstKey]);
       return;
     }
+    setErrors({});
 
     const token = localStorage.getItem("token")?.trim();
     if (!token) {
@@ -87,6 +101,8 @@ export default function FundDashCreatePitch() {
         <PitchEditorForm
           mode="create"
           formData={formData}
+          errors={errors}
+          isDirty={isDirty}
           onChange={handleChange}
           onSubmit={handleSubmit}
           busy={submitting}

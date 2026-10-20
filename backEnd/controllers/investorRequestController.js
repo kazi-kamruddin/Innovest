@@ -1,6 +1,9 @@
 const db = require("../config/database");
 const { parseAmountRange } = require("../utils/amounts");
 const { createNotification, notifyBestEffort } = require("../utils/notifications");
+const { textFieldsError } = require('../utils/inputValidation');
+const { rollbackQuietly } = require('../utils/transactions');
+const requestFields = { title: 255, description: 'text', category: 255 };
 
 async function notifyResponders(req, requestId, status) {
   const [responders] = await db.execute('SELECT DISTINCT user_id FROM pitches WHERE forRequestId = ?', [requestId]);
@@ -16,10 +19,12 @@ async function notifyResponders(req, requestId, status) {
 
 // POST /investor-requests/create-new-request 
 const createInvestorRequest = async (req, res) => {
+  const inputError = textFieldsError(req.body, requestFields, ['title', 'description', 'category']);
+  if (inputError) return res.status(400).json({ error: inputError });
   try {
     const { investorId, title, description, category, minInvestment, maxInvestment } = req.body || {};
 
-    if (!investorId || ![title, description, category].every((value) => typeof value === "string" && value.trim())) {
+    if (!investorId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -65,6 +70,8 @@ const createInvestorRequest = async (req, res) => {
 
 
 const editRequest = async (req, res) => {
+  const inputError = textFieldsError(req.body, requestFields, ['title', 'description', 'category']);
+  if (inputError) return res.status(400).json({ error: inputError });
   try {
     const { id } = req.params;
     const { title, description, category, minInvestment, maxInvestment } = req.body || {};
@@ -76,9 +83,6 @@ const editRequest = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized: You can only edit your own requests" });
     }
 
-    if (![title, description, category].every((value) => typeof value === "string" && value.trim())) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
     const amounts = parseAmountRange(minInvestment, maxInvestment);
     if (!amounts) {
       return res.status(400).json({ error: "Investment amounts must be non-negative numbers, with minimum no greater than maximum" });
@@ -209,7 +213,7 @@ const getPitchesForRequest = async (req, res) => {
       return res.status(403).json({ error: 'Only the request owner can view responses' });
     }
     const [rows] = await db.execute(
-      `SELECT p.*, u.name, u.email, COALESCE(prs.status, 'submitted') AS response_status
+      `SELECT p.*, u.name, COALESCE(prs.status, 'submitted') AS response_status
        FROM pitches AS p
        LEFT JOIN users AS u ON p.user_id = u.id
        LEFT JOIN pitch_response_states AS prs ON prs.pitch_id = p.id
@@ -283,7 +287,7 @@ const updateResponseStatus = async (req, res) => {
     if (notification) req.app?.get('io')?.to(`user:${rows[0].user_id}`).emit('notification', notification);
     res.json({ status, changed: true });
   } catch (error) {
-    if (connection) await connection.rollback();
+    await rollbackQuietly(connection);
     console.error('Failed to update response status:', error);
     res.status(500).json({ error: 'Failed to update response status' });
   } finally {
@@ -295,6 +299,10 @@ const updateResponseStatus = async (req, res) => {
 // GET /investor-requests (list all requests)
 const getAllInvestorRequests = async (req, res) => {
   try {
+    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 50), 100);
+    const page = Math.max(1, parseInt(req.query?.page, 10) || 1);
+    const offset = Math.max(0, parseInt(req.query?.offset, 10) || (page - 1) * limit);
+
     const [rows] = await db.execute(
       `SELECT ir.id, ir.investorId, ir.title, ir.description, ir.category, 
               ir.minInvestment, ir.maxInvestment, ir.status, ir.createdAt, ir.updatedAt, 
@@ -302,9 +310,15 @@ const getAllInvestorRequests = async (req, res) => {
        FROM investor_requests AS ir
        LEFT JOIN users AS u ON ir.investorId = u.id
        WHERE ir.status = 'open'
-       ORDER BY ir.createdAt DESC`
+       ORDER BY ir.createdAt DESC
+       LIMIT ? OFFSET ?`,
+      [limit, offset]
     );
 
+    if (typeof res.set === "function") {
+      res.set("X-Page", String(page));
+      res.set("X-Limit", String(limit));
+    }
     res.json(rows);
   } catch (err) {
     console.error("Error retrieving investor requests:", err);

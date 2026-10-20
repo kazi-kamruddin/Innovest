@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -13,49 +14,6 @@ import {
 
 import "../styles/pitch-editor.css";
 
-export const EMPTY_PITCH = {
-  title: "",
-  company_location: "",
-  country: "",
-  cell_number: "",
-  industry: "",
-  stage: "",
-  ideal_investor_role: "",
-  total_raising_amount: "",
-  minimum_investment: "",
-  the_business: "",
-  the_market: "",
-  progress: "",
-  objective: "",
-};
-
-export function normalizePitch(data) {
-  return Object.fromEntries(
-    Object.keys(EMPTY_PITCH).map((key) => [key, data?.[key] ?? ""])
-  );
-}
-
-export function validatePitch(data) {
-  if (!String(data.title ?? "").trim()) return "Please enter a pitch title.";
-  if (!data.country) return "Please select a country.";
-  if (!data.industry) return "Please select an industry.";
-
-  const total = data.total_raising_amount;
-  const minimum = data.minimum_investment;
-  for (const value of [total, minimum]) {
-    if (value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0)) {
-      return "Funding amounts must be valid non-negative numbers.";
-    }
-  }
-  if (
-    total !== "" && minimum !== "" &&
-    Number(minimum) > Number(total)
-  ) {
-    return "Minimum investment cannot exceed the total raising amount.";
-  }
-
-  return null;
-}
 
 const INDUSTRIES = [
   "Technology", "Healthcare", "Finance", "Real Estate",
@@ -120,8 +78,20 @@ function previewAmount(value) {
     : String(value);
 }
 
-function FormField({ field, value, onChange, disabled }) {
+function FormField({ field, value, onChange, disabled, error }) {
   const id = `pitch-editor-${field.name}`;
+  const errorId = `${id}-error`;
+  const countId = `${id}-count`;
+  const helperId = `${id}-helper`;
+  const isNumber = field.type === "number";
+  const numValue = isNumber && value !== "" && value !== null && !isNaN(Number(value)) ? Number(value) : null;
+
+  const describedBy = [
+    error ? errorId : null,
+    field.maxLength ? countId : null,
+    numValue !== null ? helperId : null,
+  ].filter(Boolean).join(" ") || undefined;
+
   const inputProps = {
     id,
     name: field.name,
@@ -130,7 +100,8 @@ function FormField({ field, value, onChange, disabled }) {
     required: Boolean(field.required),
     disabled,
     maxLength: field.maxLength,
-    "aria-describedby": field.maxLength ? `${id}-count` : undefined,
+    "aria-invalid": Boolean(error),
+    "aria-describedby": describedBy,
   };
 
   return (
@@ -158,11 +129,24 @@ function FormField({ field, value, onChange, disabled }) {
           placeholder={field.placeholder}
           min={field.type === "number" ? 0 : undefined}
           step={field.type === "number" ? "any" : undefined}
+          onWheel={isNumber ? (e) => e.currentTarget.blur() : undefined}
         />
       )}
 
+      {error && (
+        <p id={errorId} className="iv-pe-field-error" role="alert">
+          {error}
+        </p>
+      )}
+
+      {numValue !== null && !error && (
+        <span id={helperId} className="iv-pe-amount-helper" aria-live="polite">
+          Formatted: ${numValue.toLocaleString("en-US", { maximumFractionDigits: 2 })} USD
+        </span>
+      )}
+
       {field.maxLength && (
-        <span id={`${id}-count`} className="iv-pe-character-count">
+        <span id={countId} className="iv-pe-character-count">
           {String(value ?? "").length} / {field.maxLength}
         </span>
       )}
@@ -253,6 +237,8 @@ export function PitchEditorStatus({ title, message, retry, signIn = false, loadi
 export default function PitchEditorForm({
   mode = "create",
   formData,
+  errors = {},
+  isDirty = false,
   onChange,
   onSubmit,
   busy = false,
@@ -260,10 +246,27 @@ export default function PitchEditorForm({
 }) {
   const editing = mode === "edit";
 
+  // Warn on browser unload / reload if there are unsaved changes
+  useEffect(() => {
+    if (!isDirty || busy) return;
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty, busy]);
+
+  const handleLeave = (event) => {
+    if (isDirty && !window.confirm("You have unsaved changes. Are you sure you want to discard them?")) {
+      event.preventDefault();
+    }
+  };
+
   return (
     <main className="iv-pe-page">
       <div className="iv-pe-wrap">
-        <Link className="iv-pe-back" to="/fundraise-dashboard">
+        <Link className="iv-pe-back" to="/fundraise-dashboard" onClick={handleLeave}>
           <FiArrowLeft size={16} aria-hidden="true" />
           Back to dashboard
         </Link>
@@ -282,7 +285,7 @@ export default function PitchEditorForm({
         </header>
 
         <div className="iv-pe-layout">
-          <form className="iv-pe-form" onSubmit={onSubmit}>
+          <form className="iv-pe-form" onSubmit={onSubmit} noValidate>
             {SECTIONS.map((section) => {
               const Icon = section.icon;
               return (
@@ -301,6 +304,7 @@ export default function PitchEditorForm({
                         key={field.name}
                         field={field}
                         value={formData[field.name]}
+                        error={errors[field.name]}
                         onChange={onChange}
                         disabled={busy}
                       />
@@ -311,7 +315,7 @@ export default function PitchEditorForm({
             })}
 
             <div className="iv-pe-action-row">
-              <Link to="/fundraise-dashboard" className="iv-pe-cancel">Cancel</Link>
+              <Link to="/fundraise-dashboard" className="iv-pe-cancel" onClick={handleLeave}>Cancel</Link>
               <button className="iv-pe-primary" type="submit" disabled={busy}>
                 {busy
                   ? editing ? "Updating pitch..." : "Publishing pitch..."

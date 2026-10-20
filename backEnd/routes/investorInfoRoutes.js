@@ -8,6 +8,7 @@ const {
 } = require("../controllers/investorInfoController");
 
 const router = express.Router();
+router.param('userId', require('../middleware/validateId'));
 
 // Public route
 router.get("/public/:userId", getInvestorInfoPublic);

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft, FiArrowRight, FiBriefcase, FiMapPin,
   FiMessageCircle, FiTarget, FiUser, FiUsers,
 } from "react-icons/fi";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { PROFILE_API, moneyText } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, InterestPills, moneyText, ProfileAvatar,
+  InterestPills, ProfileAvatar,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";
@@ -15,6 +16,7 @@ export default function ProfileOthers() {
   const { userId } = useParams();
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [investor, setInvestor] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function ProfileOthers() {
 
   async function handleKnock() {
     if (!user?.id) {
-      navigate("/login");
+      navigate("/login", { state: { from: location } });
       return;
     }
     if (String(user.id) === String(userId)) {

@@ -4,8 +4,9 @@ import { FiArrowLeft, FiBriefcase, FiCheck, FiDollarSign, FiSave, FiTarget } fro
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext.jsx";
+import { PROFILE_API, moneyText } from "../utils/profileUtils.js";
 import {
-  PROFILE_API, InterestPicker, InterestPills, moneyText,
+  InterestPicker, InterestPills,
   ProfileCard, ProfileFailure, ProfileLoading,
 } from "../components/ProfilePrimitives.jsx";
 import "../styles/profile-suite.css";
@@ -21,6 +22,7 @@ export default function ProfileInvestorInfo() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const redirectTimer = useRef(null);
+  const initialDataRef = useRef({ industries: [], fields: [], minimum: "", maximum: "" });
   const [industries, setIndustries] = useState([]);
   const [fields, setFields] = useState([]);
   const [minimum, setMinimum] = useState("");
@@ -54,10 +56,21 @@ export default function ProfileInvestorInfo() {
         if (!response.ok) throw new Error("Could not load your investor preferences.");
         const data = await response.json();
         if (controller.signal.aborted) return;
-        setIndustries(data.preferred_industries ? data.preferred_industries.split(",").map((s) => s.trim()).filter(Boolean) : []);
-        setFields(data.fields_of_interest ? data.fields_of_interest.split(",").map((s) => s.trim()).filter(Boolean) : []);
-        setMinimum(data.investment_range_min == null ? "" : String(data.investment_range_min));
-        setMaximum(data.investment_range_max == null ? "" : String(data.investment_range_max));
+        const loadedInd = data.preferred_industries ? data.preferred_industries.split(",").map((s) => s.trim()).filter(Boolean) : [];
+        const loadedFld = data.fields_of_interest ? data.fields_of_interest.split(",").map((s) => s.trim()).filter(Boolean) : [];
+        const loadedMin = data.investment_range_min == null ? "" : String(data.investment_range_min);
+        const loadedMax = data.investment_range_max == null ? "" : String(data.investment_range_max);
+
+        setIndustries(loadedInd);
+        setFields(loadedFld);
+        setMinimum(loadedMin);
+        setMaximum(loadedMax);
+        initialDataRef.current = {
+          industries: loadedInd,
+          fields: loadedFld,
+          minimum: loadedMin,
+          maximum: loadedMax,
+        };
       } catch (err) {
         if (!controller.signal.aborted) setLoadError(err.message || "Could not load preferences.");
       } finally {
@@ -67,6 +80,35 @@ export default function ProfileInvestorInfo() {
     load();
     return () => controller.abort();
   }, [user?.id, retryKey]);
+
+  const isDirty =
+    minimum !== initialDataRef.current.minimum ||
+    maximum !== initialDataRef.current.maximum ||
+    industries.length !== initialDataRef.current.industries.length ||
+    fields.length !== initialDataRef.current.fields.length ||
+    industries.some((x) => !initialDataRef.current.industries.includes(x)) ||
+    fields.some((x) => !initialDataRef.current.fields.includes(x));
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  const handleNavBack = (e) => {
+    if (isDirty && !window.confirm("You have unsaved changes. Are you sure you want to leave without saving?")) {
+      e.preventDefault();
+    }
+  };
+
+  const numMin = Number(minimum);
+  const numMax = Number(maximum);
+  const hasRangeMismatch = minimum.trim() !== "" && maximum.trim() !== "" && !isNaN(numMin) && !isNaN(numMax) && numMin > numMax;
 
   function toggle(value, setter) {
     setter((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
@@ -78,7 +120,7 @@ export default function ProfileInvestorInfo() {
     setSaveError("");
     const min = Number(minimum);
     const max = Number(maximum);
-    // Existing backend parses both fields with parseFloat; blank strings lead to invalid SQL values.
+    // The form requires an explicit range even though the API permits omitted amounts.
     if (minimum.trim() === "" || maximum.trim() === "" || !Number.isFinite(min) || !Number.isFinite(max) || min < 0 || max < 0 || min > max) {
       setSaveError("Enter both investment amounts. They must be non-negative, and the maximum must be at least the minimum.");
       return;
@@ -100,6 +142,12 @@ export default function ProfileInvestorInfo() {
       });
       const data = await response.json().catch(() => ({}));
       if (response.status !== 201) throw new Error(data.message || data.error || "Unable to save investor preferences.");
+      initialDataRef.current = {
+        industries: [...industries],
+        fields: [...fields],
+        minimum: String(min),
+        maximum: String(max),
+      };
       toast.success("Investor profile saved successfully.");
       redirectTimer.current = setTimeout(() => navigate("/profile"), 850);
     } catch (err) {
@@ -117,7 +165,7 @@ export default function ProfileInvestorInfo() {
   return (
     <main className="iv-profile">
       <div className="iv-profile-container">
-        <Link to="/profile" className="iv-profile-back"><FiArrowLeft size={16} /> Back to profile</Link>
+        <Link to="/profile" className="iv-profile-back" onClick={handleNavBack}><FiArrowLeft size={16} /> Back to profile</Link>
         <div className="iv-profile-page-heading">
           <div>
             <span className="iv-profile-eyebrow"><span /> YOUR WORKSPACE</span>
@@ -148,19 +196,50 @@ export default function ProfileInvestorInfo() {
                 <div className="iv-profile-fields iv-profile-fields--two">
                   <label className="iv-profile-field">
                     <span>Minimum investment *</span>
-                    <input type="number" min="0" step="any" inputMode="decimal" value={minimum} onChange={(e) => setMinimum(e.target.value)} placeholder="e.g. 5000" required />
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      inputMode="decimal"
+                      value={minimum}
+                      onChange={(e) => setMinimum(e.target.value)}
+                      onWheel={(e) => e.target.blur()}
+                      placeholder="e.g. 5000"
+                      required
+                    />
+                    {minimum.trim() !== "" && !isNaN(numMin) && numMin >= 0 && (
+                      <span className="iv-profile-amount-helper">{moneyText(minimum)}</span>
+                    )}
                   </label>
                   <label className="iv-profile-field">
                     <span>Maximum investment *</span>
-                    <input type="number" min="0" step="any" inputMode="decimal" value={maximum} onChange={(e) => setMaximum(e.target.value)} placeholder="e.g. 50000" required />
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      inputMode="decimal"
+                      value={maximum}
+                      onChange={(e) => setMaximum(e.target.value)}
+                      onWheel={(e) => e.target.blur()}
+                      placeholder="e.g. 50000"
+                      required
+                    />
+                    {maximum.trim() !== "" && !isNaN(numMax) && numMax >= 0 && (
+                      <span className="iv-profile-amount-helper">{moneyText(maximum)}</span>
+                    )}
                   </label>
                 </div>
+                {hasRangeMismatch && (
+                  <p className="iv-profile-inline-error" role="alert">
+                    The maximum investment cannot be smaller than the minimum investment.
+                  </p>
+                )}
                 <p className="iv-profile-field-help iv-profile-field-help--bottom">Both amounts are required by the existing investor-profile service. The maximum cannot be smaller than the minimum.</p>
               </ProfileCard>
 
               {saveError && <p className="iv-profile-form-error" role="alert">{saveError}</p>}
               <div className="iv-profile-form-actions">
-                <Link to="/profile" className="iv-profile-button iv-profile-button--outline">Cancel</Link>
+                <Link to="/profile" className="iv-profile-button iv-profile-button--outline" onClick={handleNavBack}>Cancel</Link>
                 <button type="submit" className="iv-profile-button iv-profile-button--solid" disabled={saving}>{saving ? "Saving…" : <><FiSave size={16} /> Save preferences</>}</button>
               </div>
             </form>

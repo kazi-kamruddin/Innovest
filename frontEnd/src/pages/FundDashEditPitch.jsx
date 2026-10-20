@@ -6,11 +6,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext";
 
 import PitchEditorForm, {
+  PitchEditorStatus,
+} from "../components/PitchEditorForm";
+import {
   EMPTY_PITCH,
   normalizePitch,
-  PitchEditorStatus,
-  validatePitch,
-} from "../components/PitchEditorForm";
+  validatePitchFields,
+} from "../utils/pitchEditorUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
@@ -20,12 +22,17 @@ export default function FundDashEditPitch() {
   const { user } = useAuthContext();
 
   const [formData, setFormData] = useState({ ...EMPTY_PITCH });
+  const [initialData, setInitialData] = useState(null);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const cancelRef = useRef(null);
+  const redirectRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(redirectRef.current), []);
 
   useEffect(() => {
     if (!user?.id) {
@@ -41,10 +48,12 @@ export default function FundDashEditPitch() {
 
       try {
         if (!API_BASE) throw new Error("The API URL is not configured.");
+        const token = localStorage.getItem('token')?.trim();
+        if (!token) throw new Error('Your session has expired. Please sign in again.');
 
         const response = await fetch(
           `${API_BASE}/pitches/${encodeURIComponent(id)}`,
-          { signal: controller.signal }
+          { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 404) throw new Error("This pitch could not be found.");
@@ -59,7 +68,11 @@ export default function FundDashEditPitch() {
           throw new Error("You can only edit pitches created by your account.");
         }
 
-        if (!controller.signal.aborted) setFormData(normalizePitch(data));
+        if (!controller.signal.aborted) {
+          const normalized = normalizePitch(data);
+          setFormData(normalized);
+          setInitialData(normalized);
+        }
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error("Error loading pitch:", error);
@@ -73,6 +86,8 @@ export default function FundDashEditPitch() {
     loadPitch();
     return () => controller.abort();
   }, [id, user?.id, retryKey]);
+
+  const isDirty = Boolean(initialData && Object.keys(formData).some((key) => formData[key] !== initialData[key]));
 
   useEffect(() => {
     if (!showModal) return;
@@ -89,12 +104,24 @@ export default function FundDashEditPitch() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((current) => ({ ...current, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const validationError = validatePitch(formData);
-    if (validationError) return toast.error(validationError);
+    const fieldErrors = validatePitchFields(formData);
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      const firstKey = Object.keys(fieldErrors)[0];
+      const el = document.getElementById(`pitch-editor-${firstKey}`);
+      el?.focus();
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error(fieldErrors[firstKey]);
+      return;
+    }
+    setErrors({});
     setShowModal(true);
   };
 
@@ -127,7 +154,7 @@ export default function FundDashEditPitch() {
 
       setShowModal(false);
       toast.success("Pitch updated successfully!");
-      setTimeout(() => navigate("/fundraise-dashboard"), 1300);
+      redirectRef.current = setTimeout(() => navigate("/fundraise-dashboard"), 1300);
     } catch (error) {
       console.error("Pitch update failed:", error);
       toast.error(error.message || "Failed to update pitch.");
@@ -217,6 +244,8 @@ export default function FundDashEditPitch() {
       <PitchEditorForm
         mode="edit"
         formData={formData}
+        errors={errors}
+        isDirty={isDirty}
         onChange={handleChange}
         onSubmit={handleSubmit}
         busy={submitting}

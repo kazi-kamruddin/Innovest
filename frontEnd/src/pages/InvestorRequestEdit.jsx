@@ -5,13 +5,15 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuthContext } from "../hooks/useAuthContext";
 import InvestorRequestForm, {
-  EMPTY_INVESTOR_REQUEST,
-  getInvestorRequestPayload,
   InvestorRequestConfirmDialog,
   InvestorRequestState,
-  normalizeInvestorRequest,
-  validateInvestorRequest,
 } from "../components/InvestorRequestForm";
+import {
+  EMPTY_INVESTOR_REQUEST,
+  getInvestorRequestPayload,
+  normalizeInvestorRequest,
+  validateInvestorRequestFields,
+} from "../utils/investorRequestUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
@@ -20,11 +22,19 @@ export default function InvestorRequestEdit() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ ...EMPTY_INVESTOR_REQUEST });
+  const [initialData, setInitialData] = useState(null);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const isDirty = initialData
+    ? Object.keys(EMPTY_INVESTOR_REQUEST).some(
+        (key) => String(formData[key] ?? "") !== String(initialData[key] ?? "")
+      )
+    : false;
 
   useEffect(() => {
     if (!user?.id) {
@@ -46,7 +56,11 @@ export default function InvestorRequestEdit() {
         if (String(data.investorId) !== String(user.id)) {
           throw new Error("You can only edit requests you've created.");
         }
-        if (!controller.signal.aborted) setFormData(normalizeInvestorRequest(data));
+        if (!controller.signal.aborted) {
+          const norm = normalizeInvestorRequest(data);
+          setFormData(norm);
+          setInitialData(norm);
+        }
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error("Error loading investor request:", err);
@@ -62,8 +76,25 @@ export default function InvestorRequestEdit() {
 
   const handleReview = (event) => {
     event.preventDefault();
-    const issue = validateInvestorRequest(formData);
-    if (issue) return toast.error(issue);
+    const fieldErrors = validateInvestorRequestFields(formData);
+    setErrors(fieldErrors);
+    const errorKeys = Object.keys(fieldErrors);
+    if (errorKeys.length > 0) {
+      toast.error(fieldErrors[errorKeys[0]]);
+      const fieldIdMap = {
+        title: "iv-irf-title",
+        category: "iv-irf-category",
+        description: "iv-irf-description",
+        minInvestment: "iv-irf-min",
+        maxInvestment: "iv-irf-max",
+      };
+      const firstEl = document.getElementById(fieldIdMap[errorKeys[0]]);
+      if (firstEl) {
+        firstEl.focus();
+        firstEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
     setConfirmOpen(true);
   };
 
@@ -119,7 +150,15 @@ export default function InvestorRequestEdit() {
 
   return (
     <>
-      <InvestorRequestForm mode="edit" formData={formData} onChange={setFormData} onSubmit={handleReview} busy={saving} />
+      <InvestorRequestForm
+        mode="edit"
+        formData={formData}
+        onChange={setFormData}
+        onSubmit={handleReview}
+        busy={saving}
+        errors={errors}
+        isDirty={isDirty}
+      />
       {confirmOpen && (
           <InvestorRequestConfirmDialog
             title="Save these changes?"

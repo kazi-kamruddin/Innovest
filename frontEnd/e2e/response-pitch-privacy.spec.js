@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { loadTestAccounts } from './accounts.js';
 
-test('request responses stay out of public pitch discovery and detail routes', async ({ request, browser }) => {
+test('request responses stay private and their founder can edit them', async ({ request, browser }) => {
   test.skip(process.env.INNOVEST_TEST_WRITE !== '1' || !process.env.INNOVEST_TEST_API_URL ||
     !process.env.INNOVEST_TEST_ACCOUNTS_FILE || !process.env.INNOVEST_TEST_SITE_URL,
   'Set INNOVEST_TEST_WRITE=1, API URL, site URL and two accounts for this disposable privacy test.');
@@ -18,6 +18,7 @@ test('request responses stay out of public pitch discovery and detail routes', a
   const investor = await investorLogin.json();
   const founderHeaders = { Authorization: `Bearer ${founder.token}` };
   const investorHeaders = { Authorization: `Bearer ${investor.token}` };
+  const pitchTitle = `E2E disposable private response ${Date.now()}`;
   let requestId;
   let pitchId;
   let founderContext;
@@ -37,14 +38,16 @@ test('request responses stay out of public pitch discovery and detail routes', a
 
     const createdPitch = await request.post(`${api}/pitches/in-response/${requestId}`, {
       headers: founderHeaders,
-      data: { title: `E2E disposable private response ${Date.now()}`, industry: 'Education' },
+      data: { title: pitchTitle, industry: 'Education', country: 'Bangladesh' },
     });
     expect(createdPitch.status()).toBe(201);
     pitchId = (await createdPitch.json()).id;
 
     const ownerList = await request.get(`${api}/investor-request/${requestId}/pitches`, { headers: investorHeaders });
     expect(ownerList.status()).toBe(200);
-    expect((await ownerList.json()).some((pitch) => pitch.id === pitchId)).toBe(true);
+    const ownerPitch = (await ownerList.json()).find((pitch) => pitch.id === pitchId);
+    expect(ownerPitch).toBeTruthy();
+    expect(ownerPitch).not.toHaveProperty('email');
 
     const publicList = await request.get(`${api}/pitches`);
     expect(publicList.status()).toBe(200);
@@ -66,6 +69,19 @@ test('request responses stay out of public pitch discovery and detail routes', a
     const founderPage = await founderContext.newPage();
     await founderPage.goto(`/pitches/${pitchId}`);
     await expect(founderPage.getByText(`E2E disposable private response`, { exact: false }).first()).toBeVisible();
+    await founderPage.goto(`/fundraise-dashboard/edit-pitch/${pitchId}`);
+    await expect(founderPage.getByLabel('Pitch title')).toHaveValue(pitchTitle);
+    await founderPage.getByLabel('Pitch title').fill(`${pitchTitle} revised`);
+    await founderPage.getByRole('button', { name: 'Review changes' }).click();
+    await expect(founderPage.getByRole('dialog')).toBeVisible();
+    const [updated] = await Promise.all([
+      founderPage.waitForResponse((response) => response.url() === `${api}/pitches/users/${founder.user.id}/pitches/${pitchId}` && response.request().method() === 'PUT'),
+      founderPage.getByRole('dialog').getByRole('button', { name: 'Save changes' }).click(),
+    ]);
+    expect(updated.status()).toBe(200);
+    const edited = await request.get(`${api}/pitches/${pitchId}`, { headers: investorHeaders });
+    expect((await edited.json()).title).toBe(`${pitchTitle} revised`);
+    expect((await request.get(`${api}/pitches/${pitchId}`)).status()).toBe(404);
   } finally {
     await founderContext?.close();
     if (pitchId) {

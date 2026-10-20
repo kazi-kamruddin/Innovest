@@ -4,7 +4,8 @@ const parseOptionalAmount = (value) => {
   if (typeof value === "string" && !value.trim()) return NaN;
 
   const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? amount : NaN;
+  // All funding columns use DECIMAL(15,2); reject overflow before MySQL does.
+  return Number.isFinite(amount) && amount >= 0 && amount <= 9999999999999.99 ? amount : NaN;
 };
 
 const parseAmountRange = (minimum, maximum) => {

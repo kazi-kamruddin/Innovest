@@ -12,88 +12,16 @@ import {
   FiX,
 } from "react-icons/fi";
 import "../styles/investor-request-flow.css";
+import {
+  REQUEST_CATEGORIES,
+  moneyText,
+  investmentRange,
+} from "../utils/investorRequestUtils";
 
-export const REQUEST_CATEGORIES = [
-  "Technology",
-  "Healthcare",
-  "Finance",
-  "Real Estate",
-  "Education",
-  "Food & Beverage",
-  "Other",
-];
-
-export const EMPTY_INVESTOR_REQUEST = {
-  title: "",
-  description: "",
-  category: "",
-  minInvestment: "",
-  maxInvestment: "",
-};
-
-export function normalizeInvestorRequest(data) {
-  return Object.fromEntries(
-    Object.keys(EMPTY_INVESTOR_REQUEST).map((key) => [key, data?.[key] ?? ""])
-  );
-}
-
-export function validateInvestorRequest(formData) {
-  if (!formData.title.trim()) return "Please add a request title.";
-  if (!formData.description.trim()) return "Please describe the opportunity you're looking for.";
-  if (!formData.category) return "Please choose an investment category.";
-
-  const { minInvestment: min, maxInvestment: max } = formData;
-  for (const [value, label] of [[min, "Minimum"], [max, "Maximum"]]) {
-    if (value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0)) {
-      return `${label} investment must be a valid non-negative amount.`;
-    }
-  }
-
-  if (min !== "" && max !== "" && Number(min) > Number(max)) {
-    return "Minimum investment cannot exceed maximum investment.";
-  }
-  return null;
-}
-
-export function getInvestorRequestPayload(formData) {
-  return {
-    title: formData.title.trim(),
-    description: formData.description.trim(),
-    category: formData.category,
-    minInvestment: formData.minInvestment === "" ? null : Number(formData.minInvestment),
-    maxInvestment: formData.maxInvestment === "" ? null : Number(formData.maxInvestment),
-  };
-}
-
-const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-
-export function moneyText(value) {
-  if (value === undefined || value === null || String(value).trim() === "") return null;
-  const amount = Number(String(value).replace(/[$,\s]/g, ""));
-  return Number.isFinite(amount) ? `$${numberFormat.format(amount)}` : String(value);
-}
-
-export function investmentRange(request) {
-  const min = moneyText(request?.minInvestment);
-  const max = moneyText(request?.maxInvestment);
-  if (min && max) return `${min} – ${max}`;
-  if (min) return `From ${min}`;
-  if (max) return `Up to ${max}`;
-  return "Flexible budget";
-}
-
-export function readableDate(value) {
-  if (!value) return "Not available";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Not available"
-    : date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
-}
-
-export function InvestorRequestHeader({ eyebrow, title, accent, description, actions, backLabel = "Back to requests", backTo = "/investor-request" }) {
+export function InvestorRequestHeader({ eyebrow, title, accent, description, actions, backLabel = "Back to requests", backTo = "/investor-request", onBackClick }) {
   return (
     <>
-      <Link className="iv-irf-back" to={backTo}>
+      <Link className="iv-irf-back" to={backTo} onClick={onBackClick}>
         <FiArrowLeft size={16} aria-hidden="true" /> {backLabel}
       </Link>
       <header className="iv-irf-header">
@@ -160,17 +88,44 @@ export function InvestorRequestConfirmDialog({ title, description, confirmLabel,
   );
 }
 
-function RequestField({ label, id, required = false, children }) {
+function RequestField({ label, id, required = false, error, helper, children }) {
   return (
-    <div className="iv-irf-field">
+    <div className={`iv-irf-field ${error ? "has-error" : ""}`}>
       <label htmlFor={id}>{label}{required && <span className="iv-irf-required"> *</span>}</label>
       {children}
+      {helper && !error && <span className="iv-irf-amount-helper">{helper}</span>}
+      {error && <span id={`${id}-error`} className="iv-irf-field-error" role="alert">{error}</span>}
     </div>
   );
 }
 
-export default function InvestorRequestForm({ mode = "create", formData, onChange, onSubmit, busy = false }) {
+export default function InvestorRequestForm({
+  mode = "create",
+  formData,
+  onChange,
+  onSubmit,
+  busy = false,
+  errors = {},
+  isDirty = false,
+}) {
   const editing = mode === "edit";
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  const handleLeave = (e) => {
+    if (isDirty && !window.confirm("You have unsaved changes. Are you sure you want to leave this page?")) {
+      e.preventDefault();
+    }
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     onChange((current) => ({ ...current, [name]: value }));
@@ -187,10 +142,11 @@ export default function InvestorRequestForm({ mode = "create", formData, onChang
             ? "Update the opportunity you're looking for and keep your request clear for entrepreneurs."
             : "Tell entrepreneurs what you want to invest in and what opportunities interest you."}
           actions={<span className="iv-irf-required-note">* Required fields</span>}
+          onBackClick={handleLeave}
         />
 
         <div className="iv-irf-layout">
-          <form className="iv-irf-form" onSubmit={onSubmit}>
+          <form className="iv-irf-form" onSubmit={onSubmit} noValidate>
             <section className="iv-irf-panel">
               <div className="iv-irf-panel-head">
                 <span className="iv-irf-panel-icon"><FiFileText size={19} aria-hidden="true" /></span>
@@ -201,18 +157,54 @@ export default function InvestorRequestForm({ mode = "create", formData, onChang
                 </div>
               </div>
               <div className="iv-irf-fields">
-                <RequestField id="iv-irf-title" label="Request title" required>
-                  <input id="iv-irf-title" name="title" type="text" value={formData.title} onChange={handleChange} disabled={busy} required placeholder="e.g. Seeking promising education startups" />
+                <RequestField id="iv-irf-title" label="Request title" required error={errors.title}>
+                  <input
+                    id="iv-irf-title"
+                    name="title"
+                    type="text"
+                    value={formData.title}
+                    onChange={handleChange}
+                    disabled={busy}
+                    required
+                    aria-invalid={Boolean(errors.title)}
+                    aria-describedby={errors.title ? "iv-irf-title-error" : undefined}
+                    placeholder="e.g. Seeking promising education startups"
+                  />
                 </RequestField>
-                <RequestField id="iv-irf-category" label="Investment category" required>
-                  <select id="iv-irf-category" name="category" value={formData.category} onChange={handleChange} disabled={busy} required>
+                <RequestField id="iv-irf-category" label="Investment category" required error={errors.category}>
+                  <select
+                    id="iv-irf-category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    disabled={busy}
+                    required
+                    aria-invalid={Boolean(errors.category)}
+                    aria-describedby={errors.category ? "iv-irf-category-error" : undefined}
+                  >
                     <option value="">Select a category</option>
                     {REQUEST_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
                   </select>
                 </RequestField>
-                <div className="iv-irf-field iv-irf-full">
+                <div className={`iv-irf-field iv-irf-full ${errors.description ? "has-error" : ""}`}>
                   <label htmlFor="iv-irf-description">Description<span className="iv-irf-required"> *</span></label>
-                  <textarea id="iv-irf-description" name="description" value={formData.description} onChange={handleChange} disabled={busy} required rows={6} placeholder="Describe what you're looking for, your investment interests, and any preferences..." />
+                  <textarea
+                    id="iv-irf-description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    disabled={busy}
+                    required
+                    rows={6}
+                    aria-invalid={Boolean(errors.description)}
+                    aria-describedby={errors.description ? "iv-irf-description-error" : undefined}
+                    placeholder="Describe what you're looking for, your investment interests, and any preferences..."
+                  />
+                  {errors.description && (
+                    <span id="iv-irf-description-error" className="iv-irf-field-error" role="alert">
+                      {errors.description}
+                    </span>
+                  )}
                   <span className="iv-irf-hint">Clear details help entrepreneurs decide whether their idea is a good match.</span>
                 </div>
               </div>
@@ -228,17 +220,53 @@ export default function InvestorRequestForm({ mode = "create", formData, onChang
                 </div>
               </div>
               <div className="iv-irf-fields">
-                <RequestField id="iv-irf-min" label="Minimum investment (USD)">
-                  <input id="iv-irf-min" name="minInvestment" type="number" min="0" step="any" value={formData.minInvestment} onChange={handleChange} disabled={busy} placeholder="e.g. 25000" />
+                <RequestField
+                  id="iv-irf-min"
+                  label="Minimum investment (USD)"
+                  error={errors.minInvestment}
+                  helper={moneyText(formData.minInvestment)}
+                >
+                  <input
+                    id="iv-irf-min"
+                    name="minInvestment"
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={formData.minInvestment}
+                    onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    disabled={busy}
+                    aria-invalid={Boolean(errors.minInvestment)}
+                    aria-describedby={errors.minInvestment ? "iv-irf-min-error" : undefined}
+                    placeholder="e.g. 25000"
+                  />
                 </RequestField>
-                <RequestField id="iv-irf-max" label="Maximum investment (USD)">
-                  <input id="iv-irf-max" name="maxInvestment" type="number" min="0" step="any" value={formData.maxInvestment} onChange={handleChange} disabled={busy} placeholder="e.g. 150000" />
+                <RequestField
+                  id="iv-irf-max"
+                  label="Maximum investment (USD)"
+                  error={errors.maxInvestment}
+                  helper={moneyText(formData.maxInvestment)}
+                >
+                  <input
+                    id="iv-irf-max"
+                    name="maxInvestment"
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={formData.maxInvestment}
+                    onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    disabled={busy}
+                    aria-invalid={Boolean(errors.maxInvestment)}
+                    aria-describedby={errors.maxInvestment ? "iv-irf-max-error" : undefined}
+                    placeholder="e.g. 150000"
+                  />
                 </RequestField>
               </div>
             </section>
 
             <div className="iv-irf-form-actions">
-              <Link className="iv-irf-secondary" to="/investor-request">Cancel</Link>
+              <Link className="iv-irf-secondary" to="/investor-request" onClick={handleLeave}>Cancel</Link>
               <button type="submit" className="iv-irf-primary" disabled={busy}>
                 {busy ? "Saving..." : editing ? "Review changes" : "Review request"}
                 {!busy && <FiArrowRight size={17} aria-hidden="true" />}

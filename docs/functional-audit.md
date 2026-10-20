@@ -1,4 +1,34 @@
-# Functional verification status — 13 October 2026
+# Functional verification status
+
+**Review date:** 15 October 2026. **Latest application testing:** 15 October 2026. Reviewed `dev` at `c643f5f` plus the uncommitted audit changes described below. Results apply to their named environments, without implying every possible input or failure mode was tested.
+
+## 15 October 2026 audit
+
+| Area | Fix and verification |
+| --- | --- |
+| Private response editor | Sends the session token when loading a private response; clears its redirect timer on unmount. A mocked regression failed before the fix and passes now. The real two-account response test also opens, edits, and saves a private response locally. |
+| Session isolation | New JWTs have unique IDs so same-second logins do not share revocation state. Account changes and logout propagate between tabs, remounting pages to clear private caches. Token collision was reproduced; backend and two-tab regressions pass. |
+| Socket sessions | Sockets disconnect at token expiry and revalidate authorization before incoming packets. Real Socket.IO tests cover expiry and revocation on an established connection. |
+| Notifications | Superseded/unmounted loads are aborted; a late poll cannot undo a successful mark-read operation. A failed load no longer shows an empty-inbox success message. Two mocked regressions and real single/bulk read checks pass. |
+| Validation and privacy | Text types and column limits, TEXT byte limits, funding overflow, and numeric route IDs are validated before SQL. Response reviews omit the founder's login email. An empty investor directory returns HTTP 200 and an empty array. Backend controller/HTTP regressions pass; column types and DECIMAL(15,2) limits were checked using metadata without reading personal records. |
+| Database failure/resource handling | Failed rollback no longer escapes the API error handler; connections are released before account email delivery or follow-up notification pool queries. Failure/resource regressions pass. |
+| Request consistency | Response creation locks the request and saves in one transaction, serializing with closure. Commit and closed-request rollback tests pass, as do the real response and closed-request journeys locally. No concurrent live stress test was run. |
+| Layout resilience | Local sizing rules preserve intended widths if the external stylesheet fails. Removed a redundant Bootstrap alpha link with an unusable integrity value. The 390px mobile test failed before the fallback and passes now across guest/member pages. Colors and component arrangement were preserved. |
+
+### Results and limits
+
+- **Local backend:** 42 tests pass, including HTTP and real Socket.IO regressions. The final run includes funding overflow, failed rollback handling, and connection release before email/notification work.
+- **Production dependencies:** backend and frontend audits each report zero vulnerabilities.
+- **Local frontend:** build passes; lint has 0 errors and 15 existing Fast Refresh warnings. The build still reports a bundle over 500 kB.
+- **Local app connected to Aiven:** the default Playwright run passed **27** checks and skipped **11** gated checks. Eight stateful journeys passed in one batch; the expanded response privacy/edit journey passed separately after correcting its API fixture to include the country required by the editor. Together these cover all nine selected journeys: response/status workflow, request lifecycle, standalone pitch CRUD, profile edit/restore, preferences/restore, messaging, logout, notification bulk read, and private response editing. These do not verify today's changes on the public deployment.
+- **Production:** smoke passed `/health`, `/ready`, and the website. The original privacy regression passed on the public frontend/API: no response in public discovery, guest detail 404, permitted parties 200. This run preceded the new editor and login-email assertions; those were verified locally. Today's new fixes were not deployed by this audit, and no exact deployed revision was established.
+- **Cleanup:** no unfinished disposable pitches or open disposable requests were found. Privacy tests deleted their responses and closed their requests. Profiles/preferences were restored. Closed test requests, notifications, and labeled messages remain because no corresponding deletion flow exists.
+
+The initial expanded privacy/edit test failed because its fixture omitted the editor's required country. The corrected fixture passed; the response wait is now paired with the save click to avoid an unhandled timeout. Local test batches used a local backend restart between groups to avoid accumulated login limits; production limits were not changed.
+
+Deploy today's compatible backend/frontend changes, then repeat the expanded privacy/edit regression on the public origins. The operator checks at the end of this file remain outstanding. The 15 October production privacy pass supersedes the older exposure finding below.
+
+## Historical verification — 13 October 2026
 
 This is a coverage record, not a claim that every possible input or future service failure has been tested. The disposable accounts are `accountA` (founder) and `accountB` (investor); their credentials stay in the ignored file outside the repository described in `browser-testing.md`.
 
@@ -16,9 +46,9 @@ This is a coverage record, not a claim that every possible input or future servi
 | Help form | Success and failure UI with EmailJS intercepted | Actual delivery needs manual check |
 | Operations | Render `/ready`, Aiven connection, production dependency audit, frontend build, lint | Ready and builds; Aiven may power off independently; backup restore needs a separate manual drill |
 
-## Production blocker
+### Historical production blocker — resolved by the 15 October public-origin privacy check
 
-The deployed API still returns a newly submitted private response pitch from public `GET /pitches`, and guest `GET /pitches/:id` returns 200. The test cleaned up its pitch and closed the request. The fix in this checkout excludes response pitches from public discovery and limits detail access to the founder and request investor. `e2e/response-pitch-privacy.spec.js` passes against this updated frontend and backend connected to Aiven. Deploy both applications, then rerun the same regression against the public URLs before calling production verified.
+On 13 October the deployed API returned a newly submitted private response pitch from public `GET /pitches`, and guest `GET /pitches/:id` returned 200. The test cleaned up its pitch and closed the request. The source fix excluded response pitches from public discovery and limited details to their founder and request investor; its local regression passed that day. The public-origin pass on 15 October closed this finding. Today's additional audit changes still need their own deployed verification.
 
 ## Test execution limits
 

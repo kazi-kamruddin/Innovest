@@ -64,6 +64,25 @@
 .iv-irf-page .iv-irf-field input:disabled, .iv-irf-page .iv-irf-field select:disabled, .iv-irf-page .iv-irf-field textarea:disabled { opacity: .7; cursor: not-allowed; }
 .iv-irf-page .iv-irf-hint { color: #95a498; font-size: 10px; line-height: 1.4; }
 .iv-irf-page .iv-irf-char-count { text-align: right; }
+.iv-irf-page .iv-irf-field-error { display: block; margin-top: 4px; color: #b7624e; font-size: 11px; font-weight: 550; line-height: 1.4; }
+.iv-irf-page .iv-irf-field input[aria-invalid="true"],
+.iv-irf-page .iv-irf-field select[aria-invalid="true"],
+.iv-irf-page .iv-irf-field textarea[aria-invalid="true"] { border-color: #dca69d; background-color: #fffbfa; }
+.iv-irf-page .iv-irf-field input[aria-invalid="true"]:focus,
+.iv-irf-page .iv-irf-field select[aria-invalid="true"]:focus,
+.iv-irf-page .iv-irf-field textarea[aria-invalid="true"]:focus { border-color: #b7624e; box-shadow: 0 0 0 3px rgba(183, 98, 78, .12); }
+.iv-irf-page .iv-irf-amount-helper { display: block; margin-top: 4px; color: #2e7650; font-size: 11px; font-weight: 550; }
+.iv-irf-page .iv-irf-prefill-banner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 13px 17px; margin-bottom: 20px; border: 1.5px solid #a8cbb0;
+  border-radius: 14px; background: #edf6ef;
+}
+.iv-irf-page .iv-irf-prefill-banner span { font-size: 13px; font-weight: 650; color: #243e30; }
+.iv-irf-page .iv-irf-prefill-banner select {
+  max-width: 360px; padding: 7px 11px; border: 1.5px solid #b9d0be;
+  border-radius: 8px; background: #fff; font-size: 13px; color: #2f4436;
+}
+
 
 /* ACTIONS */
 .iv-irf-page .iv-irf-form-actions { display: flex; justify-content: flex-end; gap: 11px; padding: 2px 0; }
@@ -230,3 +249,7 @@
 .iv-irf-page .iv-irf-response-status select { min-height: 43px; padding: 10px 12px; border: 1.5px solid #b9d0be; border-radius: 10px; background: #fbfdfb; color: #2f4436; font: 400 13px "Outfit", sans-serif; cursor: pointer; }
 .iv-irf-page .iv-irf-response-status select:focus { outline: none; border-color: #176d5d; box-shadow: 0 0 0 3px rgba(23, 109, 93, .105); }
 .iv-irf-page .iv-irf-update-error { color: #a43838; margin: 1rem 0; }
+.iv-irf-page .iv-irf-status-feedback { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+.iv-irf-page .iv-irf-status-feedback--saved { color: #176d5d; }
+.iv-irf-page .iv-irf-status-feedback--updating { color: #557262; }
+

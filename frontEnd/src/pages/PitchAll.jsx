@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   FiArrowRight,
   FiArrowUpRight,
@@ -460,13 +460,36 @@ function LoadingCards() {
 
 export default function PitchAll() {
   const { user } = useAuthContext();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const searchTerm = searchParams.get("search") || "";
+  const industryFilter = searchParams.get("industry") || "";
+  const stageFilter = searchParams.get("stage") || "";
+  const countryFilter = searchParams.get("country") || "";
+
+  const updateFilters = (updates) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        Object.entries(updates).forEach(([key, value]) => {
+          if (value) {
+            next.set(key, value);
+          } else {
+            next.delete(key);
+          }
+        });
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const setSearchTerm = (value) => updateFilters({ search: value });
+  const setIndustryFilter = (value) => updateFilters({ industry: value });
+  const setStageFilter = (value) => updateFilters({ stage: value });
+  const setCountryFilter = (value) => updateFilters({ country: value });
 
   const [pitches, setPitches] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [industryFilter, setIndustryFilter] = useState("");
-  const [stageFilter, setStageFilter] = useState("");
-  const [countryFilter, setCountryFilter] = useState("");
-
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
@@ -568,10 +591,7 @@ export default function PitchAll() {
   );
 
   function clearFilters() {
-    setSearchTerm("");
-    setIndustryFilter("");
-    setStageFilter("");
-    setCountryFilter("");
+    setSearchParams({}, { replace: true });
   }
 
   return (
@@ -869,16 +889,30 @@ export default function PitchAll() {
           </div>
 
           {!isLoading && !fetchError && (
-            <span
-              className="rounded-full! border!
-                         border-[#DAE7DC]!
-                         bg-[#F2F8F3]!
-                         px-3.5! py-2!
-                         text-[11px]! font-semibold!
-                         text-[#4D7A59]!"
-            >
-              {filteredPitches.length} available to explore
-            </span>
+            <div className="flex! flex-wrap! items-center! gap-2!">
+              {user?.id && (
+                <span
+                  className="rounded-full! border!
+                             border-[#DAE7DC]!
+                             bg-white!
+                             px-3.5! py-2!
+                             text-[11px]! font-medium!
+                             text-[#6B8473]!"
+                >
+                  Public marketplace pitches
+                </span>
+              )}
+              <span
+                className="rounded-full! border!
+                           border-[#DAE7DC]!
+                           bg-[#F2F8F3]!
+                           px-3.5! py-2!
+                           text-[11px]! font-semibold!
+                           text-[#4D7A59]!"
+              >
+                {filteredPitches.length} available to explore
+              </span>
+            </div>
           )}
         </div>
 

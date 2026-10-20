@@ -28,3 +28,16 @@
 .iv-notification-count { display: inline-flex; min-width: 19px; height: 19px; align-items: center; justify-content: center; padding: 0 4px; border-radius: 100px; background: #176d5d; color: white; font-size: 10px; font-weight: 700; }
 .iv-notification-bell:focus-visible, .iv-notification-mobile-link:focus-visible, .iv-notifications-page button:focus-visible, .iv-notifications-page a:focus-visible { outline: 2px solid #176d5d; outline-offset: 2px; }
 @media (max-width: 600px) { .iv-notifications-wrap { padding: 22px 16px 65px; } .iv-notifications-heading, .iv-notification-item { align-items: flex-start; flex-direction: column; } .iv-notification-item { width: 100%; padding: 18px; } .iv-notification-actions { flex-wrap: wrap; white-space: normal; } }
+
+@keyframes ivNotificationShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.iv-notifications-skeleton-list { display: grid; gap: 14px; max-width: 900px; }
+.iv-notification-skeleton { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 19px 22px; border: 1.5px solid #e0ebe2; border-radius: 18px; background: #fff; min-height: 80px; box-shadow: 0 4px 18px rgba(33, 69, 43, 0.03); }
+.iv-notification-skeleton__main { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.iv-notification-skeleton__line { height: 14px; border-radius: 6px; background: linear-gradient(90deg, #edf4ef 25%, #f6faf7 50%, #edf4ef 75%); background-size: 200% 100%; animation: ivNotificationShimmer 1.8s ease-in-out infinite; }
+.iv-notification-skeleton__line--text { width: 72%; }
+.iv-notification-skeleton__line--time { width: 28%; height: 10px; }
+.iv-notification-skeleton__btn { width: 64px; height: 38px; border-radius: 10px; background: linear-gradient(90deg, #edf4ef 25%, #f6faf7 50%, #edf4ef 75%); background-size: 200% 100%; animation: ivNotificationShimmer 1.8s ease-in-out infinite; }
+

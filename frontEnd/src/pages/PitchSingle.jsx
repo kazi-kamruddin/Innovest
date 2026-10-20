@@ -1,18 +1,21 @@
 
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FiActivity,
   FiArrowLeft,
   FiArrowRight,
   FiBriefcase,
   FiDollarSign,
+  FiEdit2,
   FiMapPin,
+  FiMessageCircle,
   FiPhone,
   FiRefreshCw,
   FiTrendingUp,
   FiUser,
 } from "react-icons/fi";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 import "../styles/pitch-single.css";
 
@@ -155,12 +158,17 @@ function MessageState({ type, onRetry }) {
 
 export default function PitchSingle() {
   const { id } = useParams();
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
+  const currentRoute = useLocation();
 
   const [pitch, setPitch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [knockPending, setKnockPending] = useState(false);
+  const [knockError, setKnockError] = useState("");
 
   /* FETCH EXISTING PITCH API */
   useEffect(() => {
@@ -253,6 +261,38 @@ export default function PitchSingle() {
     pitch?.user_name,
     "Pitch creator"
   );
+
+  const isOwnPitch = !!user?.id && pitch?.user_id != null && String(user.id) === String(pitch.user_id);
+
+  async function handleKnock() {
+    if (!user?.id) {
+      navigate("/login", { state: { from: currentRoute } });
+      return;
+    }
+    if (isOwnPitch) {
+      navigate(`/fundraise-dashboard/edit-pitch/${pitch.id}`);
+      return;
+    }
+    if (knockPending || !pitch?.user_id) return;
+    setKnockError("");
+    setKnockPending(true);
+    try {
+      const token = localStorage.getItem("token")?.trim();
+      if (!token || !API_BASE) throw new Error("Please sign in again to start a conversation.");
+      const response = await fetch(`${API_BASE}/conversations/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ targetUserId: Number(pitch.user_id) }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.id) throw new Error(data.error || "Could not start this conversation.");
+      navigate(`/messages?conversation=${encodeURIComponent(data.id)}`);
+    } catch (err) {
+      setKnockError(err.message || "Could not start this conversation.");
+    } finally {
+      setKnockPending(false);
+    }
+  }
 
   return (
     <main className="innovest-pitch-single">
@@ -499,35 +539,62 @@ export default function PitchSingle() {
                     </div>
                   </div>
 
-                  {/* EXISTING PROFILE ACTION */}
-                  {pitch.user_id !== null &&
-                    pitch.user_id !== undefined && (
-                      <Link
-                        to={`/profile/${pitch.user_id}`}
-                        className="ps-profile-link"
-                      >
-                        View founder profile
-
-                        <FiArrowRight
-                          size={17}
-                          aria-hidden="true"
-                        />
-                      </Link>
+                  {/* ACTIONS: KNOCK / EDIT, PROFILE & CONTACT */}
+                  <div className="ps-action-stack">
+                    {pitch.user_id != null && (
+                      isOwnPitch ? (
+                        <Link
+                          to={`/fundraise-dashboard/edit-pitch/${pitch.id}`}
+                          className="ps-knock-button"
+                        >
+                          <FiEdit2 size={16} aria-hidden="true" />
+                          Edit this pitch
+                        </Link>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="ps-knock-button"
+                            disabled={knockPending}
+                            onClick={handleKnock}
+                          >
+                            <FiMessageCircle size={16} aria-hidden="true" />
+                            {knockPending ? "Connecting…" : "Knock / Start conversation"}
+                          </button>
+                          {knockError && <p className="ps-knock-error" role="alert">{knockError}</p>}
+                        </>
+                      )
                     )}
 
-                  {/* CONTACT NUMBER */}
-                  {phone && phoneLink && (
-                    <a
-                      href={`tel:${phoneLink}`}
-                      className="ps-phone-link"
-                    >
-                      <FiPhone
-                        size={16}
-                        aria-hidden="true"
-                      />
-                      {phone}
-                    </a>
-                  )}
+                    {pitch.user_id !== null &&
+                      pitch.user_id !== undefined && (
+                        <Link
+                          to={`/profile/${pitch.user_id}`}
+                          className="ps-profile-link"
+                        >
+                          View founder profile
+
+                          <FiArrowRight
+                            size={17}
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      )}
+
+                    {/* CONTACT NUMBER */}
+                    {phone && phoneLink && (
+                      <a
+                        href={`tel:${phoneLink}`}
+                        className="ps-phone-link"
+                      >
+                        <FiPhone
+                          size={16}
+                          aria-hidden="true"
+                        />
+                        {phone}
+                      </a>
+                    )}
+                  </div>
 
                   <p className="ps-disclaimer">
                     Pitch details are provided by

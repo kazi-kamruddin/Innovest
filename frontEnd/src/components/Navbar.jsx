@@ -58,6 +58,16 @@ function Navbar() {
   }, [location.pathname]);
 
   useEffect(() => {
+    if (menuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [menuOpen]);
+
+  useEffect(() => {
     const onEscape = (event) => {
       if (event.key === "Escape") setMenuOpen(false);
     };

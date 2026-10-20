@@ -3,6 +3,7 @@ const requireAuth = require('../middleware/requireAuth');
 const { listNotifications, markRead, markAllRead } = require('../controllers/notificationController');
 
 const router = express.Router();
+router.param('id', require('../middleware/validateId'));
 router.use(requireAuth);
 router.get('/', listNotifications);
 router.patch('/read-all', markAllRead);

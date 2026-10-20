@@ -481,6 +481,58 @@
   overflow-wrap: anywhere;
 }
 
+/* ACTION STACK & KNOCK BUTTON */
+
+.innovest-pitch-single .ps-action-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.innovest-pitch-single .ps-knock-button {
+  display: flex;
+  min-height: 45px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border: 1px solid #176d5d;
+  border-radius: 11px;
+  background: #176d5d;
+  color: white;
+  font-family: "Outfit", sans-serif;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(23, 109, 93, 0.16);
+  transition: all 200ms ease;
+}
+
+.innovest-pitch-single .ps-knock-button:hover:not(:disabled) {
+  background: #12584b;
+  border-color: #12584b;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(23, 109, 93, 0.22);
+}
+
+.innovest-pitch-single .ps-knock-button:disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+.innovest-pitch-single .ps-knock-error {
+  margin: 6px 0 0;
+  color: #a43838;
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* FOUNDER PROFILE BUTTON */
 
 .innovest-pitch-single .ps-profile-link {

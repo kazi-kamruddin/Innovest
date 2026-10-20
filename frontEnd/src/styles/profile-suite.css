@@ -384,3 +384,138 @@
   .iv-profile .iv-profile-button, .iv-profile .iv-profile-picker__choice { transition: none; }
   .iv-profile .iv-profile-spinner { animation: none; }
 }
+
+/* PROFILE STRENGTH & CHECKLIST */
+.iv-profile .iv-profile-meter {
+  margin-bottom: 15px;
+}
+
+.iv-profile .iv-profile-meter__track {
+  width: 100%;
+  height: 8px;
+  background: #e3ede5;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.iv-profile .iv-profile-meter__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #278466, #176d5d);
+  border-radius: 99px;
+  transition: width 0.35s ease;
+}
+
+.iv-profile .iv-profile-meter__label {
+  display: block;
+  margin-top: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #637f6a;
+}
+
+.iv-profile .iv-profile-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.iv-profile .iv-profile-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.iv-profile .iv-profile-checklist__check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.iv-profile .iv-profile-checklist__item.is-done .iv-profile-checklist__check {
+  background: #e8f4ea;
+  color: #1f7749;
+  border: 1px solid #b7dcbf;
+}
+
+.iv-profile .iv-profile-checklist__item.is-todo .iv-profile-checklist__check {
+  background: #f4f7f4;
+  border: 1px solid #d2ded5;
+}
+
+.iv-profile .iv-profile-checklist__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9aa89d;
+}
+
+.iv-profile .iv-profile-checklist__text {
+  flex: 1;
+  color: #384e40;
+}
+
+.iv-profile .iv-profile-checklist__item.is-done .iv-profile-checklist__text {
+  color: #627b68;
+}
+
+.iv-profile .iv-profile-checklist__action {
+  font-size: 11px;
+  font-weight: 700;
+  color: #176d5d;
+  text-decoration: none;
+}
+
+.iv-profile .iv-profile-checklist__action:hover {
+  text-decoration: underline;
+}
+
+.iv-profile .iv-profile-complete-badge {
+  margin: 14px 0 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #ebf6ee;
+  border: 1px solid #b9ddc2;
+  color: #1b663e;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.iv-profile .iv-profile-amount-helper {
+  display: block;
+  margin-top: 5px;
+  color: #278466;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.iv-profile .iv-profile-inline-error {
+  display: block;
+  margin-top: 5px;
+  color: #b7574b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.iv-profile .iv-profile-bio-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.iv-profile .iv-profile-char-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #7b9482;
+  white-space: nowrap;
+}
+
