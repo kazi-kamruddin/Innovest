@@ -22,18 +22,19 @@ Innovest focuses on **discovery, introductions, and communication**. Funding goa
 
 | Area | What you can do |
 | --- | --- |
-| **Authentication** | Create an account, sign in, verify an email address, and recover a password when account email is enabled. |
+| **Authentication** | Create an account, sign in with email/password or Google OAuth, verify an email address, and recover a password when account email is enabled. |
 | **Investment marketplace** | Browse startup pitches, search opportunities, and filter by industry, stage, and country. |
 | **Fundraise dashboard** | Create, view, update, and delete your own business pitches; review funding goals. |
 | **Pitch details** | Read a business overview, target market, progress, objectives, and investment requirements. |
 | **Investor directory** | Discover investors, explore their public profiles, and review investment preferences. |
 | **Investor requests** | Publish an investment request, edit it, close/reopen it, and review pitch responses. |
 | **Respond with a pitch** | Entrepreneurs can submit relevant pitches in response to investor requests. |
+| **In-app notifications** | Real-time notification center for response submissions and review status updates with bulk-read support. |
 | **Real-time messages** | Initiate a conversation through the **Knock** action and exchange messages using Socket.IO. |
 | **User profiles** | Edit personal information and manage investor interests and investment ranges. |
 | **Supporting pages** | About Us, Help/Contact, Privacy Policy, and Terms of Service. |
 
-The interface is responsive and uses an off-white, sage-green visual system with the Outfit typeface.
+The interface is responsive and uses an off-white, sage-green visual system with the Outfit typeface. Route-level code splitting and optimized vendor chunking ensure fast, accessible page transitions.
 
 ## Technology Stack
 
@@ -41,10 +42,11 @@ The interface is responsive and uses an off-white, sage-green visual system with
 | --- | --- |
 | **Frontend** | React, Vite, React Router, Tailwind CSS, Bootstrap, custom CSS |
 | **Backend** | Node.js, Express.js |
-| **Database** | MySQL (`mysql2`), hosted on Aiven |
-| **Authentication** | JSON Web Tokens (JWT), bcrypt |
+| **Database** | MySQL (`mysql2`), hosted on TiDB Cloud Starter / Aiven |
+| **Authentication** | JSON Web Tokens (JWT with HS256 pinning), bcrypt, Google OAuth 2.0 |
 | **Real-time communication** | Socket.IO |
 | **Contact form** | EmailJS |
+| **Testing & Telemetry** | Node.js test runner (60 regression tests), Playwright E2E suite |
 | **Frontend deployment** | Vercel |
 | **Backend deployment** | Render (Docker) |
 
@@ -58,7 +60,7 @@ The interface is responsive and uses an off-white, sage-green visual system with
                        |
           Node.js / Express backend
                        |
-             MySQL database (Aiven)
+             MySQL database (TiDB / Aiven)
 
           Browser <---- Socket.IO ----> Backend
                      (messaging)
@@ -69,24 +71,30 @@ The interface is responsive and uses an off-white, sage-green visual system with
 ```text
 Innovest/
 ├── frontEnd/
+│   ├── e2e/                 # Playwright E2E test suites
 │   ├── src/
 │   │   ├── assets/          # Images and static assets
 │   │   ├── components/      # Reusable UI components
 │   │   ├── hooks/           # React hooks and auth helpers
 │   │   ├── pages/           # Application pages
-│   │   └── styles/          # Page and component styles
+│   │   ├── styles/          # Page and component styles
+│   │   └── utils/           # Validation and formatting utilities
 │   ├── package.json
-│   └── vite.config.js
+│   ├── playwright.config.js # E2E configuration & failure telemetry
+│   └── vite.config.js       # Vite & vendor chunking configuration
 │
 ├── backEnd/
-│   ├── config/              # MySQL connection configuration
+│   ├── config/              # MySQL connection pool configuration
 │   ├── controllers/         # Request handlers
-│   ├── database/            # Database upgrade SQL
-│   ├── middleware/          # Authentication middleware
+│   ├── database/            # Baseline schema & migration SQL
+│   ├── middleware/          # Authentication & validation middleware
 │   ├── routes/              # Express API routes
+│   ├── scripts/             # Migrations, showcase seeder, and smoke check
+│   ├── test/                # Automated regression test suites
+│   ├── utils/               # Amount, auth token, and transaction helpers
 │   ├── .env.example         # Backend environment template
 │   ├── Dockerfile
-│   ├── README.md             # Docker / Render setup
+│   ├── README.md            # Docker / Render setup
 │   ├── package.json
 │   └── server.js
 │
@@ -131,13 +139,15 @@ DB_USER=your-mysql-user
 DB_PASS=your-mysql-password
 DB_NAME=your-database-name
 
-# When your MySQL provider requires a CA certificate:
-DB_SSL_CA_PATH=./certs/ca.pem
+# TLS: use DB_SSL_ENABLED=true for system-CA TLS (e.g., TiDB Cloud Starter),
+# or DB_SSL_CA_PATH / DB_SSL_CA when providing a custom CA certificate:
+DB_SSL_ENABLED=true
+# DB_SSL_CA_PATH=./certs/ca.pem
 ```
 
-**Database setup:** The application expects its MySQL tables to exist. Apply `backEnd/database/002_account_security.sql` for account security, then run `npm run migrate:responses` and `npm run migrate:google` from `backEnd/` before deploying this backend version. See [operations](docs/operations.md) for the rollout and restore drill.
+**Database setup:** Run `npm run migrate:all` from `backEnd/` to idempotently create all 13 baseline and additive tables (or apply `002_account_security.sql`, `npm run migrate:responses`, and `npm run migrate:google` on a pre-existing database). Optionally run `npm run seed:demo -- --apply` to populate curated showcase data; see [operations](docs/operations.md) for the full rollout, seeding, and restore workflow.
 
-For hosted MySQL, configure the certificate using `DB_SSL_CA_PATH` or `DB_SSL_CA` as supported by `backEnd/config/database.js`. Never commit your `.env`, private certificates, or credentials.
+For hosted MySQL, TLS options are configured via `DB_SSL_CA`, `DB_SSL_CA_PATH`, or `DB_SSL_ENABLED=true` in `backEnd/config/poolConfig.js`. Never commit your `.env`, private certificates, or credentials.
 
 Start the backend:
 
@@ -183,13 +193,37 @@ npm run preview
 
 The production frontend build is generated in `frontEnd/dist/`.
 
+### 5. Running automated tests
+
+**Backend regression tests (60 tests):**
+
+```bash
+cd backEnd
+npm test
+```
+
+**Frontend lint and production build:**
+
+```bash
+cd frontEnd
+npm run lint
+npm run build
+```
+
+**End-to-end tests (Playwright):**
+
+```bash
+cd frontEnd
+npm run test:e2e
+```
+
 ## Deployment
 
 The public site is hosted at **[innovest-site.vercel.app](https://innovest-site.vercel.app/)**.
 
 - **Frontend (Vercel):** Build the `frontEnd` project and configure `VITE_API_URL` to point to the deployed backend origin.
 - **Backend (Render):** Deploy `backEnd` as a Docker web service, with the required environment variables configured on the host.
-- **Database (Aiven):** Provide the MySQL connection settings and CA certificate through the backend's secure runtime configuration.
+- **Database (TiDB Cloud Starter / Aiven):** Provide the MySQL connection settings and TLS option (`DB_SSL_ENABLED=true` or custom CA via `DB_SSL_CA`) through the backend's secure runtime configuration.
 - **CORS:** Set the backend's `FRONTEND_URL` to the exact deployed frontend origin.
 - **Account email:** Configure verification and password recovery on Render after the new database tables exist.
 

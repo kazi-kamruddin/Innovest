@@ -1,6 +1,6 @@
 # Innovest backend
 
-The backend runs as a Node.js web service and connects to the separately hosted Aiven MySQL database. Its Docker image contains the application and production npm dependencies. Database credentials and the Aiven CA certificate are supplied at runtime.
+The backend runs as a Node.js web service and connects to a hosted MySQL 8 / TiDB Cloud Starter database (`mysql2/promise`). Its Docker image contains the application and production npm dependencies (`backEnd/.dockerignore` excludes `certs/` and `**/*.pem`), so database credentials and TLS configuration are supplied at runtime.
 
 ## Build and run locally
 
@@ -8,10 +8,29 @@ From the repository root:
 
 ```powershell
 docker build -t innovest-backend ./backEnd
-docker run --rm -p 4000:4000 --env-file ./backEnd/.env -e PORT=4000 -e DB_SSL_CA_PATH=/run/secrets/aiven-ca.pem --mount "type=bind,source=C:\path\to\ca.pem,target=/run/secrets/aiven-ca.pem,readonly" innovest-backend
+docker run --rm -p 4000:4000 --env-file ./backEnd/.env -e PORT=4000 -e DB_SSL_ENABLED=true innovest-backend
 ```
 
-Replace the certificate source path with your downloaded Aiven CA certificate. The mount makes it readable inside the container without copying it into the image. The local `.env` must contain the database settings, `SECRET`, and `FRONTEND_URL`; its Windows `DB_SSL_CA_PATH` is overridden by the container path above. Visit `http://localhost:4000/pitches` to check the database-backed API.
+If your MySQL host requires a custom CA file locally instead of system root certificates (for example Aiven MySQL), mount the file read-only at runtime:
+
+```powershell
+docker run --rm -p 4000:4000 --env-file ./backEnd/.env -e PORT=4000 -e DB_SSL_CA_PATH=/run/secrets/db-ca.pem --mount "type=bind,source=C:\path\to\ca.pem,target=/run/secrets/db-ca.pem,readonly" innovest-backend
+```
+
+The local `.env` must contain `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `SECRET`, and `FRONTEND_URL`. Never commit `.env` or `*.pem` certificates.
+
+## Database setup, migrations, and demo data
+
+From `backEnd/`:
+
+```bash
+npm run migrate:all -- --dry-run   # Inspect 000..004 DDL statements offline
+npm run migrate:all                # Apply baseline + additive tables and verify all 13 tables
+npm run seed:demo                  # Dry-run validate curated showcase dataset
+npm run seed:demo -- --apply       # Transactional idempotent upsert of demo dataset
+```
+
+See [operations](../docs/operations.md) for `SEED_DEMO_PASSWORD`, `--prune-test-data`, and cutover instructions.
 
 ## Deploy on Render
 
@@ -24,10 +43,11 @@ Create a Web Service linked to the GitHub repository with these settings:
 | Language | Docker |
 | Dockerfile path | `./Dockerfile` |
 
-Render builds the image from the Dockerfile and starts it with its `CMD`. The server reads Render's `PORT` automatically. Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `SECRET`, and `FRONTEND_URL` as Render environment variables. Set `DB_SSL_CA` to the full PEM contents of the Aiven CA certificate, including the BEGIN and END lines; do not set `DB_SSL_CA_PATH` to a path on your computer. Set `FRONTEND_URL` to the final Vercel production origin (for example, `https://innovest.vercel.app`) without a trailing slash. Never commit the `.env` file, certificate, or credentials.
+Render builds the image from the Dockerfile and starts it with its `CMD`. The server reads Render's `PORT` automatically:
 
-The root endpoint (`/`) returns a small API status response. Set Render's health check path to `/health`. The `/ready` endpoint checks MySQL and the account tables, returning HTTP 503 when either is unavailable.
+- Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`, `SECRET`, and `FRONTEND_URL` (`https://innovest-site.vercel.app`, no trailing slash) as Render environment variables.
+- For **TiDB Cloud Starter**, set `DB_SSL_ENABLED=true` (uses container system root CAs; remove stale `DB_SSL_CA` / `DB_SSL_CA_PATH` overrides). For providers requiring a private CA, set `DB_SSL_CA` to the full PEM string (`BEGIN`/`END` lines included) — never set `DB_SSL_CA_PATH` to a Windows workstation path.
+- Health & readiness: Render's health check path is `/health`; external uptime monitoring and `npm run wake` verify `/ready` (all 6 additive tables + MySQL ping).
+- Optional email flows: set `BREVO_API_KEY`, `AUTH_EMAIL_FROM`, and `ACCOUNT_EMAIL_ENABLED=true` after all 13 schema tables exist.
 
-Apply `database/002_account_security.sql` to Aiven before deploying this backend version. To activate email verification and password recovery, configure `BREVO_API_KEY`, `AUTH_EMAIL_FROM`, and `ACCOUNT_EMAIL_ENABLED=true` on Render. A verified personal address can be used as a Brevo sender without a custom domain, although Brevo replaces the From address for delivery. New users receive a verification link before they can sign in. Accounts created before this change keep access without a verification step. See [operations](../docs/operations.md) for the rollout, smoke check, and backup procedure.
-
-The Dockerfile does not include or start MySQL. Aiven remains the database service, and Vercel builds the frontend separately.
+The Dockerfile does not start MySQL; the database runs externally on TiDB Cloud Starter (or Aiven MySQL) and Vercel builds the frontend separately. See [operations](../docs/operations.md) for smoke checks, free-tier wakeups, and backups.
