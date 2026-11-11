@@ -3,6 +3,7 @@ const { parseAmountRange } = require("../utils/amounts");
 const { createNotification, notifyBestEffort } = require("../utils/notifications");
 const { textFieldsError } = require('../utils/inputValidation');
 const { rollbackQuietly } = require('../utils/transactions');
+const { parsePagination } = require('../utils/pagination');
 const requestFields = { title: 255, description: 'text', category: 255 };
 
 async function notifyResponders(req, requestId, status) {
@@ -299,10 +300,9 @@ const updateResponseStatus = async (req, res) => {
 // GET /investor-requests (list all requests)
 const getAllInvestorRequests = async (req, res) => {
   try {
-    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 50), 100);
-    const page = Math.max(1, parseInt(req.query?.page, 10) || 1);
-    const offset = Math.max(0, parseInt(req.query?.offset, 10) || (page - 1) * limit);
+    const { page, limit, offset } = parsePagination(req.query, { defaultLimit: 50, maxLimit: 100 });
 
+    // Safe integer bounds inline cleanly; TiDB binary prepared statements reject LIMIT ? placeholders.
     const [rows] = await db.execute(
       `SELECT ir.id, ir.investorId, ir.title, ir.description, ir.category, 
               ir.minInvestment, ir.maxInvestment, ir.status, ir.createdAt, ir.updatedAt, 
@@ -311,8 +311,7 @@ const getAllInvestorRequests = async (req, res) => {
        LEFT JOIN users AS u ON ir.investorId = u.id
        WHERE ir.status = 'open'
        ORDER BY ir.createdAt DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
+       LIMIT ${limit} OFFSET ${offset}`
     );
 
     if (typeof res.set === "function") {

@@ -12,6 +12,7 @@ const dbPath = require.resolve("../config/database");
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: db };
 
 const { verifyAccessToken } = require("../utils/authTokens");
+const { parsePagination, MAX_OFFSET } = require("../utils/pagination");
 const { getAllPitches } = require("../controllers/pitchController");
 const { getAllInvestorRequests } = require("../controllers/investorRequestController");
 const { startConversation, getMessages } = require("../controllers/messageController");
@@ -35,7 +36,18 @@ test("verifyAccessToken rejects token signed with an unauthorized algorithm", as
   );
 });
 
-test("getAllPitches respects page and limit bounds and sets headers", async () => {
+test("parsePagination sanitizes bounds and blocks malformed or overflowing values", () => {
+  assert.deepEqual(parsePagination(undefined, { defaultLimit: 50, maxLimit: 100 }), { page: 1, limit: 50, offset: 0 });
+  assert.deepEqual(parsePagination({ page: "2", limit: "15" }, { defaultLimit: 50, maxLimit: 100 }), { page: 2, limit: 15, offset: 15 });
+  assert.deepEqual(parsePagination({ page: "0", limit: "9999", offset: "0" }, { defaultLimit: 50, maxLimit: 100 }), { page: 1, limit: 100, offset: 0 });
+  assert.deepEqual(parsePagination({ limit: "15abc", page: "2e10", offset: "-5" }, { defaultLimit: 50, maxLimit: 100 }), { page: 1, limit: 50, offset: 0 });
+  assert.deepEqual(parsePagination({ limit: "999999999999999999999", offset: "999999999" }, { defaultLimit: 50, maxLimit: 100 }), { page: 1, limit: 50, offset: MAX_OFFSET });
+
+  const nullProto = Object.create(null);
+  assert.deepEqual(parsePagination({ limit: nullProto, page: ["2", "3"], offset: { a: 1 } }), { page: 1, limit: 50, offset: 0 });
+});
+
+test("getAllPitches respects page and limit bounds and keeps filters parameterized without LIMIT placeholders", async () => {
   let executedSql = "";
   let executedParams = [];
   db.execute = async (sql, params) => {
@@ -45,16 +57,17 @@ test("getAllPitches respects page and limit bounds and sets headers", async () =
   };
 
   const res = response();
-  await getAllPitches({ query: { page: "2", limit: "15" } }, res);
+  await getAllPitches({ query: { page: "2", limit: "15", industry: "Fin_Tech" } }, res);
 
   assert.equal(res.statusCode, 200);
   assert.equal(res.headers["X-Page"], "2");
   assert.equal(res.headers["X-Limit"], "15");
-  assert.match(executedSql, /LIMIT \? OFFSET \?/);
-  assert.deepEqual(executedParams.slice(-2), [15, 15]);
+  assert.match(executedSql, /LIMIT 15 OFFSET 15$/);
+  assert.doesNotMatch(executedSql, /LIMIT \?/i);
+  assert.deepEqual(executedParams, ["%Fin\\_Tech%"]);
 });
 
-test("getAllInvestorRequests sets bounded pagination headers and parameters", async () => {
+test("getAllInvestorRequests sets bounded pagination headers and inlines safe integer bounds", async () => {
   let executedSql = "";
   let executedParams = [];
   db.execute = async (sql, params) => {
@@ -69,8 +82,9 @@ test("getAllInvestorRequests sets bounded pagination headers and parameters", as
   assert.equal(res.statusCode, 200);
   assert.equal(res.headers["X-Page"], "1");
   assert.equal(res.headers["X-Limit"], "25");
-  assert.match(executedSql, /LIMIT \? OFFSET \?/);
-  assert.deepEqual(executedParams, [25, 0]);
+  assert.match(executedSql, /LIMIT 25 OFFSET 0$/);
+  assert.doesNotMatch(executedSql, /LIMIT \?/i);
+  assert.equal(executedParams, undefined);
 });
 
 test("startConversation enforces canonical user order to prevent dual-knock race conditions", async () => {
@@ -94,7 +108,7 @@ test("startConversation enforces canonical user order to prevent dual-knock race
   assert.deepEqual(insertedOrder, [3, 10]);
 });
 
-test("getMessages enforces bounded message retrieval with LIMIT and OFFSET", async () => {
+test("getMessages enforces bounded message retrieval with validated integer LIMIT and OFFSET", async () => {
   let executedSql = "";
   let executedParams = [];
   db.execute = async (sql, params) => {
@@ -114,6 +128,7 @@ test("getMessages enforces bounded message retrieval with LIMIT and OFFSET", asy
 
   assert.equal(res.statusCode, 200);
   assert.equal(res.headers["X-Limit"], "30");
-  assert.match(executedSql, /LIMIT \? OFFSET \?/);
-  assert.deepEqual(executedParams, ["50", 30, 10]);
+  assert.match(executedSql, /LIMIT 30 OFFSET 10$/);
+  assert.doesNotMatch(executedSql, /LIMIT \?/i);
+  assert.deepEqual(executedParams, ["50"]);
 });

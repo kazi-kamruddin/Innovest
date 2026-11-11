@@ -261,3 +261,49 @@ test('smoke check retries transient cold-start responses and fails fast on 404 o
     /did not contain the expected response/
   );
 });
+
+test('runSmoke verifies /health, /ready, /pitches, and frontend / in sequence and fails on /pitches 500', async (t) => {
+  t.mock.method(console, 'log', () => {});
+  const { runSmoke } = await import('../scripts/smoke.mjs');
+
+  const visited = [];
+  await runSmoke(
+    { BACKEND_URL: 'https://api.example/', FRONTEND_URL: 'https://web.example/' },
+    {
+      retries: 0,
+      delayMs: 0,
+      timeoutMs: 1000,
+      fetchImpl: async (url) => {
+        visited.push(url);
+        if (url.endsWith('/health')) return { ok: true, status: 200, text: async () => '{"status":"ok"}' };
+        if (url.endsWith('/ready')) return { ok: true, status: 200, text: async () => '{"status":"ready"}' };
+        if (url.endsWith('/pitches')) return { ok: true, status: 200, text: async () => '[]' };
+        return { ok: true, status: 200, text: async () => '<title>Innovest</title>' };
+      },
+    }
+  );
+  assert.deepEqual(visited, [
+    'https://api.example/health',
+    'https://api.example/ready',
+    'https://api.example/pitches',
+    'https://web.example/',
+  ]);
+
+  await assert.rejects(
+    runSmoke(
+      { BACKEND_URL: 'https://api.example', FRONTEND_URL: 'https://web.example' },
+      {
+        retries: 0,
+        delayMs: 0,
+        timeoutMs: 1000,
+        fetchImpl: async (url) => {
+          if (url.endsWith('/health')) return { ok: true, status: 200, text: async () => '{"status":"ok"}' };
+          if (url.endsWith('/ready')) return { ok: true, status: 200, text: async () => '{"status":"ready"}' };
+          if (url.endsWith('/pitches')) return { ok: false, status: 500, text: async () => '{"error":"Failed to fetch pitches"}' };
+          return { ok: true, status: 200, text: async () => '<title>Innovest</title>' };
+        },
+      }
+    ),
+    /\/pitches returned HTTP 500/
+  );
+});

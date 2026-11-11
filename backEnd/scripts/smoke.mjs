@@ -69,6 +69,7 @@ export async function runSmoke(env = process.env, options = {}) {
 
   await checkWithRetry(`${api}/health`, '"status":"ok"', { ...options, onRetry: logRetry(`${api}/health`) });
   await checkWithRetry(`${api}/ready`, '"status":"ready"', { ...options, onRetry: logRetry(`${api}/ready`) });
+  await checkWithRetry(`${api}/pitches`, '[', { ...options, onRetry: logRetry(`${api}/pitches`) });
   await checkWithRetry(`${site}/`, "Innovest", { ...options, onRetry: logRetry(`${site}/`) });
 }
 
