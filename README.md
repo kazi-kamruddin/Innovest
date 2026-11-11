@@ -91,7 +91,7 @@ Innovest/
 │   ├── routes/              # Express API routes
 │   ├── scripts/             # Migrations, showcase seeder, and smoke check
 │   ├── test/                # Automated regression test suites
-│   ├── utils/               # Amount, auth token, and transaction helpers
+│   ├── utils/               # Amount, auth token, pagination, and transaction helpers
 │   ├── .env.example         # Backend environment template
 │   ├── Dockerfile
 │   ├── README.md            # Docker / Render setup
@@ -195,7 +195,7 @@ The production frontend build is generated in `frontEnd/dist/`.
 
 ### 5. Running automated tests
 
-**Backend regression tests (60 tests):**
+**Backend regression tests (62 tests):**
 
 ```bash
 cd backEnd

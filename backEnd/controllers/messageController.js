@@ -2,6 +2,7 @@ const db = require("../config/database");
 const { notifyBestEffort } = require('../utils/notifications');
 const { messageContentError } = require('../utils/messageValidation');
 const { findOrCreateConversation } = require('../utils/conversations');
+const { parsePagination } = require('../utils/pagination');
 
 const getConversations = async (req, res) => {
   try {
@@ -73,13 +74,13 @@ const getMessages = async (req, res) => {
       return res.status(403).json({ error: "Not authorized for this conversation" });
     }
 
-    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 100), 200);
-    const offset = Math.max(0, parseInt(req.query?.offset, 10) || 0);
+    const { limit, offset } = parsePagination(req.query, { defaultLimit: 100, maxLimit: 200 });
 
+    // Safe integer bounds inline cleanly; TiDB binary prepared statements reject LIMIT ? placeholders.
     const [msgs] = await db.execute(
       `SELECT id, conversation_id, sender_id, body as content, created_at
-      FROM messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ? OFFSET ?`,
-      [id, limit, offset]
+      FROM messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ${limit} OFFSET ${offset}`,
+      [id]
     );
 
     if (typeof res.set === "function") {

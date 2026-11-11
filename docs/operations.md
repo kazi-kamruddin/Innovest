@@ -36,7 +36,7 @@ Do not place `BREVO_API_KEY` or DB/JWT secrets in Vercel variables, `VITE_` vari
 ## Service checks and Render free-tier wakeups
 
 - **Probes:** Render uses `/health` (HTTP process liveness). Monitor `/ready` externally (`GET /ready` runs `SELECT 1 ... LIMIT 1` with a 3s timeout on all 6 additive security/workflow/identity tables and returns `503` if unavailable).
-- **Smoke / Wake script (`npm run smoke` / `npm run wake`):** Both commands run `backEnd/scripts/smoke.mjs`, verifying `/health`, `/ready`, and the Vercel frontend `/`, retrying transient cold-start `502`/`503`/`504` responses and timeouts (`90s` request timeout, up to 4 retries). Override `BACKEND_URL` and `FRONTEND_URL` in your shell when targeting another environment.
+- **Smoke / Wake script (`npm run smoke` / `npm run wake`):** Both commands run `backEnd/scripts/smoke.mjs`, verifying `/health`, `/ready`, `/pitches`, and the Vercel frontend `/`, retrying transient cold-start `502`/`503`/`504` responses and timeouts (`90s` request timeout, up to 4 retries). Override `BACKEND_URL` and `FRONTEND_URL` in your shell when targeting another environment.
 - **GitHub Actions cadence:** `.github/workflows/production-smoke.yml` runs on `cron: '15 8 */3 * *'` (every 3 days) and `workflow_dispatch`, avoiding twice-daily cold wakes against Render's 750 free instance-hours/month quota.
 - **Pre-demo warmup:** When the Vercel frontend mounts, `App.jsx` sends a silent, non-blocking `GET <VITE_API_URL>/health` request to start waking a sleeping Render container early. Before live interviews or demos, run `npm run wake` from `backEnd/` (or dispatch `Production smoke check` in GitHub Actions) 2–3 minutes ahead of time until `OK /ready` prints.
 
@@ -49,7 +49,7 @@ Do not place `BREVO_API_KEY` or DB/JWT secrets in Vercel variables, `VITE_` vari
 5. Start backend and frontend locally, confirm `GET /ready` returns `200`, and inspect `/pitches`, `/investor-list`, `/investor-request`, and `/messages`.
 6. Merge `dev` -> `main` and push so Vercel and Render deploy matching revisions.
 7. Update Render environment variables (`DB_HOST`, `DB_PORT=4000`, `DB_USER`, `DB_PASS`, `DB_NAME=innovest`, `DB_SSL_ENABLED=true`, removing stale Aiven `DB_SSL_CA` / `DB_SSL_CA_PATH` overrides if using system TLS).
-8. Trigger a Render redeploy and run `npm run wake` from `backEnd/` to confirm `/health`, `/ready`, and Vercel `/` all pass.
+8. Trigger a Render redeploy and run `npm run wake` from `backEnd/` to confirm `/health`, `/ready`, `/pitches`, and Vercel `/` all pass.
 
 ## Database backup and restore drill
 

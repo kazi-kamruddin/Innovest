@@ -3,6 +3,7 @@ const { parseAmountRange } = require("../utils/amounts");
 const { notifyBestEffort } = require('../utils/notifications');
 const { textFieldsError } = require('../utils/inputValidation');
 const { rollbackQuietly } = require('../utils/transactions');
+const { parsePagination } = require('../utils/pagination');
 const pitchFields = {
   title: 255, industry: 255, company_location: 255, country: 255, cell_number: 255,
   stage: 255, ideal_investor_role: 255, the_business: 'text', the_market: 'text',
@@ -35,12 +36,9 @@ const getAllPitches = async (req, res) => {
 
     sql += " ORDER BY pitches.created_at DESC, pitches.id DESC";
 
-    const limit = Math.min(Math.max(1, parseInt(req.query?.limit, 10) || 50), 100);
-    const page = Math.max(1, parseInt(req.query?.page, 10) || 1);
-    const offset = Math.max(0, parseInt(req.query?.offset, 10) || (page - 1) * limit);
-
-    sql += " LIMIT ? OFFSET ?";
-    params.push(limit, offset);
+    const { page, limit, offset } = parsePagination(req.query, { defaultLimit: 50, maxLimit: 100 });
+    // Safe integer bounds inline cleanly; TiDB binary prepared statements reject LIMIT ? placeholders.
+    sql += ` LIMIT ${limit} OFFSET ${offset}`;
 
     const [rows] = await db.execute(sql, params);
     if (typeof res.set === "function") {
