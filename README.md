@@ -42,11 +42,11 @@ The interface is responsive and uses an off-white, sage-green visual system with
 | --- | --- |
 | **Frontend** | React, Vite, React Router, Tailwind CSS, Bootstrap, custom CSS |
 | **Backend** | Node.js, Express.js |
-| **Database** | MySQL (`mysql2`), hosted on Aiven |
+| **Database** | MySQL (`mysql2`), hosted on TiDB Cloud Starter / Aiven |
 | **Authentication** | JSON Web Tokens (JWT with HS256 pinning), bcrypt, Google OAuth 2.0 |
 | **Real-time communication** | Socket.IO |
 | **Contact form** | EmailJS |
-| **Testing & Telemetry** | Node.js test runner (47 regression tests), Playwright E2E suite |
+| **Testing & Telemetry** | Node.js test runner (60 regression tests), Playwright E2E suite |
 | **Frontend deployment** | Vercel |
 | **Backend deployment** | Render (Docker) |
 
@@ -60,7 +60,7 @@ The interface is responsive and uses an off-white, sage-green visual system with
                        |
           Node.js / Express backend
                        |
-             MySQL database (Aiven)
+             MySQL database (TiDB / Aiven)
 
           Browser <---- Socket.IO ----> Backend
                      (messaging)
@@ -89,6 +89,7 @@ Innovest/
 │   ├── database/            # Baseline schema & migration SQL
 │   ├── middleware/          # Authentication & validation middleware
 │   ├── routes/              # Express API routes
+│   ├── scripts/             # Migrations, showcase seeder, and smoke check
 │   ├── test/                # Automated regression test suites
 │   ├── utils/               # Amount, auth token, and transaction helpers
 │   ├── .env.example         # Backend environment template
@@ -138,13 +139,15 @@ DB_USER=your-mysql-user
 DB_PASS=your-mysql-password
 DB_NAME=your-database-name
 
-# When your MySQL provider requires a CA certificate:
-DB_SSL_CA_PATH=./certs/ca.pem
+# TLS: use DB_SSL_ENABLED=true for system-CA TLS (e.g., TiDB Cloud Starter),
+# or DB_SSL_CA_PATH / DB_SSL_CA when providing a custom CA certificate:
+DB_SSL_ENABLED=true
+# DB_SSL_CA_PATH=./certs/ca.pem
 ```
 
-**Database setup:** For a fresh database, apply the baseline schema in `backEnd/database/000_baseline_schema.sql`. For an existing database, apply `backEnd/database/002_account_security.sql` for account security, then run `npm run migrate:responses` and `npm run migrate:google` from `backEnd/`. See [operations](docs/operations.md) for the rollout and restore drill.
+**Database setup:** Run `npm run migrate:all` from `backEnd/` to idempotently create all 13 baseline and additive tables (or apply `002_account_security.sql`, `npm run migrate:responses`, and `npm run migrate:google` on a pre-existing database). Optionally run `npm run seed:demo -- --apply` to populate curated showcase data; see [operations](docs/operations.md) for the full rollout, seeding, and restore workflow.
 
-For hosted MySQL, configure the certificate using `DB_SSL_CA_PATH` or `DB_SSL_CA` as supported by `backEnd/config/database.js`. Never commit your `.env`, private certificates, or credentials.
+For hosted MySQL, TLS options are configured via `DB_SSL_CA`, `DB_SSL_CA_PATH`, or `DB_SSL_ENABLED=true` in `backEnd/config/poolConfig.js`. Never commit your `.env`, private certificates, or credentials.
 
 Start the backend:
 
@@ -192,7 +195,7 @@ The production frontend build is generated in `frontEnd/dist/`.
 
 ### 5. Running automated tests
 
-**Backend regression tests (47 tests):**
+**Backend regression tests (60 tests):**
 
 ```bash
 cd backEnd
@@ -220,7 +223,7 @@ The public site is hosted at **[innovest-site.vercel.app](https://innovest-site.
 
 - **Frontend (Vercel):** Build the `frontEnd` project and configure `VITE_API_URL` to point to the deployed backend origin.
 - **Backend (Render):** Deploy `backEnd` as a Docker web service, with the required environment variables configured on the host.
-- **Database (Aiven):** Provide the MySQL connection settings and CA certificate through the backend's secure runtime configuration.
+- **Database (TiDB Cloud Starter / Aiven):** Provide the MySQL connection settings and TLS option (`DB_SSL_ENABLED=true` or custom CA via `DB_SSL_CA`) through the backend's secure runtime configuration.
 - **CORS:** Set the backend's `FRONTEND_URL` to the exact deployed frontend origin.
 - **Account email:** Configure verification and password recovery on Render after the new database tables exist.
 

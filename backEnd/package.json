@@ -8,6 +8,7 @@
     "smoke": "node scripts/smoke.mjs",
     "wake": "node scripts/smoke.mjs",
     "migrate:all": "node scripts/migrate-all.js",
+    "seed:demo": "node scripts/seed-demo.js",
     "migrate:responses": "node scripts/migrate-responses.js",
     "migrate:google": "node scripts/migrate-google.js",
     "start": "node server.js",
