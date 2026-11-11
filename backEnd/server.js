@@ -8,6 +8,8 @@ const db = require("./config/database");
 const { authenticateSocket, protectSocketSession } = require('./middleware/socketAuth');
 const { notifyBestEffort } = require('./utils/notifications');
 const { messageContentError } = require('./utils/messageValidation');
+const { findOrCreateConversation } = require('./utils/conversations');
+const { pruneExpiredTokensBestEffort } = require('./utils/authTokens');
 
 if (!process.env.SECRET) throw new Error("SECRET must be configured");
 
@@ -79,6 +81,7 @@ app.get("/ready", async (req, res) => {
     const conn = await db.getConnection();
     console.log("Connected to MySQL");
     conn.release();
+    await pruneExpiredTokensBestEffort();
   } catch (err) {
     console.error("Database connection failed:", err);
   }
@@ -150,26 +153,8 @@ io.on("connection", (socket) => {
         return socket.emit("knock_error", { message: "Recipient not found" });
       }
 
-      const userOne = Math.min(senderId, targetId);
-      const userTwo = Math.max(senderId, targetId);
-
-      const [existing] = await db.execute(
-        `SELECT * FROM conversations 
-         WHERE (user_one_id = ? AND user_two_id = ?) 
-            OR (user_one_id = ? AND user_two_id = ?)`,
-        [senderId, targetId, targetId, senderId]
-      );
-
-      let conversationId;
-      if (existing.length > 0) {
-        conversationId = existing[0].id;
-      } else {
-        const [result] = await db.execute(
-          "INSERT INTO conversations (user_one_id, user_two_id, created_at) VALUES (?, ?, NOW())",
-          [userOne, userTwo]
-        );
-        conversationId = result.insertId;
-      }
+      const { conversation } = await findOrCreateConversation(db, senderId, targetId);
+      const conversationId = conversation.id;
 
       [senderId, targetId].forEach((id) => {
         io.to(`user:${id}`).emit("new_conversation", {
@@ -247,6 +232,11 @@ io.on("connection", (socket) => {
 });
 
 
+const tokenPruneTimer = setInterval(() => {
+  pruneExpiredTokensBestEffort();
+}, 6 * 60 * 60 * 1000);
+tokenPruneTimer.unref?.();
+
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -254,6 +244,7 @@ server.listen(PORT, () => {
 
 const gracefulShutdown = (signal) => {
   console.log(`Received ${signal}. Shutting down gracefully...`);
+  clearInterval(tokenPruneTimer);
   server.close(async () => {
     try {
       if (io) io.close();

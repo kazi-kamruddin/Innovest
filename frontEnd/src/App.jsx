@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "./hooks/useAuthContext";
 
@@ -62,6 +62,14 @@ function PageLoader() {
 function App() {
   const { user } = useAuthContext();
   const location = useLocation();
+
+  useEffect(() => {
+    const apiBase = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+    if (!apiBase) return;
+    const controller = new AbortController();
+    fetch(`${apiBase}/health`, { signal: controller.signal, cache: "no-store" }).catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   return (
     <>

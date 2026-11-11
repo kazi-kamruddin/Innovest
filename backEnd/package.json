@@ -6,6 +6,8 @@
   "scripts": {
     "test": "node --test",
     "smoke": "node scripts/smoke.mjs",
+    "wake": "node scripts/smoke.mjs",
+    "migrate:all": "node scripts/migrate-all.js",
     "migrate:responses": "node scripts/migrate-responses.js",
     "migrate:google": "node scripts/migrate-google.js",
     "start": "node server.js",

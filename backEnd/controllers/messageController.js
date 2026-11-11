@@ -1,6 +1,7 @@
 const db = require("../config/database");
 const { notifyBestEffort } = require('../utils/notifications');
 const { messageContentError } = require('../utils/messageValidation');
+const { findOrCreateConversation } = require('../utils/conversations');
 
 const getConversations = async (req, res) => {
   try {
@@ -38,37 +39,19 @@ const startConversation = async (req, res) => {
       return res.status(404).json({ error: "Recipient not found" });
     }
 
-    const userOne = Math.min(userId, targetUserId);
-    const userTwo = Math.max(userId, targetUserId);
-
-    const [existing] = await db.execute(
-      `SELECT * FROM conversations
-       WHERE (user_one_id = ? AND user_two_id = ?)
-          OR (user_one_id = ? AND user_two_id = ?)`,
-      [userId, targetUserId, targetUserId, userId]
-    );
-
-    if (existing.length > 0) {
-      return res.status(200).json(existing[0]);
+    const { conversation, created } = await findOrCreateConversation(db, userId, targetUserId);
+    if (!created) {
+      return res.status(200).json(conversation);
     }
-
-    const [result] = await db.execute(
-      "INSERT INTO conversations (user_one_id, user_two_id, created_at) VALUES (?, ?, NOW())",
-      [userOne, userTwo]
-    );
 
     for (const [id, partnerId] of [[userId, targetUserId], [targetUserId, userId]]) {
       req.app?.get('io')?.to(`user:${id}`).emit('new_conversation', {
-        conversationId: result.insertId,
+        conversationId: conversation.id,
         partnerId,
       });
     }
 
-    res.status(201).json({
-      id: result.insertId,
-      user_one_id: userOne,
-      user_two_id: userTwo,
-    });
+    res.status(201).json(conversation);
   } catch (error) {
     console.error("startConversation error:", error);
     res.status(500).json({ error: "Failed to start conversation" });

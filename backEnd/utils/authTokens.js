@@ -38,4 +38,33 @@ const verifyAccessToken = async (token) => {
   return id;
 };
 
-module.exports = { hashToken, createAccessToken, issueActionToken, verifyAccessToken };
+const pruneExpiredTokens = async (executor = pool) => {
+  const [revokedResult] = await executor.execute(
+    "DELETE FROM auth_revoked_tokens WHERE expires_at <= UTC_TIMESTAMP(6)"
+  );
+  const [actionResult] = await executor.execute(
+    "DELETE FROM auth_action_tokens WHERE expires_at <= UTC_TIMESTAMP(6) OR (consumed_at IS NOT NULL AND consumed_at < DATE_SUB(UTC_TIMESTAMP(6), INTERVAL 7 DAY))"
+  );
+  return {
+    revokedDeleted: revokedResult?.affectedRows ?? 0,
+    actionDeleted: actionResult?.affectedRows ?? 0,
+  };
+};
+
+const pruneExpiredTokensBestEffort = async (executor = pool) => {
+  try {
+    return await pruneExpiredTokens(executor);
+  } catch (error) {
+    console.error("Expired token cleanup skipped:", error.message);
+    return { revokedDeleted: 0, actionDeleted: 0 };
+  }
+};
+
+module.exports = {
+  hashToken,
+  createAccessToken,
+  issueActionToken,
+  verifyAccessToken,
+  pruneExpiredTokens,
+  pruneExpiredTokensBestEffort,
+};
